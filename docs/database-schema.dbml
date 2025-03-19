@@ -54,12 +54,32 @@ Table homologues {
 }
 
 Table pdb {
-  Proteinaccession_NCBI varchar //This is the filename
+  Proteinaccession_NCBI varchar //This is the filename (Removing the ".1" in the example)
   Location varchar // I am guessing we will store these files somewhere
 }
+
+Table fasta_nucleotide {
+  Proteinaccession_NCBI varchar // This is the ID to find the sequence in the fasta file
+  Sequence varchar // Will we store the sequence for each ID in the database?
+}
+
+Table fasta_protein {
+  Proteinaccession_NCBI varchar // This is the ID to find the sequence in the fasta file
+  Sequence varchar // Will we store the sequence for each ID in the database?
+}
+
+Ref experimental: fasta_protein.Proteinaccession_NCBI < experimental.Proteinaccession_NCBI
+
+Ref experimental: fasta_nucleotide.Proteinaccession_NCBI < experimental.Proteinaccession_NCBI
+
+Ref experimental: pdb.Proteinaccession_NCBI < experimental.Proteinaccession_NCBI
+
+Ref experimental: homologues.query < experimental.Proteinaccession_NCBI // This is not exactly the same id (Removing the ".1" in the example)
 
 Ref experimental: experimental.Compound < compounds.Biocide_name
 
 Ref homologues: homologues.target < groups.Matching_IDs
 
-Ref experimental: pdb.Proteinaccession_NCBI < experimental.Proteinaccession_NCBI
+// 2. Groups file
+//- What are the Matching_ids in the groups files? Are they used for something? (foreign key?)
+//- The second part of the Unique ID seems to be the same as the NCBI ID in the homologues.query and Experimental.Proteinaccession_NCBI
