@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - DATABASE_REINIT
     volumes:
       - data:/data
       - ./data/data-current:/data-import:ro
