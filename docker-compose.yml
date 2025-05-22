@@ -1,0 +1,13 @@
+name: bacmet
+
+services:
+  database:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - data:/data
+      - ./data/data-current:/data-import:ro
+
+volumes:
+  data:
