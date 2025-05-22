@@ -15,11 +15,9 @@ RUN mkdir scripts
 RUN mkdir sql
 
 COPY --chmod=644 sql/schema.sql sql/
-COPY --chmod=755 scripts/import-data.sh scripts/
-COPY --chmod=755 scripts/import-pdb-data.sh scripts/
+COPY --chmod=755 scripts/import-all.sh scripts/
+COPY --chmod=755 scripts/import-experimentally_validated.sh scripts/
 
 ENV DATABASE=/data/database.db
 
-RUN sqlite3 "$DATABASE" <sql/schema.sql
-
-CMD [ "scripts/import-data.sh" ]
+CMD [ "scripts/import-all.sh" ]

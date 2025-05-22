@@ -2,5 +2,5 @@
 
 PATH=$HOME/scripts:$PATH
 
-import-pdb-data.sh \
+import-experimentally_validated.sh \
 	/data-import/1-Experimentally_validated/Experimentally_validated_PDB_files.zip
