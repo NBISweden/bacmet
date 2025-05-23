@@ -17,6 +17,7 @@ RUN mkdir sql
 COPY --chmod=644 sql/schema.sql sql/
 COPY --chmod=755 scripts/import-all.sh scripts/
 COPY --chmod=755 scripts/import-experimentally_validated.sh scripts/
+COPY --chmod=755 scripts/import-predicted_unique_homologues.sh scripts/
 
 ENV DATABASE=/data/database.db
 

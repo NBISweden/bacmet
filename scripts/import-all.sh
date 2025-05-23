@@ -14,3 +14,6 @@ fi
 
 import-experimentally_validated.sh \
 	/data-import/1-Experimentally_validated/Experimentally_validated_PDB_files.zip
+
+import-predicted_unique_homologues.sh \
+	/data-import/2-Predicted_database/1-Predicted_unique_homologues.zip
