@@ -14,7 +14,7 @@ fi
 
 count=$(
 	sqlite3 "$database" <<-'SQL'
-		SELECT COUNT(*) FROM experimentally_validated_pdb_files
+		SELECT COUNT(*) FROM experimentally_validated;
 	SQL
 )
 
@@ -35,7 +35,7 @@ do
 	pdb_id=${pdb##*/}
 	pdb_id=${pdb_id%.pdb}
 
-	printf "INSERT INTO experimentally_validated_pdb_files (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$pdb"
+	printf "INSERT INTO experimentally_validated (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$pdb"
 done >>"$tmpdir"/insert.sql
 echo 'COMMIT;' >>"$tmpdir"/insert.sql
 
