@@ -30,6 +30,17 @@ CREATE TABLE predicted_unique_homologues (
 	alntmscore REAL NOT NULL,
 	rmsd REAL NOT NULL,
 
+	PRIMARY KEY(BLAST_hit_genome_id),
 	FOREIGN KEY(query) REFERENCES
 		experimentally_validated(pdb_id)
+);
+
+DROP TABLE IF EXISTS predicted_groups;
+CREATE TABLE predicted_groups (
+	BLAST_hit_genome_id NOT NULL,
+	sequence TEXT NOT NULL,
+	matching_id_list TEXT NOT NULL,
+
+	FOREIGN KEY(BLAST_hit_genome_id) REFERENCES
+		predicted_unique_homologues(BLAST_hit_genome_id)
 );
