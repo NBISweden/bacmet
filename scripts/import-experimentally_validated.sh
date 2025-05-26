@@ -19,7 +19,7 @@ count=$(
 )
 
 if [ "$count" -gt 0 ]; then
-	printf 'Database "%s" already contains data\n' "$database" >&2
+	echo 'Data is already loaded.' >&2
 	exit 0	# not an error
 fi
 

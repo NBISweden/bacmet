@@ -1,12 +1,15 @@
 DROP TABLE IF EXISTS experimentally_validated;
 CREATE TABLE experimentally_validated (
-	pdb_id TEXT PRIMARY KEY,
-	data TEXT NOT NULL
+	pdb_id TEXT NOT NULL,
+	data TEXT NOT NULL,
+
+	PRIMARY KEY(pdb_id)
 );
 
 DROP TABLE IF EXISTS predicted_unique_homologues;
 CREATE TABLE predicted_unique_homologues (
 	query TEXT NOT NULL,
+	BLAST_hit_genome_id INTEGER NOT NULL,
 	BLAST_hit_genome TEXT NOT NULL,
 	Start_alignment_query INTEGER NOT NULL,
 	End_alignment_query INTEGER NOT NULL,
