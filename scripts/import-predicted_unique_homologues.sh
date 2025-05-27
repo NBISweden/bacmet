@@ -69,7 +69,6 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
                 prob, lddt, alntmscore, rmsd
 	)
 	SELECT * FROM import_tmp;
-	DROP TABLE import_tmp;
 SQL
 
 sqlite3 "$database" <"$tmpdir"/insert.sql
