@@ -25,10 +25,10 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
-echo 'Extracting CSV files...' >&2
+echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
-echo 'Loading CSV files into database...' >&2
+echo 'Loading files into database...' >&2
 echo '.mode csv' >"$tmpdir"/insert.sql
 
 cat <<-'SQL' >>"$tmpdir"/insert.sql
@@ -39,9 +39,9 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
 	);
 SQL
 
-for csv in "$tmpdir"/*.csv
+for file in "$tmpdir"/*.csv
 do
-	printf '.import --skip 1 %s import_tmp\n' "$csv"
+	printf '.import --skip 1 %s import_tmp\n' "$file"
 done >>"$tmpdir"/insert.sql
 
 cat <<-'SQL' >>"$tmpdir"/insert.sql

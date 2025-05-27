@@ -5,7 +5,7 @@ set -u
 database=$DATABASE
 data_zip_archive=$1
 
-echo 'Importing experimentally validated PDB files.' >&2
+echo 'Importing experimentally validated data.' >&2
 
 if [ ! -f "$database" ]; then
 	printf 'Database "%s" not found\n' "$database" >&2
@@ -25,17 +25,17 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
-echo 'Extracting PDB files...' >&2
+echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
-echo 'Loading PDB files into database...' >&2
+echo 'Loading files into database...' >&2
 echo 'BEGIN TRANSACTION;' >"$tmpdir"/insert.sql
-for pdb in "$tmpdir"/*.pdb
+for file in "$tmpdir"/*.pdb
 do
-	pdb_id=${pdb##*/}
+	pdb_id=${file##*/}
 	pdb_id=${pdb_id%.pdb}
 
-	printf "INSERT INTO experimentally_validated (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$pdb"
+	printf "INSERT INTO experimentally_validated (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$file"
 done >>"$tmpdir"/insert.sql
 echo 'COMMIT;' >>"$tmpdir"/insert.sql
 
