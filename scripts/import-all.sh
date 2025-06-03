@@ -20,3 +20,6 @@ import-predicted_unique_homologues.sh \
 
 import-predicted_groups.sh \
 	/data-import/2-Predicted_database/3-Predicted_groups.zip
+
+echo 'Vacuuming database...' >&2
+sqlite3 "$DATABASE" vacuum
