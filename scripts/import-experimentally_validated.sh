@@ -29,16 +29,16 @@ echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
 echo 'Loading files into database...' >&2
-echo 'BEGIN TRANSACTION;' >"$tmpdir"/insert.sql
+echo 'BEGIN TRANSACTION;' >"$tmpdir/import.sql"
 for file in "$tmpdir"/*.pdb
 do
 	pdb_id=${file##*/}
 	pdb_id=${pdb_id%.pdb}
 
 	printf "INSERT INTO experimentally_validated (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$file"
-done >>"$tmpdir"/insert.sql
-echo 'COMMIT;' >>"$tmpdir"/insert.sql
+done >>"$tmpdir/import.sql"
+echo 'COMMIT;' >>"$tmpdir/import.sql"
 
-sqlite3 "$database" <"$tmpdir"/insert.sql
+sqlite3 "$database" <"$tmpdir/import.sql"
 
 echo 'Done.' >&2

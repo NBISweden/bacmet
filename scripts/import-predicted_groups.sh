@@ -29,9 +29,9 @@ echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
 echo 'Loading files into database...' >&2
-echo '.mode csv' >"$tmpdir"/insert.sql
+echo '.mode csv' >"$tmpdir/import.sql"
 
-cat <<-'SQL' >>"$tmpdir"/insert.sql
+cat <<-'SQL' >>"$tmpdir/import.sql"
 	CREATE TEMPORARY TABLE import_tmp (
 		BLAST_hit_genome TEXT NOT NULL,
 		sequence TEXT NOT NULL,
@@ -39,12 +39,9 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
 	);
 SQL
 
-for file in "$tmpdir"/*.csv
-do
-	printf '.import --skip 1 %s import_tmp\n' "$file"
-done >>"$tmpdir"/insert.sql
+printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
-cat <<-'SQL' >>"$tmpdir"/insert.sql
+cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_groups (BLAST_hit_genome_id, sequence, matching_id_list)
 	SELECT BLAST_hit_genome_id, sequence, matching_id_list
 	FROM import_tmp
@@ -52,6 +49,6 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
 	USING (BLAST_hit_genome);
 SQL
 
-sqlite3 "$database" <"$tmpdir"/insert.sql
+sqlite3 "$database" <"$tmpdir/import.sql"
 
 echo 'Done.' >&2

@@ -29,9 +29,9 @@ echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
 echo 'Loading files into database...' >&2
-echo '.mode tabs' >"$tmpdir"/insert.sql
+echo '.mode tabs' >"$tmpdir/import.sql"
 
-cat <<-'SQL' >>"$tmpdir"/insert.sql
+cat <<-'SQL' >>"$tmpdir/import.sql"
 	CREATE TEMPORARY TABLE import_tmp (
 		query TEXT NOT NULL,
 		BLAST_hit_genome TEXT NOT NULL,
@@ -56,12 +56,9 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
 	);
 SQL
 
-for file in "$tmpdir"/*.tab
-do
-	printf '.import --skip 1 %s import_tmp\n' "$file"
-done >>"$tmpdir"/insert.sql
+printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.tab >>"$tmpdir/import.sql"
 
-cat <<-'SQL' >>"$tmpdir"/insert.sql
+cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_unique_homologues (
                 query, BLAST_hit_genome, Start_alignment_query,
                 End_alignment_query, fident, alnlen, mismatch, gapopen,
@@ -71,6 +68,6 @@ cat <<-'SQL' >>"$tmpdir"/insert.sql
 	SELECT * FROM import_tmp;
 SQL
 
-sqlite3 "$database" <"$tmpdir"/insert.sql
+sqlite3 "$database" <"$tmpdir/import.sql"
 
 echo 'Done.' >&2
