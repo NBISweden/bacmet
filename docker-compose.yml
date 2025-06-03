@@ -9,7 +9,7 @@ services:
       - DATABASE_REINIT
     volumes:
       - data:/data
-      - ./data/data-current:/data-import:ro
+      - ./data-import:/data-import:ro
 
 volumes:
   data:
