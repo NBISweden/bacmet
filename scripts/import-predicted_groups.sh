@@ -32,6 +32,7 @@ echo 'Loading files into database...' >&2
 echo '.mode csv' >"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
+	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
 		BLAST_hit_genome TEXT NOT NULL,
 		sequence TEXT NOT NULL,
