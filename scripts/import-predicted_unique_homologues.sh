@@ -53,7 +53,10 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 		prob INTEGER NOT NULL,
 		lddt REAL NOT NULL,
 		alntmscore REAL NOT NULL,
-		rmsd REAL NOT NULL
+		rmsd REAL NOT NULL,
+
+		UNIQUE(BLAST_hit_genome),
+		FOREIGN KEY(query) REFERENCES pdb(pdb_name)
 	);
 SQL
 
@@ -61,12 +64,17 @@ printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.tab >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_unique_homologues (
-                query, BLAST_hit_genome, Start_alignment_query,
+                BLAST_hit_genome, pdb_id, Start_alignment_query,
                 End_alignment_query, fident, alnlen, mismatch, gapopen,
                 qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
                 prob, lddt, alntmscore, rmsd
 	)
-	SELECT * FROM import_tmp;
+	SELECT BLAST_hit_genome, pdb_id, Start_alignment_query,
+	       End_alignment_query, fident, alnlen, mismatch, gapopen,
+	       qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
+	       prob, lddt, alntmscore, rmsd
+	FROM import_tmp
+	JOIN pdb ON import_tmp.query = pdb.pdb_name
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"

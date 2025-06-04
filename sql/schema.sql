@@ -1,6 +1,7 @@
-DROP TABLE IF EXISTS experimentally_validated;
-CREATE TABLE experimentally_validated (
-	pdb_id TEXT NOT NULL,
+DROP TABLE IF EXISTS pdb;
+CREATE TABLE pdb (
+	pdb_id INTEGER NOT NULL,
+	pdb_name TEXT NOT NULL,
 	data TEXT NOT NULL,
 
 	PRIMARY KEY(pdb_id)
@@ -8,9 +9,9 @@ CREATE TABLE experimentally_validated (
 
 DROP TABLE IF EXISTS predicted_unique_homologues;
 CREATE TABLE predicted_unique_homologues (
-	query TEXT NOT NULL,
 	BLAST_hit_genome_id INTEGER NOT NULL,
 	BLAST_hit_genome TEXT NOT NULL,
+	pdb_id INTEGER NOT NULL,
 	Start_alignment_query INTEGER NOT NULL,
 	End_alignment_query INTEGER NOT NULL,
 	fident REAL NOT NULL,
@@ -31,8 +32,8 @@ CREATE TABLE predicted_unique_homologues (
 	rmsd REAL NOT NULL,
 
 	PRIMARY KEY(BLAST_hit_genome_id),
-	FOREIGN KEY(query) REFERENCES
-		experimentally_validated(pdb_id)
+	FOREIGN KEY(pdb_id) REFERENCES
+		pdb(pdb_id)
 );
 
 DROP TABLE IF EXISTS predicted_groups;

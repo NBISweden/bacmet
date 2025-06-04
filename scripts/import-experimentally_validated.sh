@@ -14,7 +14,7 @@ fi
 
 count=$(
 	sqlite3 "$database" <<-'SQL'
-		SELECT COUNT(*) FROM experimentally_validated;
+		SELECT COUNT(*) FROM pdb;
 	SQL
 )
 
@@ -29,15 +29,28 @@ echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
 echo 'Loading files into database...' >&2
-echo 'BEGIN TRANSACTION;' >"$tmpdir/import.sql"
+cat <<-'SQL' >"$tmpdir/import.sql"
+	PRAGMA temp_store = MEMORY;
+	CREATE TEMPORARY TABLE import_tmp (
+		pdb_name TEXT NOT NULL,
+		data TEXT NOT NULL,
+
+		UNIQUE(pdb_name)
+	);
+SQL
+
 for file in "$tmpdir"/*.pdb
 do
-	pdb_id=${file##*/}
-	pdb_id=${pdb_id%.pdb}
+	pdb_name=${file##*/}
+	pdb_name=${pdb_name%.pdb}
 
-	printf "INSERT INTO experimentally_validated (pdb_id, data) VALUES ('%s', readfile('%s'));\n" "$pdb_id" "$file"
+	printf "INSERT INTO import_tmp (pdb_name, data) VALUES ('%s', readfile('%s'));\n" "$pdb_name" "$file"
 done >>"$tmpdir/import.sql"
-echo 'COMMIT;' >>"$tmpdir/import.sql"
+
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	INSERT INTO pdb (pdb_name, data)
+		SELECT pdb_name, data FROM import_tmp;
+SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"
 

@@ -36,7 +36,9 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 	CREATE TEMPORARY TABLE import_tmp (
 		BLAST_hit_genome TEXT NOT NULL,
 		sequence TEXT NOT NULL,
-		matching_id_list TEXT NOT NULL
+		matching_id_list TEXT NOT NULL,
+
+		UNIQUE(BLAST_hit_genome)
 	);
 SQL
 
