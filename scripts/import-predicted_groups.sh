@@ -34,11 +34,11 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	.mode csv
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
-		BLAST_hit_genome TEXT NOT NULL,
+		blast_hit_genome TEXT NOT NULL,
 		sequence TEXT NOT NULL,
 		matching_id_list TEXT NOT NULL,
 
-		UNIQUE(BLAST_hit_genome)
+		UNIQUE(blast_hit_genome)
 	);
 SQL
 
@@ -49,7 +49,7 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 	SELECT predicted_id, sequence, matching_id_list
 	FROM import_tmp
 	JOIN predicted_unique_homologues
-	USING (BLAST_hit_genome);
+	USING (blast_hit_genome);
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"

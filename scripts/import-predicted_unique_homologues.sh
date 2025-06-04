@@ -35,9 +35,9 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
 		query TEXT NOT NULL,
-		BLAST_hit_genome TEXT NOT NULL,
-		Start_alignment_query INTEGER NOT NULL,
-		End_alignment_query INTEGER NOT NULL,
+		blast_hit_genome TEXT NOT NULL,
+		start_alignment_query INTEGER NOT NULL,
+		end_alignment_query INTEGER NOT NULL,
 		fident REAL NOT NULL,
 		alnlen INTEGER NOT NULL,
 		mismatch INTEGER NOT NULL,
@@ -55,7 +55,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 		alntmscore REAL NOT NULL,
 		rmsd REAL NOT NULL,
 
-		UNIQUE(BLAST_hit_genome),
+		UNIQUE(blast_hit_genome),
 		FOREIGN KEY(query) REFERENCES validated(protein_accession_ncbi)
 	);
 SQL
@@ -64,13 +64,13 @@ printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.tab >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_unique_homologues (
-		validated_id, BLAST_hit_genome, Start_alignment_query,
-		End_alignment_query, fident, alnlen, mismatch, gapopen,
+		validated_id, blast_hit_genome, start_alignment_query,
+		end_alignment_query, fident, alnlen, mismatch, gapopen,
 		qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
 		prob, lddt, alntmscore, rmsd
 	)
-	SELECT validated_id, BLAST_hit_genome, Start_alignment_query,
-		End_alignment_query, fident, alnlen, mismatch, gapopen,
+	SELECT validated_id, blast_hit_genome, start_alignment_query,
+		end_alignment_query, fident, alnlen, mismatch, gapopen,
 		qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
 		prob, lddt, alntmscore, rmsd
 	FROM import_tmp
