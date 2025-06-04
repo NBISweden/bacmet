@@ -12,11 +12,19 @@ brought up and the database is missing or empty.
 
 The data can be reimported by removing the database’s Docker volume
 and restarting the service. This will cause the database to be recreated
-and the data to be imported again:
+and the data to be imported:
 
 ``` shell
 docker compose down -v
 docker compose up
+```
+
+The database will also be recreated and the data reimported if the
+environment variable `DATABASE_REINIT` has a non-empty value when the
+service is started.
+
+``` shell
+DATABASE_REINIT=1 docker compose up
 ```
 
 ### Fetching updated data
