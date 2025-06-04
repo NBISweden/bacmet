@@ -29,13 +29,25 @@ CREATE TABLE validated_pdb (
 		validated(validated_id)
 );
 
+DROP TABLE IF EXISTS compounds;
+CREATE TABLE compounds (
+	compound_id INTEGER NOT NULL,
+	compound_name TEXT NOT NULL,
+	cas_number TEXT NOT NULL,
+	chemical_class TEXT NOT NULL,
+	description TEXT NOT NULL,
+
+	PRIMARY KEY(compound_id),
+	UNIQUE(compound_name)
+);
+
 DROP TABLE IF EXISTS predicted_unique_homologues;
 CREATE TABLE predicted_unique_homologues (
 	predicted_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
-	BLAST_hit_genome TEXT NOT NULL,
-	Start_alignment_query INTEGER NOT NULL,
-	End_alignment_query INTEGER NOT NULL,
+	blast_hit_genome TEXT NOT NULL,
+	start_alignment_query INTEGER NOT NULL,
+	end_alignment_query INTEGER NOT NULL,
 	fident REAL NOT NULL,
 	alnlen INTEGER NOT NULL,
 	mismatch INTEGER NOT NULL,
