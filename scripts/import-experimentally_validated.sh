@@ -5,7 +5,7 @@ set -u
 database=$DATABASE
 data_zip_archive=$1
 
-echo 'Importing experimentally validated data.' >&2
+echo 'Importing experimentally validated PDB data.' >&2
 
 if [ ! -f "$database" ]; then
 	printf 'Database "%s" not found\n' "$database" >&2
