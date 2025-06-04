@@ -29,9 +29,9 @@ echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
 echo 'Loading files into database...' >&2
-echo '.mode tabs' >"$tmpdir/import.sql"
 
-cat <<-'SQL' >>"$tmpdir/import.sql"
+cat <<-'SQL' >"$tmpdir/import.sql"
+	.mode tabs
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
 		query TEXT NOT NULL,
