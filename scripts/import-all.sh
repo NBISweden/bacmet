@@ -12,7 +12,10 @@ then
 	sqlite3 "$DATABASE" <sql/schema.sql
 fi
 
-import-experimentally_validated.sh \
+import-validated.sh \
+	/data-import/1-Experimentally_validated/1-BacMet_experimentally_validated_database_3.0.csv
+
+import-validated-pdb-files.sh \
 	/data-import/1-Experimentally_validated/Experimentally_validated_PDB_files.zip
 
 import-predicted_unique_homologues.sh \

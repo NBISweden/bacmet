@@ -45,8 +45,8 @@ SQL
 printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
-	INSERT INTO predicted_groups (BLAST_hit_genome_id, sequence, matching_id_list)
-	SELECT BLAST_hit_genome_id, sequence, matching_id_list
+	INSERT INTO predicted_groups (predicted_id, sequence, matching_id_list)
+	SELECT predicted_id, sequence, matching_id_list
 	FROM import_tmp
 	JOIN predicted_unique_homologues
 	USING (BLAST_hit_genome);

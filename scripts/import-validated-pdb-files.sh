@@ -14,7 +14,7 @@ fi
 
 count=$(
 	sqlite3 "$database" <<-'SQL'
-		SELECT COUNT(*) FROM pdb;
+		SELECT COUNT(*) FROM validated_pdb;
 	SQL
 )
 
@@ -33,7 +33,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
 		pdb_name TEXT NOT NULL,
-		data TEXT NOT NULL,
+		pdb TEXT NOT NULL,
 
 		UNIQUE(pdb_name)
 	);
@@ -44,12 +44,14 @@ do
 	pdb_name=${file##*/}
 	pdb_name=${pdb_name%.pdb}
 
-	printf "INSERT INTO import_tmp (pdb_name, data) VALUES ('%s', readfile('%s'));\n" "$pdb_name" "$file"
+	printf "INSERT INTO import_tmp (pdb_name, pdb) VALUES ('%s', readfile('%s'));\n" "$pdb_name" "$file"
 done >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
-	INSERT INTO pdb (pdb_name, data)
-		SELECT pdb_name, data FROM import_tmp;
+	INSERT INTO validated_pdb (validated_id, pdb)
+		SELECT validated_id, pdb
+		FROM import_tmp
+		JOIN validated ON pdb_name = protein_accession_ncbi
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"

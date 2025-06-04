@@ -56,7 +56,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 		rmsd REAL NOT NULL,
 
 		UNIQUE(BLAST_hit_genome),
-		FOREIGN KEY(query) REFERENCES pdb(pdb_name)
+		FOREIGN KEY(query) REFERENCES validated(protein_accession_ncbi)
 	);
 SQL
 
@@ -64,17 +64,17 @@ printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.tab >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_unique_homologues (
-                BLAST_hit_genome, pdb_id, Start_alignment_query,
-                End_alignment_query, fident, alnlen, mismatch, gapopen,
-                qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
-                prob, lddt, alntmscore, rmsd
+		validated_id, BLAST_hit_genome, Start_alignment_query,
+		End_alignment_query, fident, alnlen, mismatch, gapopen,
+		qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
+		prob, lddt, alntmscore, rmsd
 	)
-	SELECT BLAST_hit_genome, pdb_id, Start_alignment_query,
-	       End_alignment_query, fident, alnlen, mismatch, gapopen,
-	       qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
-	       prob, lddt, alntmscore, rmsd
+	SELECT validated_id, BLAST_hit_genome, Start_alignment_query,
+		End_alignment_query, fident, alnlen, mismatch, gapopen,
+		qstart, qend, qlen, tstart, tend, tlen, evalue, bits,
+		prob, lddt, alntmscore, rmsd
 	FROM import_tmp
-	JOIN pdb ON import_tmp.query = pdb.pdb_name
+	JOIN validated ON import_tmp.query = validated.protein_accession_ncbi
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"
