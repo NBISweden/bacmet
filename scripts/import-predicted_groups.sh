@@ -34,22 +34,30 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	.mode csv
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
-		blast_hit_genome TEXT NOT NULL,
+		unique_id TEXT NOT NULL,
 		sequence TEXT NOT NULL,
-		matching_id_list TEXT NOT NULL,
+		matching_ids TEXT NOT NULL,
 
-		UNIQUE(blast_hit_genome)
+		UNIQUE(unique_id)
 	);
 SQL
 
 printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
-	INSERT INTO predicted_groups (predicted_id, sequence, matching_id_list)
-	SELECT predicted_id, sequence, matching_id_list
+	DELETE FROM sequences;
+	INSERT INTO sequences (sequence)
+	SELECT DISTINCT sequence
+	FROM import_tmp;
+SQL
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	INSERT INTO predicted_groups (predicted_id, sequence_id, matching_ids)
+	SELECT predicted_id, sequence_id, matching_ids
 	FROM import_tmp
 	JOIN predicted_unique_homologues
-	USING (blast_hit_genome);
+		ON import_tmp.unique_id = predicted_unique_homologues.blast_hit_genome
+	JOIN sequences
+		ON import_tmp.sequence = sequences.sequence;
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"

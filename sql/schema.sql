@@ -70,12 +70,22 @@ CREATE TABLE predicted_unique_homologues (
 		validated(validated_id)
 );
 
+DROP TABLE IF EXISTS sequences;
+CREATE TABLE sequences (
+	sequence_id INTEGER NOT NULL,
+	sequence TEXT NOT NULL,
+
+	PRIMARY KEY(sequence_id)
+);
+
 DROP TABLE IF EXISTS predicted_groups;
 CREATE TABLE predicted_groups (
-	predicted_id NOT NULL,
-	sequence TEXT NOT NULL,
-	matching_id_list TEXT NOT NULL,
+	predicted_id INTEGER NOT NULL,
+	sequence_id INTEGER NOT NULL,
+	matching_ids TEXT NOT NULL,
 
 	FOREIGN KEY(predicted_id) REFERENCES
-		predicted_unique_homologues(predicted_id)
+		predicted_unique_homologues(predicted_id),
+	FOREIGN KEY(sequence_id) REFERENCES
+		sequences(sequence_id)
 );
