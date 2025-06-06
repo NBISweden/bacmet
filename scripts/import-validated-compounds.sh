@@ -27,7 +27,7 @@ tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 # This data needs to be preprocessed to remove empty records
 # and internal headers.
-grep -vF -e 'CAS Number,Chemical Class' -e ',,,' \
+awk 'NR == 1 || !(/,,,/ || /CAS Number,Chemical Class/)' \
 	"$data_csv_file" >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
@@ -45,7 +45,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	);
 SQL
 
-printf '.import %s import_tmp\n' "$tmpdir/data.csv" >>"$tmpdir/import.sql"
+printf '.import --skip 1 %s import_tmp\n' "$tmpdir/data.csv" >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO compounds (
