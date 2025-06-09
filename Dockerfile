@@ -1,7 +1,8 @@
 FROM alpine:latest
 
 RUN apk add --no-cache \
-	sqlite~3
+	sqlite~3 \
+	miller~6
 
 RUN adduser -D database
 
@@ -21,6 +22,7 @@ COPY --chmod=755 scripts/import-validated-compounds.sh scripts/
 COPY --chmod=755 scripts/import-validated-pdb-files.sh scripts/
 COPY --chmod=755 scripts/import-predicted_unique_homologues.sh scripts/
 COPY --chmod=755 scripts/import-predicted_groups.sh scripts/
+COPY --chmod=755 scripts/import-sensitivity-distributions.sh scripts/
 
 ENV DATABASE=/data/database.db
 

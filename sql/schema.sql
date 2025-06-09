@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS validated;
 CREATE TABLE validated (
 	validated_id INTEGER NOT NULL,
@@ -88,4 +87,24 @@ CREATE TABLE predicted_groups (
 		predicted_unique_homologues(predicted_id),
 	FOREIGN KEY(sequence_id) REFERENCES
 		sequences(sequence_id)
+);
+
+-- Note: Not directly related to the other tables.
+DROP TABLE IF EXISTS sensitivity_distributions;
+CREATE TABLE sensitivity_distributions (
+	sensitivity_distribution_id INTEGER NOT NULL,
+	species TEXT NOT NULL,
+	strain TEXT NOT NULL,
+	geographical_region TEXT NOT NULL,
+	source TEXT NOT NULL,
+	biocide TEXT NOT NULL,
+	mic REAL NOT NULL,
+	method TEXT NOT NULL,
+	temperature TEXT NOT NULL,
+	incubation_time TEXT NOT NULL,
+	media TEXT NOT NULL,
+	doi TEXT NOT NULL,
+	comment TEXT,
+
+	PRIMARY KEY(sensitivity_distribution_id)
 );
