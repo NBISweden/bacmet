@@ -6,7 +6,7 @@ The original data should be fetched from the server at Chalmers and
 be put in a directory called `data-import`, replicating the directory
 structure on the Chalmers server (see below).
 
-The data is imported into the persistant SQLite database
+The data is imported into the persistent SQLite database
 `/data/database.db` in the `database` container when the service is
 brought up and the database is missing or empty.
 
@@ -46,7 +46,7 @@ data-import
 │   └── Experimentally_validated_PDB_files.zip
 ├── 2-Predicted_database
 │   ├── 1-Predicted_unique_homologues.zip
-│   ├── 2-Predicted_unique_homologous_sequences.zip
+│   ├── 2-Predicted_unique_homologous_sequences.zip     # (not used)
 │   └── 3-Predicted_groups.zip
 └── 3-Sensitivity_distributions
     ├── MIC_Biocides.zip

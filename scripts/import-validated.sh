@@ -3,7 +3,6 @@
 set -u
 
 database=$DATABASE
-data_csv_file=$1
 
 echo 'Importing experimentally validated data.' >&2
 
