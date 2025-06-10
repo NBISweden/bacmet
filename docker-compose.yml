@@ -1,0 +1,15 @@
+name: bacmet
+
+services:
+  database:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_REINIT
+    volumes:
+      - data:/data
+      - ./data-import:/data-import:ro
+
+volumes:
+  data:
