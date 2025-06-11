@@ -1,2 +1,3 @@
 # Ignore data-import directory
 /data-import/
+__pycache__

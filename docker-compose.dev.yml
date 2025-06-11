@@ -1,0 +1,9 @@
+name: bacmet
+
+services:
+  app:
+    build:
+      target: dev
+    volumes:
+      - ./app:/opt/bacmet/app
+
