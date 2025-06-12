@@ -1,6 +1,4 @@
-# bacmet
-
-
+# BacMet
 
 ## Getting started
 
@@ -70,11 +68,11 @@ data-import
 
 ### Start the app
 
-The app can be started in a production like environment or a an environment tuned for convenient development. When you are switching between environments it is important to remember to rebuild the container so either use the `build` command or add the flag `--build`.
+The app can be started in a production-like environment or in an environment tuned for convenient development. When you are switching between environments it is important to remember to rebuild the container so either use the `build` command or add the flag `--build`.
 
-#### Start production like environment
+#### Start production-like environment
 
-The production like environment will copy all necessary app related code and assets into the container in order to create a self contained deployable container.
+The production-like environment will copy all necessary app related code and assets into the container in order to create a self contained deployable container.
 
 ```sh
 docker compose up --build
@@ -83,7 +81,7 @@ docker compose up --build
 
 #### Start development environment
 
-The development evironment will mount the `app` directory and automatically reload code when it is changed.
+The development environment will mount the `app` directory and automatically reload code when it is changed.
 
 ```sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
