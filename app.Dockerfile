@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM python:3.13-slim AS base
+FROM python:3.13-alpine AS base
 
 WORKDIR /opt/bacmet/app
 
@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 ARG UID=1000
 ARG GID=1000
-RUN groupadd -g "$GID" python && useradd -u "$UID" -g "$GID" python
+RUN addgroup -g "$GID" python && adduser -D -u "$UID" -G python python
 
 EXPOSE ${APP_PORT:-5000}/tcp
 
