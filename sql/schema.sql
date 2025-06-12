@@ -21,9 +21,11 @@ CREATE TABLE validated (
 
 DROP TABLE IF EXISTS validated_pdb;
 CREATE TABLE validated_pdb (
+	validated_pdb_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
 	pdb TEXT NOT NULL,
 
+	PRIMARY KEY(validated_pdb_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
 );
@@ -42,7 +44,7 @@ CREATE TABLE compounds (
 
 DROP TABLE IF EXISTS predicted_unique_homologues;
 CREATE TABLE predicted_unique_homologues (
-	predicted_id INTEGER NOT NULL,
+	predicted_unique_homologue_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
 	blast_hit_genome TEXT NOT NULL,
 	start_alignment_query INTEGER NOT NULL,
@@ -64,7 +66,7 @@ CREATE TABLE predicted_unique_homologues (
 	alntmscore REAL NOT NULL,
 	rmsd REAL NOT NULL,
 
-	PRIMARY KEY(predicted_id),
+	PRIMARY KEY(predicted_unique_homologue_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
 );
@@ -79,12 +81,14 @@ CREATE TABLE sequences (
 
 DROP TABLE IF EXISTS predicted_groups;
 CREATE TABLE predicted_groups (
-	predicted_id INTEGER NOT NULL,
+	predicted_group_id INTEGER NOT NULL,
+	predicted_unique_homologue_id INTEGER NOT NULL,
 	sequence_id INTEGER NOT NULL,
 	matching_ids TEXT NOT NULL,
 
-	FOREIGN KEY(predicted_id) REFERENCES
-		predicted_unique_homologues(predicted_id),
+	PRIMARY KEY(predicted_group_id),
+	FOREIGN KEY(predicted_unique_homologue_id) REFERENCES
+		predicted_unique_homologues(predicted_unique_homologue_id),
 	FOREIGN KEY(sequence_id) REFERENCES
 		sequences(sequence_id)
 );

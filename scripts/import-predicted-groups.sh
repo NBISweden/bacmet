@@ -51,8 +51,10 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 	FROM import_tmp;
 SQL
 cat <<-'SQL' >>"$tmpdir/import.sql"
-	INSERT INTO predicted_groups (predicted_id, sequence_id, matching_ids)
-	SELECT predicted_id, sequence_id, matching_ids
+	INSERT INTO predicted_groups (
+		predicted_unique_homologue_id, sequence_id, matching_ids
+	)
+	SELECT predicted_unique_homologue_id, sequence_id, matching_ids
 	FROM import_tmp
 	JOIN predicted_unique_homologues
 		ON import_tmp.unique_id = predicted_unique_homologues.blast_hit_genome
