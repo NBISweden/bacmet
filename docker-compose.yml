@@ -4,12 +4,23 @@ services:
   database:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: database.Dockerfile
     environment:
       - DATABASE_REINIT
     volumes:
       - data:/data
       - ./data-import:/data-import:ro
+    profiles: ["load-data"]
+
+  app:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+      target: prod
+    ports:
+      - 127.0.0.1:${APP_PORT:-5000}:${APP_PORT:-5000}
+    volumes:
+      - data:/data
 
 volumes:
   data:
