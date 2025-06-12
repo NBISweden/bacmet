@@ -21,9 +21,11 @@ CREATE TABLE validated (
 
 DROP TABLE IF EXISTS validated_pdb;
 CREATE TABLE validated_pdb (
+	validated_pdb_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
 	pdb TEXT NOT NULL,
 
+	PRIMARY KEY(validated_pdb_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
 );
@@ -80,9 +82,11 @@ CREATE TABLE sequences (
 DROP TABLE IF EXISTS predicted_groups;
 CREATE TABLE predicted_groups (
 	predicted_id INTEGER NOT NULL,
+	predicted_group_id INTEGER NOT NULL,
 	sequence_id INTEGER NOT NULL,
 	matching_ids TEXT NOT NULL,
 
+	PRIMARY KEY(predicted_group_id),
 	FOREIGN KEY(predicted_id) REFERENCES
 		predicted_unique_homologues(predicted_id),
 	FOREIGN KEY(sequence_id) REFERENCES
