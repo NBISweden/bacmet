@@ -1,0 +1,21 @@
+:root {
+    --cell-spacing: 0.75rem;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+body > main {
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+footer > .row > .col-sm {
+    padding-top: var(--cell-spacing);
+    padding-bottom: var(--cell-spacing);
+}
