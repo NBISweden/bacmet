@@ -112,7 +112,7 @@ def advanced_search():
         FormField(
             name="database",
             label="Select database",
-            value=database,
+            value="validated" if database is None else database,
             values=[
                 FormFieldValue(
                     value="validated",
