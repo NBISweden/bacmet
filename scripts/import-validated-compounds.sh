@@ -3,7 +3,6 @@
 set -u
 
 database=$DATABASE
-data_csv_file=$1
 
 echo 'Importing experimentally validated compounds.' >&2
 
@@ -25,10 +24,11 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
-# This data needs to be preprocessed to remove empty records
-# and internal headers.
-awk 'NR == 1 || !(/,,,/ || /CAS Number,Chemical Class/)' \
-	"$data_csv_file" >"$tmpdir/data.csv"
+# This data needs to be preprocessed to remove empty records and
+# internal headers.  There are characters that are not UTF-8 (these are
+# dropped).
+iconv -c -t UTF-8 "$1" |
+awk 'NR == 1 || !(/,,,/ || /CAS Number,Chemical Class/)' >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
 

@@ -24,6 +24,9 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
+# This data needs to be preprocessed to remove charecters that are not
+# UTF-8.
+iconv -c -t UTF-8 "$1" >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
 
@@ -50,7 +53,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	);
 SQL
 
-printf '.import --skip 1 %s import_tmp\n' "$1" >>"$tmpdir/import.sql"
+printf '.import --skip 1 %s import_tmp\n' "$tmpdir/data.csv" >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO validated (
