@@ -1,3 +1,15 @@
+DROP TABLE IF EXISTS compounds;
+CREATE TABLE compounds (
+	compound_id INTEGER NOT NULL,
+	compound_name TEXT NOT NULL,
+	cas_number TEXT NOT NULL,
+	chemical_class TEXT NOT NULL,
+	description TEXT NOT NULL,
+
+	PRIMARY KEY(compound_id),
+	UNIQUE(compound_name)
+);
+
 DROP TABLE IF EXISTS validated;
 CREATE TABLE validated (
 	validated_id INTEGER NOT NULL,
@@ -28,18 +40,6 @@ CREATE TABLE validated_pdb (
 	PRIMARY KEY(validated_pdb_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
-);
-
-DROP TABLE IF EXISTS compounds;
-CREATE TABLE compounds (
-	compound_id INTEGER NOT NULL,
-	compound_name TEXT NOT NULL,
-	cas_number TEXT NOT NULL,
-	chemical_class TEXT NOT NULL,
-	description TEXT NOT NULL,
-
-	PRIMARY KEY(compound_id),
-	UNIQUE(compound_name)
 );
 
 DROP TABLE IF EXISTS predicted_unique_homologues;
