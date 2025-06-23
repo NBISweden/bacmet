@@ -2,6 +2,7 @@ from flask import (  # type: ignore
     Flask,
     render_template,
     request,
+    url_for,
 )
 import os
 import logging
@@ -14,7 +15,7 @@ from .search import (
     get_chemical_classes,
     get_compounds
 )
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 from .types import FormField, FormFieldValue
 
 
@@ -28,9 +29,17 @@ class MenuItem:
 
 
 @dataclasses.dataclass
+class ResultPage:
+    state: Optional[Literal["active", "disabled"]] = None
+    label: Optional[str] = None
+    url: Optional[str] = None
+
+
+@dataclasses.dataclass
 class SearchResult:
     status: Optional[str] = None
     items: Optional[Any] = None
+    pages: Optional[list[ResultPage]] = None
 
 
 def create_app(
@@ -99,27 +108,62 @@ def advanced_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
-    items = (
+    page = int(request.args.get("page", "0"))
+    page_size = min(100, int(request.args.get("page_size", "25")))
+    items, total_count = (
         find_in_validated(
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
-            peptide_sequence_length_range=peptide_sequence_length_range
+            peptide_sequence_length_range=peptide_sequence_length_range,
+            pagination=(page, page_size)
         ) if database == "validated"
         else find_in_predicted(
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
+            pagination=(page, page_size)
         )
-    ) if database else None
+    ) if database else (None, -1)
     chemical_classes = get_chemical_classes()
     compounds = get_compounds()
 
+    pages_to_list = 5
+    page_list_start = max(1, page - int(pages_to_list / 2))
+    last_page = int(total_count / page_size)
+    args = request.args.to_dict()
     search_result = (
         None if items is None
         else SearchResult(
-            status=None if len(items) > 0 else "No results found",
-            items=items
+            status=(
+                f"Showing {len(items)} of {total_count} items."
+                if len(items) > 0
+                else "No results found."
+            ),
+            items=[
+                item[0]
+                for item in items
+            ],
+            pages=[
+                ResultPage(
+                    label=f"First",
+                    state="active" if page == 0 else None,
+                    url=url_for("advanced_search", **{**args, "page": 0})
+                ),
+                *[
+                    ResultPage(
+                        label=f"{i + 1}",
+                        state="active" if page == i else None,
+                        url=url_for("advanced_search", **{**args, "page": i})
+                    )
+                    for i in range(page_list_start, min(page_list_start + pages_to_list, last_page))
+                ],
+                ResultPage(
+                    label=f"Last",
+                    state="active" if page == last_page else None,
+                    url=url_for("advanced_search", **{**args, "page": last_page})
+                )
+            ],
         )
     )
 
