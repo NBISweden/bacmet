@@ -39,6 +39,6 @@ def peptide_sequence_length_range(
     data: (str, str)
 ) -> Optional[Tuple[int | None, int | None]]:
     min_len, max_len = data
-    min_len = None if min_len is None else int(min_len)
-    max_len = None if max_len is None else int(max_len)
+    min_len = None if not min_len else int(min_len)
+    max_len = None if not max_len else int(max_len)
     return min_len, max_len

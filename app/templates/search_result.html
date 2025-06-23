@@ -50,11 +50,11 @@
         <legend class="border-bottom mb-4">Peptide sequence length</legend>
         {% with field = fields.peptide_sequence_length_min %}
         <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
+        <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
         {% with field = fields.peptide_sequence_length_max %}
         <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
+        <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
     </fieldset>
     <input class="btn btn-primary" type="submit" value="Search">

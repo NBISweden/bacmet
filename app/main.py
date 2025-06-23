@@ -178,11 +178,8 @@ def advanced_search():
                 "Peptide sequence length greater than "
                 "(for EXP confirmed database only)"
             ),
-            value=(
-                50
-                if peptide_sequence_length_range[0] is None
-                else peptide_sequence_length_range[0]
-            )
+            value=peptide_sequence_length_range[0],
+            placeholder=50,
         ),
         FormField(
             name="peptide_sequence_length_max",
@@ -190,11 +187,8 @@ def advanced_search():
                 "Peptide sequence length less than "
                 "(for EXP confirmed database only)"
             ),
-            value=(
-                2000
-                if peptide_sequence_length_range[1] is None
-                else peptide_sequence_length_range[1]
-            )
+            value=peptide_sequence_length_range[1],
+            placeholder=2000
         ),
     ]
     return render_template(
