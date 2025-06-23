@@ -41,37 +41,36 @@
     {% with field = fields.protein_description %}
     <fieldset class="form-group">
         <legend class="border-bottom mb-4">Protein</legend>
-        <div class="">
-            <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-            <input class="form-control" type="text" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
-        </div>
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <input class="form-control" type="text" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
     </fieldset>
     {% endwith %}
 
     <fieldset class="form-group">
         <legend class="border-bottom mb-4">Peptide sequence length</legend>
         {% with field = fields.peptide_sequence_length_min %}
-        <div class="">
-            <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-            <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
-        </div>
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
         {% with field = fields.peptide_sequence_length_max %}
-        <div class="">
-            <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-            <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
-        </div>
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
     </fieldset>
     <input class="btn btn-primary" type="submit" value="Search">
 </form>
 
-{% if results %}
+{% if result %}
 <hr />
+{% if result.status %}
+<div>{{ result.status }}</div>
+{% endif %}
+{% if result.items %}
 <ul>
-    {% for result in results %}
+    {% for result in result.items %}
     <li>{{ result.gene_name }}, {{ result.bacmet_id }}</li>
     {% endfor %}
 </ul>
+{% endif %}
 {% endif %}
 {% endblock %}

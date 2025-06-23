@@ -14,6 +14,7 @@ from .search import (
     get_chemical_classes,
     get_compounds
 )
+from typing import Any, Optional
 from .types import FormField, FormFieldValue
 
 
@@ -24,6 +25,12 @@ logger = logging.getLogger(__name__)
 class MenuItem:
     href: str
     label: str
+
+
+@dataclasses.dataclass
+class SearchResult:
+    status: Optional[str] = None
+    items: Optional[Any] = None
 
 
 def create_app(
@@ -92,7 +99,7 @@ def advanced_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
-    results = (
+    items = (
         find_in_validated(
             chemical_class=chemical_class,
             location=location,
@@ -107,6 +114,14 @@ def advanced_search():
     ) if database else None
     chemical_classes = get_chemical_classes()
     compounds = get_compounds()
+
+    search_result = (
+        None if items is None
+        else SearchResult(
+            status=None if len(items) > 0 else "No results found",
+            items=items
+        )
+    )
 
     fields = [
         FormField(
@@ -186,7 +201,7 @@ def advanced_search():
         'search_result.html',
         copyright="Developed by NBIS",
         brand_name="BacMet",
-        results=results,
+        result=search_result,
         fields={
             field.name: field
             for field in fields
