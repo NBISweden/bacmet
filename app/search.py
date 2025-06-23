@@ -22,6 +22,10 @@ def find_in_validated(
             items = items.filter(
                 Validated.description.ilike(f"%{protein_description}%")
             )
+        if location and location != "any":
+            items = items.filter(
+                Validated.location.ilike(f"%{location}%")
+            )
         if peptide_sequence_length_range:
             min_length, max_length = peptide_sequence_length_range
             if min_length is not None:
@@ -40,6 +44,7 @@ def find_in_predicted(
     location: Literal["any", "chromosome"],
     protein_description: Optional[str],
 ):
+    # TODO: Not implemented yet
     return []
 
 
