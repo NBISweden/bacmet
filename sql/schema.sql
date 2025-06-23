@@ -23,7 +23,6 @@ CREATE TABLE validated (
 	organism TEXT NOT NULL,
 	location TEXT NOT NULL,
 	type_of_compounds TEXT NOT NULL,
-	compound TEXT NOT NULL,
 	description TEXT NOT NULL,
 	length_aa INTEGER NOT NULL,
 	reference TEXT NOT NULL,

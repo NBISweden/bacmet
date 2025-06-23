@@ -60,14 +60,14 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 		bacmet_id, gene_name, code_for, family,
 		protein_accession_ncbi, nucleotide_accession_ena_embl,
 		protein_accession_uniprot, organism, location,
-		type_of_compounds, compound, description, length_aa,
+		type_of_compounds, description, length_aa,
 		reference
 	)
 	SELECT 
 		bacmet_id, gene_name, code_for, family,
 		protein_accession_ncbi, nucleotide_accession_ena_embl,
 		protein_accession_uniprot, organism, location,
-		type_of_compounds, compound, description, length_aa,
+		type_of_compounds, description, length_aa,
 		reference
 	FROM import_tmp;
 SQL
