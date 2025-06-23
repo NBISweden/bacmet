@@ -25,23 +25,9 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           {% for item in navigation %}
-          {% if item.subnavigation %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="{{ item.href }}" role="button" aria-haspopup="true" aria-expanded="false">{{ item.label }}</a>
-            <ul class="dropdown-menu">
-              {% for subitem in item.subnavigation %}
-              {% if subitem.label == "-" %}
-              <li class="dropdown-divider"></li>
-              {%else%}
-              <li class="dropdown-item" href="{{ subitem.href }}">{{ subitem.label }}</li>
-              {%endif%}
-              {% endfor %}
-            </ul>
-          </li>
-          {% else %}
           <li class="nav-item active"><a class="nav-link" href="{{ item.href }}">{{ item.label }}</a></li>
-          {% endif %}
           {% endfor %}
+        </ul>
       </div>
     </nav>
     {% endif %}
