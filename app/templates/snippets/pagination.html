@@ -1,4 +1,4 @@
-<nav aria-label="...">
+{% if pages %}<nav aria-label="...">
   <ul class="pagination">
     {% for page in pages %}
     <li class="page-item {{ page.state }}">
@@ -6,4 +6,4 @@
     </li>
     {% endfor %}
   </ul>
-</nav>
+</nav>{% endif %}
