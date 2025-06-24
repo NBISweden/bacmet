@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.sql import func
+from sqlalchemy.orm import joinedload
 from typing import Optional, Tuple
 from .database import (
     db_session,
@@ -73,14 +74,18 @@ def find_in_validated(
     pagination: Tuple[int, int]
 ) -> Tuple[list[Validated], int]:
     stmt = apply_search_filters(
-        select(Validated).order_by(Validated.validated_id),
+        select(Validated).options(
+            joinedload(Validated.compounds)
+        ).order_by(Validated.validated_id),
         chemical_class,
         location,
         protein_description,
         peptide_sequence_length_range
     )
     with db_session() as session:
-        items = session.execute(apply_pagination(stmt, pagination)).all()
+        items = session.execute(
+            apply_pagination(stmt, pagination)
+        ).unique().all()
         total_count = session.execute(apply_total_count(stmt)).scalar()
         return (list(items), total_count)
 
@@ -95,7 +100,11 @@ def find_in_predicted(
         select(
             Validated,
             PredictedUniqueHomologues,
-        ).order_by(PredictedUniqueHomologues.predicted_unique_homologue_id).join(
+        ).options(
+            joinedload(Validated.compounds)
+        ).order_by(
+            PredictedUniqueHomologues.predicted_unique_homologue_id
+        ).join(
             Validated,
             PredictedUniqueHomologues.validated_id == Validated.validated_id
         ),
@@ -105,7 +114,7 @@ def find_in_predicted(
         (None, None)
     )
     with db_session() as session:
-        items = session.execute(apply_pagination(stmt, pagination)).all()
+        items = session.execute(apply_pagination(stmt, pagination)).unique().all()
         total_count = session.execute(apply_total_count(stmt)).scalar()
         return (list(items), total_count)
 

@@ -140,10 +140,7 @@ def advanced_search():
                 if len(items) > 0
                 else "No results found."
             ),
-            items=[
-                item[0]
-                for item in items
-            ],
+            items=items,
             pages=[
                 ResultPage(
                     label="First",
