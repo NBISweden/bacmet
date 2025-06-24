@@ -146,7 +146,7 @@ def advanced_search():
             ],
             pages=[
                 ResultPage(
-                    label=f"First",
+                    label="First",
                     state="active" if page == 0 else None,
                     url=url_for("advanced_search", **{**args, "page": 0})
                 ),
@@ -156,12 +156,18 @@ def advanced_search():
                         state="active" if page == i else None,
                         url=url_for("advanced_search", **{**args, "page": i})
                     )
-                    for i in range(page_list_start, min(page_list_start + pages_to_list, last_page))
+                    for i in range(
+                        page_list_start,
+                        min(page_list_start + pages_to_list, last_page)
+                    )
                 ],
                 ResultPage(
-                    label=f"Last",
+                    label="Last",
                     state="active" if page == last_page else None,
-                    url=url_for("advanced_search", **{**args, "page": last_page})
+                    url=url_for(
+                        "advanced_search",
+                        **{**args, "page": last_page}
+                    )
                 )
             ],
         )
