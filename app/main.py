@@ -169,7 +169,7 @@ def advanced_search():
                         **{**args, "page": last_page}
                     )
                 )
-            ],
+            ] if last_page > 0 else None,
         )
     )
 
@@ -192,12 +192,12 @@ def advanced_search():
         FormField(
             name="chemical_class",
             label="Select 'chemical class' / 'compound' (resistant to)",
-            value=chemical_class,
+            value=":".join(chemical_class) if chemical_class else "",
             values=[
                 FormFieldValue(value="", label="class: Any"),
                 *[
-                    FormFieldValue(value=v, label=v)
-                    for v in [
+                    FormFieldValue(value=value, label=label)
+                    for (label, value) in [
                         *chemical_classes,
                         *compounds
                     ]

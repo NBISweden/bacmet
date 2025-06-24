@@ -1,27 +1,36 @@
 from sqlalchemy import select
 from sqlalchemy.sql import func
-from typing import Literal, Optional, Tuple
+from typing import Optional, Tuple
 from .database import (
     db_session,
     Validated,
     PredictedUniqueHomologues,
     Compounds
 )
+from .types import LocationOption, OpenRange, ChemicalClass
 
 
 def apply_search_filters(
     stmt,
-    chemical_class: Optional[str],
-    location: Literal["any", "chromosome", "plasmid"],
+    chemical_class: Optional[ChemicalClass],
+    location: Optional[LocationOption],
     protein_description: Optional[str],
-    peptide_sequence_length_range: Optional[Tuple[int | None, int | None]],
+    peptide_sequence_length_range: Optional[OpenRange],
 ):
     if chemical_class:
-        stmt = stmt.filter(
-            Validated.compounds.any(
-                Compounds.compound_name.ilike(f"%{chemical_class}%")
+        chemical_class_type, chemical_class_name = chemical_class
+        if chemical_class_type == "class":
+            stmt = stmt.filter(
+                Validated.compounds.any(
+                    Compounds.chemical_class.ilike(f"%{chemical_class_name}%")
+                )
             )
-        )
+        elif chemical_class_type == "compound":
+            stmt = stmt.filter(
+                Validated.compounds.any(
+                    Compounds.compound_name.ilike(f"%{chemical_class_name}%")
+                )
+            )
     if protein_description:
         stmt = stmt.filter(
             Validated.description.ilike(f"%{protein_description}%")
@@ -57,10 +66,10 @@ def apply_total_count(stmt):
 
 
 def find_in_validated(
-    chemical_class: Optional[str],
-    location: Literal["any", "chromosome", "plasmid"],
+    chemical_class: Optional[ChemicalClass],
+    location: Optional[LocationOption],
     protein_description: Optional[str],
-    peptide_sequence_length_range: Optional[Tuple[int | None, int | None]],
+    peptide_sequence_length_range: Optional[OpenRange],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Validated], int]:
     stmt = apply_search_filters(
@@ -77,8 +86,8 @@ def find_in_validated(
 
 
 def find_in_predicted(
-    chemical_class: Optional[str],
-    location: Literal["any", "chromosome"],
+    chemical_class: Optional[ChemicalClass],
+    location: Optional[LocationOption],
     protein_description: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:
@@ -101,19 +110,19 @@ def find_in_predicted(
         return (list(items), total_count)
 
 
-def get_chemical_classes():
+def get_chemical_classes() -> list[Tuple[str, str]]:
     with db_session() as session:
         chemical_classes = session.query(Compounds.chemical_class).distinct()
         return [
-            f"class: {cc}"
+            (f"class: {cc}", f"class:{cc.lower()}")
             for cc, in chemical_classes
         ]
 
 
-def get_compounds():
+def get_compounds() -> list[Tuple[str, str]]:
     with db_session() as session:
         compound_names = session.query(Compounds.compound_name).distinct()
         return [
-            cn
+            (cn, f"compound:{cn.lower()}")
             for cn, in compound_names
         ]

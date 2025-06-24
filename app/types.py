@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional
+from typing import Literal, Optional, Tuple
 
 
 @dataclasses.dataclass
@@ -15,3 +15,18 @@ class FormField:
     value: str
     placeholder: Optional[str] = None
     values: Optional[list[FormFieldValue]] = None
+
+
+ChemicalClassType = Literal["class", "compound"]
+
+
+ChemicalClass = Tuple[ChemicalClassType, str]
+
+
+DatabaseOption = Literal["validated", "predicted"]
+
+
+LocationOption = Literal["chromosome", "plasmid"]
+
+
+OpenRange = Tuple[int | None, int | None]
