@@ -25,7 +25,7 @@ fi
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 # This data needs to be preprocessed to remove characters that are not
-# UTF-8 and to correct some misspellt terms.
+# UTF-8 and to correct some misspelled terms.
 iconv -c -t UTF-8 "$1" |
 mlr --csv put '
 	$Compound = gssub($Compound,
