@@ -61,11 +61,13 @@
 </form>
 
 {% if result %}
-<hr />
 {% if result.status %}
+<hr />
 <div>{{ result.status }}</div>
 {% endif %}
+{% if result.items %}
 {% if result.pages %}
+<hr />
 <nav aria-label="...">
   <ul class="pagination">
     {% for page in result.pages %}
@@ -76,7 +78,6 @@
   </ul>
 </nav>
 {% endif %}
-{% if result.items %}
 <ul>
     {% for result in result.items %}
     <li>{{ result.gene_name }}, {{ result.bacmet_id }}</li>
