@@ -25,8 +25,19 @@ fi
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 # This data needs to be preprocessed to remove characters that are not
-# UTF-8.
-iconv -c -t UTF-8 "$1" >"$tmpdir/data.csv"
+# UTF-8 and to correct some misspellt terms.
+iconv -c -t UTF-8 "$1" |
+mlr --csv put '
+	$Compound = gssub($Compound,
+		"Benzylkonium Chloride (BAC)", 
+		"Benzalkonium Chloride (BAC)");
+	$Compound = gssub($Compound,
+		"Benzalkonium chloride",
+		"Benzalkonium Chloride (BAC)");
+	$Compound = gssub($Compound,
+		"Carbonyl cyanide 3-chlorophenylhydrazone (CCCP)",
+		"Carbonyl cyanide (3-chlorophenyl)hydrazone (CCCP)");
+	' >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
 
@@ -74,7 +85,7 @@ SQL
 
 # Create the relationships table between "validated" and "compounds".
 mlr --csv cut -f 'BacMet ID,Compound' then \
-	nest -f Compound --evar ', ' "$1" \
+	nest -f Compound --evar ', ' "$tmpdir/data.csv" \
 	>"$tmpdir/validated_compounds.csv"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
