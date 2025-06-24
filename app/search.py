@@ -17,7 +17,7 @@ def find_in_validated(
         if chemical_class:
             items = items.filter(
                 Validated.compounds.any(
-                    Compounds.compound_name.ilike(f"%{chemical_class}%")
+                    Compounds.chemical_class.ilike(f"%{chemical_class}%")
                 )
             )
         if protein_description:
