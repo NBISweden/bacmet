@@ -68,21 +68,14 @@
 {% if result.items %}
 {% if result.pages %}
 <hr />
-<nav aria-label="...">
-  <ul class="pagination">
-    {% for page in result.pages %}
-    <li class="page-item {{ page.state }}">
-      <a class="page-link" href="{{ page.url }}">{{ page.label }}</a>
-    </li>
-    {% endfor %}
-  </ul>
-</nav>
+{% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
 {% endif %}
 <ul>
     {% for result in result.items %}
     <li>{{ result.gene_name }}, {{ result.bacmet_id }}</li>
     {% endfor %}
 </ul>
+{% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
 {% endif %}
 {% endif %}
 {% endblock %}
