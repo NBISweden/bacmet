@@ -32,10 +32,12 @@ CREATE TABLE validated (
 
 DROP TABLE IF EXISTS validated_compounds;
 CREATE TABLE validated_compounds (
+	validated_compound_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
 	compound_id INTEGER NOT NULL,
 
-	PRIMARY KEY(validated_id, compound_id),
+	PRIMARY KEY(validated_compound_id),
+	UNIQUE(validated_id, compound_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id),
 	FOREIGN KEY(compound_id) REFERENCES
