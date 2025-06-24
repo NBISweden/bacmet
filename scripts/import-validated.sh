@@ -72,6 +72,30 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 	FROM import_tmp;
 SQL
 
+# Create the relationships table between "validated" and "compounds".
+mlr --csv cut -f 'BacMet ID,Compound' then \
+	nest -f Compound --evar ', ' "$1" \
+	>"$tmpdir/validated_compounds.csv"
+
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	CREATE TEMPORARY TABLE validated_compounds_tmp (
+		bacmet_id TEXT NOT NULL,
+		compound_name TEXT NOT NULL,
+		UNIQUE (bacmet_id, compound_name)
+	);
+SQL
+
+printf '.import --skip 1 %s validated_compounds_tmp\n' \
+	"$tmpdir/validated_compounds.csv" >>"$tmpdir/import.sql"
+
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	INSERT INTO validated_compounds (validated_id, compound_id)
+	SELECT v.validated_id, c.compound_id
+	FROM validated v
+	JOIN validated_compounds_tmp tmp ON v.bacmet_id = tmp.bacmet_id
+	JOIN compounds c ON tmp.compound_name = c.compound_name;
+SQL
+
 sqlite3 "$database" <"$tmpdir/import.sql"
 
 echo 'Done.' >&2
