@@ -16,7 +16,9 @@ def find_in_validated(
         items = session.query(Validated)
         if chemical_class:
             items = items.filter(
-                Validated.compound.ilike(f"%{chemical_class}%")
+                Validated.compounds.any(
+                    Compounds.compound_name.ilike(f"%{chemical_class}%")
+                )
             )
         if protein_description:
             items = items.filter(
