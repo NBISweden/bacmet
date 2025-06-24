@@ -73,7 +73,7 @@ def find_in_validated(
     pagination: Tuple[int, int]
 ) -> Tuple[list[Validated], int]:
     stmt = apply_search_filters(
-        select(Validated),
+        select(Validated).order_by(Validated.validated_id),
         chemical_class,
         location,
         protein_description,
@@ -95,7 +95,7 @@ def find_in_predicted(
         select(
             Validated,
             PredictedUniqueHomologues,
-        ).join(
+        ).order_by(PredictedUniqueHomologues.predicted_unique_homologue_id).join(
             Validated,
             PredictedUniqueHomologues.validated_id == Validated.validated_id
         ),
