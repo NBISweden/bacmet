@@ -1,3 +1,15 @@
+DROP TABLE IF EXISTS compounds;
+CREATE TABLE compounds (
+	compound_id INTEGER NOT NULL,
+	compound_name TEXT NOT NULL,
+	cas_number TEXT NOT NULL,
+	chemical_class TEXT NOT NULL,
+	description TEXT NOT NULL,
+
+	PRIMARY KEY(compound_id),
+	UNIQUE(compound_name)
+);
+
 DROP TABLE IF EXISTS validated;
 CREATE TABLE validated (
 	validated_id INTEGER NOT NULL,
@@ -11,7 +23,6 @@ CREATE TABLE validated (
 	organism TEXT NOT NULL,
 	location TEXT NOT NULL,
 	type_of_compounds TEXT NOT NULL,
-	compound TEXT NOT NULL,
 	description TEXT NOT NULL,
 	length_aa INTEGER NOT NULL,
 	reference TEXT NOT NULL,
@@ -19,27 +30,28 @@ CREATE TABLE validated (
 	PRIMARY KEY(validated_id)
 );
 
+DROP TABLE IF EXISTS validated_compounds;
+CREATE TABLE validated_compounds (
+	validated_compound_id INTEGER NOT NULL,
+	validated_id INTEGER NOT NULL,
+	compound_id INTEGER NOT NULL,
+
+	PRIMARY KEY(validated_compound_id),
+	UNIQUE(validated_id, compound_id),
+	FOREIGN KEY(validated_id) REFERENCES
+		validated(validated_id),
+	FOREIGN KEY(compound_id) REFERENCES
+		compounds(compound_id)
+);
+
 DROP TABLE IF EXISTS validated_pdb;
 CREATE TABLE validated_pdb (
-	validated_pdb_id INTEGER NOT NULL,
 	validated_id INTEGER NOT NULL,
 	pdb TEXT NOT NULL,
 
-	PRIMARY KEY(validated_pdb_id),
+	PRIMARY KEY(validated_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
-);
-
-DROP TABLE IF EXISTS compounds;
-CREATE TABLE compounds (
-	compound_id INTEGER NOT NULL,
-	compound_name TEXT NOT NULL,
-	cas_number TEXT NOT NULL,
-	chemical_class TEXT NOT NULL,
-	description TEXT NOT NULL,
-
-	PRIMARY KEY(compound_id),
-	UNIQUE(compound_name)
 );
 
 DROP TABLE IF EXISTS predicted_unique_homologues;

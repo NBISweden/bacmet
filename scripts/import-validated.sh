@@ -25,8 +25,19 @@ fi
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 # This data needs to be preprocessed to remove characters that are not
-# UTF-8.
-iconv -c -t UTF-8 "$1" >"$tmpdir/data.csv"
+# UTF-8 and to correct some misspelled terms.
+iconv -c -t UTF-8 "$1" |
+mlr --csv put '
+	$Compound = gssub($Compound,
+		"Benzylkonium Chloride (BAC)", 
+		"Benzalkonium Chloride (BAC)");
+	$Compound = gssub($Compound,
+		"Benzalkonium chloride",
+		"Benzalkonium Chloride (BAC)");
+	$Compound = gssub($Compound,
+		"Carbonyl cyanide 3-chlorophenylhydrazone (CCCP)",
+		"Carbonyl cyanide (3-chlorophenyl)hydrazone (CCCP)");
+	' >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
 
@@ -60,16 +71,40 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 		bacmet_id, gene_name, code_for, family,
 		protein_accession_ncbi, nucleotide_accession_ena_embl,
 		protein_accession_uniprot, organism, location,
-		type_of_compounds, compound, description, length_aa,
+		type_of_compounds, description, length_aa,
 		reference
 	)
 	SELECT 
 		bacmet_id, gene_name, code_for, family,
 		protein_accession_ncbi, nucleotide_accession_ena_embl,
 		protein_accession_uniprot, organism, location,
-		type_of_compounds, compound, description, length_aa,
+		type_of_compounds, description, length_aa,
 		reference
 	FROM import_tmp;
+SQL
+
+# Create the relationships table between "validated" and "compounds".
+mlr --csv cut -f 'BacMet ID,Compound' then \
+	nest -f Compound --evar ', ' "$tmpdir/data.csv" \
+	>"$tmpdir/validated_compounds.csv"
+
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	CREATE TEMPORARY TABLE validated_compounds_tmp (
+		bacmet_id TEXT NOT NULL,
+		compound_name TEXT NOT NULL,
+		UNIQUE (bacmet_id, compound_name)
+	);
+SQL
+
+printf '.import --skip 1 %s validated_compounds_tmp\n' \
+	"$tmpdir/validated_compounds.csv" >>"$tmpdir/import.sql"
+
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	INSERT INTO validated_compounds (validated_id, compound_id)
+	SELECT v.validated_id, c.compound_id
+	FROM validated v
+	JOIN validated_compounds_tmp tmp ON v.bacmet_id = tmp.bacmet_id
+	JOIN compounds c ON tmp.compound_name = c.compound_name;
 SQL
 
 sqlite3 "$database" <"$tmpdir/import.sql"
