@@ -1,11 +1,13 @@
-from flask import (
+from flask import (  # type: ignore
     Flask,
     render_template,
     request,
+    url_for,
 )
 import os
 import logging
 import dataclasses
+import math
 from .database import db_session, Validated
 from . import parsers
 from .search import (
@@ -14,7 +16,7 @@ from .search import (
     get_chemical_classes,
     get_compounds
 )
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 from .types import FormField, FormFieldValue
 
 
@@ -28,9 +30,17 @@ class MenuItem:
 
 
 @dataclasses.dataclass
+class ResultPage:
+    state: Optional[Literal["active", "disabled"]] = None
+    label: Optional[str] = None
+    url: Optional[str] = None
+
+
+@dataclasses.dataclass
 class SearchResult:
     status: Optional[str] = None
     items: Optional[Any] = None
+    pages: Optional[list[ResultPage]] = None
 
 
 def create_app(
@@ -99,27 +109,65 @@ def advanced_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
-    items = (
+    page = int(request.args.get("page", "0"))
+    page_size = min(100, int(request.args.get("page_size", "25")))
+    items, total_count = (
         find_in_validated(
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
-            peptide_sequence_length_range=peptide_sequence_length_range
+            peptide_sequence_length_range=peptide_sequence_length_range,
+            pagination=(page, page_size)
         ) if database == "validated"
         else find_in_predicted(
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
+            pagination=(page, page_size)
         )
-    ) if database else None
+    ) if database else (None, -1)
     chemical_classes = get_chemical_classes()
     compounds = get_compounds()
 
+    pages_to_list = 5
+    page_list_start = max(1, page - int(pages_to_list / 2))
+    last_page = math.ceil(total_count / page_size) - 1
+    args = request.args.to_dict()
     search_result = (
         None if items is None
         else SearchResult(
-            status=None if len(items) > 0 else "No results found",
-            items=items
+            status=(
+                f"Showing {len(items)} of {total_count} items. On page {page + 1} of {last_page + 1}."
+                if len(items) > 0
+                else "No results found."
+            ),
+            items=items,
+            pages=[
+                ResultPage(
+                    label="First",
+                    state="active" if page == 0 else None,
+                    url=url_for("advanced_search", **{**args, "page": 0})
+                ),
+                *[
+                    ResultPage(
+                        label=f"{i + 1}",
+                        state="active" if page == i else None,
+                        url=url_for("advanced_search", **{**args, "page": i})
+                    )
+                    for i in range(
+                        page_list_start,
+                        min(page_list_start + pages_to_list, last_page)
+                    )
+                ],
+                ResultPage(
+                    label="Last",
+                    state="active" if page == last_page else None,
+                    url=url_for(
+                        "advanced_search",
+                        **{**args, "page": last_page}
+                    )
+                )
+            ] if last_page > 0 else None,
         )
     )
 
@@ -142,12 +190,12 @@ def advanced_search():
         FormField(
             name="chemical_class",
             label="Select 'chemical class' / 'compound' (resistant to)",
-            value=chemical_class,
+            value=":".join(chemical_class) if chemical_class else "",
             values=[
                 FormFieldValue(value="", label="class: Any"),
                 *[
-                    FormFieldValue(value=v, label=v)
-                    for v in [
+                    FormFieldValue(value=value, label=label)
+                    for (label, value) in [
                         *chemical_classes,
                         *compounds
                     ]
@@ -178,11 +226,8 @@ def advanced_search():
                 "Peptide sequence length greater than "
                 "(for EXP confirmed database only)"
             ),
-            value=(
-                50
-                if peptide_sequence_length_range[0] is None
-                else peptide_sequence_length_range[0]
-            )
+            value=peptide_sequence_length_range[0],
+            placeholder=50,
         ),
         FormField(
             name="peptide_sequence_length_max",
@@ -190,11 +235,8 @@ def advanced_search():
                 "Peptide sequence length less than "
                 "(for EXP confirmed database only)"
             ),
-            value=(
-                2000
-                if peptide_sequence_length_range[1] is None
-                else peptide_sequence_length_range[1]
-            )
+            value=peptide_sequence_length_range[1],
+            placeholder=2000
         ),
     ]
     return render_template(

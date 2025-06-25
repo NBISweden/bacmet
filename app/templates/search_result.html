@@ -50,27 +50,34 @@
         <legend class="border-bottom mb-4">Peptide sequence length</legend>
         {% with field = fields.peptide_sequence_length_min %}
         <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
+        <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
         {% with field = fields.peptide_sequence_length_max %}
         <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-        <input class="form-control" type="number" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
+        <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}" value="{{ field.value }}" id="{{ field.name }}">
         {% endwith %}
     </fieldset>
     <input class="btn btn-primary" type="submit" value="Search">
 </form>
 
 {% if result %}
-<hr />
 {% if result.status %}
+<hr />
 <div>{{ result.status }}</div>
 {% endif %}
 {% if result.items %}
+<hr />
+{% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
 <ul>
-    {% for result in result.items %}
-    <li>{{ result.gene_name }}, {{ result.bacmet_id }}</li>
-    {% endfor %}
+    {% for item in result.items %}{% with validated=item[0], predicted=item[1]%}
+    {% if predicted %}
+    <li>{{ predicted.blast_hit_genome }}, {{ validated.gene_name }}, {{ validated.bacmet_id }}</li>
+    {% else %}
+    <li>{{ validated.gene_name }}, {{ validated.bacmet_id }}{% if validated.compounds %}{% for compound in validated.compounds %}, {{ compound.compound_name }} {% endfor %}{% endif %}</li>
+    {% endif %}
+    {% endwith %}{% endfor %}
 </ul>
+{% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
 {% endif %}
 {% endif %}
 {% endblock %}

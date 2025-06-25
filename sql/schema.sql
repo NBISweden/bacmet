@@ -9,6 +9,7 @@ CREATE TABLE compounds (
 	PRIMARY KEY(compound_id),
 	UNIQUE(compound_name)
 );
+CREATE INDEX chemical_class_idx ON compounds(chemical_class);
 
 DROP TABLE IF EXISTS validated;
 CREATE TABLE validated (
@@ -37,7 +38,7 @@ CREATE TABLE validated_compounds (
 	compound_id INTEGER NOT NULL,
 
 	PRIMARY KEY(validated_compound_id),
-	UNIQUE(validated_id, compound_id),
+	UNIQUE(compound_id, validated_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id),
 	FOREIGN KEY(compound_id) REFERENCES
@@ -82,6 +83,7 @@ CREATE TABLE predicted_unique_homologues (
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
 );
+CREATE INDEX validated_idx ON predicted_unique_homologues(validated_id);
 
 DROP TABLE IF EXISTS sequences;
 CREATE TABLE sequences (
