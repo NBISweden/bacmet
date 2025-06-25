@@ -137,7 +137,7 @@ def advanced_search():
         None if items is None
         else SearchResult(
             status=(
-                f"Showing {len(items)} of {total_count} items."
+                f"Showing {len(items)} of {total_count} items. On page {page + 1} of {last_page + 1}."
                 if len(items) > 0
                 else "No results found."
             ),
