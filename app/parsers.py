@@ -14,7 +14,8 @@ def chemical_class(data: str) -> (
     Optional[Tuple[ChemicalClassType, str]]
 ):
     if data:
-        [value_type_str, *value] = data.lower().split(":")
+        [value_type_str, *value] = data.split(":")
+        value_type_str = value_type_str.lower()
         if value_type_str in {"class", "compound"}:
             value_type = cast(ChemicalClassType, value_type_str)
             return value_type, ":".join(value)
