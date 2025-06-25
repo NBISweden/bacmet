@@ -7,7 +7,7 @@ def database(data: str) -> Optional[DatabaseOption]:
     if value in {None, "validated", "predicted"}:
         return cast(DatabaseOption, value)
 
-    raise ValueError(f"Could not parse location: {value}")
+    raise ValueError(f"Could not parse database: {value}")
 
 
 def chemical_class(data: str) -> (
@@ -21,7 +21,7 @@ def chemical_class(data: str) -> (
     else:
         return None
 
-    raise ValueError(f"Could not parse chemical_class: {value}")
+    raise ValueError(f"Could not parse chemical_class: {data}")
 
 
 def location(

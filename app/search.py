@@ -36,7 +36,7 @@ def apply_search_filters(
         stmt = stmt.filter(
             Validated.description.ilike(f"%{protein_description}%")
         )
-    if location and location != "any":
+    if location:
         stmt = stmt.filter(
             Validated.location.ilike(f"%{location}%")
         )
