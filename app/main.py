@@ -7,6 +7,7 @@ from flask import (  # type: ignore
 import os
 import logging
 import dataclasses
+import math
 from .database import db_session, Validated
 from . import parsers
 from .search import (
@@ -130,13 +131,13 @@ def advanced_search():
 
     pages_to_list = 5
     page_list_start = max(1, page - int(pages_to_list / 2))
-    last_page = int(total_count / page_size)
+    last_page = math.ceil(total_count / page_size) - 1
     args = request.args.to_dict()
     search_result = (
         None if items is None
         else SearchResult(
             status=(
-                f"Showing {len(items)} of {total_count} items."
+                f"Showing {len(items)} of {total_count} items. On page {page + 1} of {last_page + 1}."
                 if len(items) > 0
                 else "No results found."
             ),

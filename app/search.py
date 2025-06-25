@@ -6,9 +6,11 @@ from .database import (
     db_session,
     Validated,
     PredictedUniqueHomologues,
-    Compounds
+    Compounds,
+    ValidatedCompounds
 )
 from .types import LocationOption, OpenRange, ChemicalClass
+from functools import cache
 
 
 def apply_search_filters(
@@ -20,23 +22,18 @@ def apply_search_filters(
 ):
     if chemical_class:
         chemical_class_type, chemical_class_name = chemical_class
-        if chemical_class_type == "class":
-            stmt = stmt.filter(
-                Validated.compounds.any(
-                    Compounds.chemical_class.ilike(f"%{chemical_class_name}%")
-                )
+        stmt = stmt.filter(
+            Validated.compounds.any(
+                Compounds.compound_name == chemical_class_name
+                if chemical_class_type == "compound"
+                else Compounds.chemical_class == chemical_class_name
             )
-        elif chemical_class_type == "compound":
-            stmt = stmt.filter(
-                Validated.compounds.any(
-                    Compounds.compound_name.ilike(f"%{chemical_class_name}%")
-                )
-            )
+        )
     if protein_description:
         stmt = stmt.filter(
             Validated.description.ilike(f"%{protein_description}%")
         )
-    if location and location != "any":
+    if location:
         stmt = stmt.filter(
             Validated.location.ilike(f"%{location}%")
         )
@@ -119,19 +116,25 @@ def find_in_predicted(
         return (list(items), total_count)
 
 
+@cache
 def get_chemical_classes() -> list[Tuple[str, str]]:
+    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
+    stmt = select(Compounds.chemical_class).filter(Compounds.compound_id.in_(all_compounds)).distinct()
     with db_session() as session:
-        chemical_classes = session.query(Compounds.chemical_class).distinct()
+        chemical_classes = session.execute(stmt)
         return [
-            (f"class: {cc}", f"class:{cc.lower()}")
+            (f"class: {cc}", f"class:{cc}")
             for cc, in chemical_classes
         ]
 
 
+@cache
 def get_compounds() -> list[Tuple[str, str]]:
+    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
+    stmt = select(Compounds.compound_name).filter(Compounds.compound_id.in_(all_compounds)).distinct()
     with db_session() as session:
-        compound_names = session.query(Compounds.compound_name).distinct()
+        compound_names = session.execute(stmt)
         return [
-            (cn, f"compound:{cn.lower()}")
+            (cn, f"compound:{cn}")
             for cn, in compound_names
         ]
