@@ -1,5 +1,11 @@
-:root {
-    --cell-spacing: 0.75rem;
+:root,
+[data-bs-theme="light"] {
+  --bs-primary:#4A6080;
+  --bs-primary-rgb: 74, 96, 128;
+  --bs-secondary: #7fa1c3;
+  --bs-secondary-rgb: 127, 161, 195;
+  --bs-footer: #e2dad6;
+  --bs-footer-rgb: 226, 218, 214;
 }
 
 body {
@@ -16,6 +22,7 @@ body > main {
 }
 
 footer > .row > .col-sm {
+    background-color: var(--bs-footer);
     padding-top: var(--cell-spacing);
     padding-bottom: var(--cell-spacing);
 }
@@ -32,3 +39,12 @@ header > .navbar .nav-item:not(:last-child):after {
     content: "";
     border-right: solid 1px rgba(0, 0, 0, 0.1);
 }
+
+.navbar-toggler {
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+  }

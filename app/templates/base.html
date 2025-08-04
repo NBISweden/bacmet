@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}BacMet{% endblock %}</title>
   <link href="/static/vendor/bootstrap.min.css" rel="stylesheet">
-  <link href="/static/vendor/bootstrap-reboot.min.css" rel="stylesheet">
-  <link href="/static/vendor/bootstrap-grid.min.css" rel="stylesheet">
-  <link href="/static/main.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/vendor/bootstrap-icons.min.css">
+  <link href="/static/main.css" rel="stylesheet">
   <script src="/static/vendor/jquery-3.0.0.min.js"></script>
   <script src="/static/vendor/bootstrap.bundle.min.js"></script>
   {% block head %}{% endblock %}
@@ -16,27 +14,38 @@
 <body>
   <header>
     {% if navigation %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">{{ brand_name }}</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          {% for item in navigation %}
-          <li class="nav-item active"><a class="nav-link" href="{{ item.href }}">{{ item.label }}</a></li>
-          {% endfor %}
-        </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+      <div class="container-fluid justify-content-between">
+        <div>
+          <a class="navbar-brand text-white" href="#">{{ brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
+        </div>
+        <div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+              {% for item in navigation %}
+              <li class="nav-item active"><a class="nav-link text-white" href="{{ item.href }}">{{ item.label }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
     </nav>
     {% endif %}
   </header>
   <main class="container">
+    <div>
+      <p class="text-primary">Test 1</p>
+      <p class="text-secondary">Test 2</p>
+    </div>
     {% block content %}{{ content_text }}{% endblock %}
   </main>
 
-  <footer class="container-fluid bg-light">
+  <footer class="container-fluid">
     <div class="row">
       <div class="col-sm">
         {{ copyright }}
