@@ -8,8 +8,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt
 
 ARG UID=1000
-ARG GID=1000
-RUN addgroup -g "$GID" python && adduser -D -u "$UID" -G python python
+RUN adduser -D -u "$UID" python
 
 EXPOSE ${APP_PORT:-5000}/tcp
 
