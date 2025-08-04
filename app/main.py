@@ -81,7 +81,6 @@ def get_site_info():
             "copyright": "Copyright © 2013-2018 All rights reserved",
             "brand_name": "BacMet",
             "contact": "info@example.com",
-            "site_information": "Developed by NBIS",
             "attribution": "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team",
         }
     }

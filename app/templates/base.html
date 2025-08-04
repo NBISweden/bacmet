@@ -42,20 +42,21 @@
   </main>
   {% if site_info %}
   <footer class="container-fluid">
-    <div class="row">
+    <div class="row small d-flex justify-content-between">
       <div class="col-sm p-2">
         <p class="mb-1"><strong>{{ site_info.brand_name }}</strong></p>
         {{ site_info.copyright }}
       </div>
       <div class="col-sm p-2">
         <p class="mb-1"><strong>CONTACT</strong></p>
+        <icon class="bi bi-envelope-fill me-1"></icon>
         {{ site_info.contact }}
       </div>
       <div class="col-sm p-2">
-        {{ site_info.site_information }}
-      </div>
-      <div class="col-sm p-2">
         {{ site_info.attribution }}
+      </div>
+      <div class="col-sm p-2 d-flex align-items-center justify-content-end">
+        <img src="{{ url_for('static', filename='img/Chalmers_GU.png') }}" alt="Chalmers and Gothenburg university logo" class="img-fluid" style="max-height:32px;">
       </div>
     </div>
   </footer>
