@@ -4,7 +4,8 @@ RUN apk add --no-cache \
 	sqlite~3 \
 	miller~6
 
-RUN adduser -D database
+ARG UID=1000
+RUN adduser -D -u "$UID" database
 
 RUN mkdir -m 775 /data
 RUN chown database /data
