@@ -66,15 +66,12 @@ def get_navigation() -> list[MenuItem]:
     return [
         MenuItem(label=label, href=href)
         for label, href in [
-            ("Home", "#"),
-            ("Browse", "#"),
-            ("Search", "search"),
+            ("Browse & Search", "/search"),
+            ("Advanced search", "#"),
             ("BLAST", "#"),
             ("Download", "#"),
+            ("FAQ", "#"),
             ("About BacMet", "#"),
-            ("Submission", "#"),
-            ("Tutorial", "#"),
-            ("FAQs", "#"),
             ("Contact", "#"),
         ]
     ]

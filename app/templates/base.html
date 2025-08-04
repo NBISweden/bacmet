@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
       <div class="container-fluid justify-content-between">
         <div>
-          <a class="navbar-brand text-white" href="#">{{ brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
+          <a class="navbar-brand text-white" href="/">{{ brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
         </div>
         <div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -27,7 +27,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
               {% for item in navigation %}
-              <li class="nav-item active"><a class="nav-link text-white" href="{{ item.href }}">{{ item.label }}</a>
+              <li class="nav-item me-2"><a class="nav-link text-white {% if request.path == item.href %}active{% endif %}" href="{{ item.href }}">{{ item.label}}</a>
               </li>
               {% endfor %}
             </ul>
