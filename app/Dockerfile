@@ -27,7 +27,7 @@ CMD flask --app app/main --debug run --host 0.0.0.0 --port 5000
 # Production setup
 FROM base AS prod
 
-COPY scripts/start-script.sh ./start-script.sh
+COPY --chmod=755 scripts/start-script.sh ./start-script.sh
 
 USER python
 CMD ./start-script.sh
