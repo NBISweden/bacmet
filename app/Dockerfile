@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ARG UID=1000
 RUN adduser -D -u "$UID" python
 
-EXPOSE ${APP_PORT:-5000}/tcp
+EXPOSE 5000/tcp
 
 
 # Development setup
@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.dev.txt
 
 USER python
-CMD flask --app main --debug run --host 0.0.0.0 --port "${APP_PORT:-5000}"
+CMD flask --app main --debug run --host 0.0.0.0 --port 5000
 
 
 # Production setup
