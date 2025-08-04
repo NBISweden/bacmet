@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
       <div class="container-fluid justify-content-between">
         <div>
-          <a class="navbar-brand text-white" href="/">{{ brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
+          <a class="navbar-brand text-white" href="/">{{ site_info.brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
         </div>
         <div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -38,28 +38,27 @@
     {% endif %}
   </header>
   <main class="container">
-    <div>
-      <p class="text-primary">Test 1</p>
-      <p class="text-secondary">Test 2</p>
-    </div>
     {% block content %}{{ content_text }}{% endblock %}
   </main>
-
+  {% if site_info %}
   <footer class="container-fluid">
     <div class="row">
-      <div class="col-sm">
-        {{ copyright }}
+      <div class="col-sm p-2">
+        <p class="mb-1"><strong>{{ site_info.brand_name }}</strong></p>
+        {{ site_info.copyright }}
       </div>
-      <div class="col-sm">
-        {{ site_info }}
+      <div class="col-sm p-2">
+        <p class="mb-1"><strong>CONTACT</strong></p>
+        {{ site_info.contact }}
       </div>
-      <div class="col-sm">
-        {{ contact }}
+      <div class="col-sm p-2">
+        {{ site_info.site_information }}
       </div>
-      <div class="col-sm">
-        {{ attribution }}
+      <div class="col-sm p-2">
+        {{ site_info.attribution }}
       </div>
     </div>
   </footer>
+  {% endif %}
 </body>
 </html>

@@ -61,7 +61,6 @@ app = create_app(
     message_root=os.getenv("APP_MESSAGE_ROOT", "/home/bacmet")
 )
 
-
 def get_navigation() -> list[MenuItem]:
     return [
         MenuItem(label=label, href=href)
@@ -75,7 +74,17 @@ def get_navigation() -> list[MenuItem]:
             ("Contact", "#"),
         ]
     ]
-
+@app.context_processor
+def get_site_info():
+    return {
+        "site_info": {
+            "copyright": "Copyright © 2013-2018 All rights reserved",
+            "brand_name": "BacMet",
+            "contact": "info@example.com",
+            "site_information": "Developed by NBIS",
+            "attribution": "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team",
+        }
+    }
 
 @app.route('/')
 def root():
@@ -88,9 +97,7 @@ def root():
 
     return render_template(
         'base.html',
-        copyright="Developed by NBIS",
-        brand_name="BacMet",
-        navigation=get_navigation()
+        navigation=get_navigation(),
     )
 
 
@@ -238,15 +245,13 @@ def advanced_search():
     ]
     return render_template(
         'search_result.html',
-        copyright="Developed by NBIS",
-        brand_name="BacMet",
         result=search_result,
         fields={
             field.name: field
             for field in fields
         },
         form_target="search",
-        navigation=get_navigation()
+        navigation=get_navigation(),
     )
 
 
