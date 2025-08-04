@@ -16,7 +16,7 @@ RUN mkdir scripts
 RUN mkdir sql
 
 COPY --chmod=644 sql/schema.sql sql/
-COPY --chmod=755 scripts/import-all.sh scripts/
+COPY --chmod=755 scripts/entrypoint.sh ./
 COPY --chmod=755 scripts/import-validated.sh scripts/
 COPY --chmod=755 scripts/import-validated-compounds.sh scripts/
 COPY --chmod=755 scripts/import-validated-pdb-files.sh scripts/
@@ -26,4 +26,4 @@ COPY --chmod=755 scripts/import-sensitivity-distributions.sh scripts/
 
 ENV DATABASE=/data/database.db
 
-CMD [ "scripts/import-all.sh" ]
+CMD ./entrypoint.sh
