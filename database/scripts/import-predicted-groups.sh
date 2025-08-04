@@ -2,6 +2,7 @@
 
 set -u
 
+# shellcheck disable=SC2153
 database=$DATABASE
 data_zip_archive=$1
 
@@ -42,6 +43,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	);
 SQL
 
+# shellcheck disable=SC2129
 printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"

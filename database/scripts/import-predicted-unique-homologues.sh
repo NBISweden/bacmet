@@ -2,6 +2,7 @@
 
 set -u
 
+# shellcheck disable=SC2153
 database=$DATABASE
 data_zip_archive=$1
 

@@ -2,6 +2,7 @@
 
 set -u
 
+# shellcheck disable=SC2153
 database=$DATABASE
 
 echo 'Importing sensitivity distributions.' >&2
@@ -35,6 +36,7 @@ done
 # * Remove duplicated records,
 # * Move comments from the unnamed field "Unnamed: 13" to the "Comment" field,
 # * Remove empty columns.
+# shellcheck disable=SC1010,SC2016
 mlr --csv \
 	rename 'strain,Strain,Incubation time (),Incubation time (h)' then \
 	uniq -a then \

@@ -2,6 +2,7 @@
 
 set -u
 
+# shellcheck disable=SC2153
 database=$DATABASE
 
 echo 'Importing experimentally validated compounds.' >&2
