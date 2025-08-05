@@ -75,7 +75,7 @@ def get_navigation() -> list[MenuItem]:
         ]
     ]
 @app.context_processor
-def get_site_info():
+def inject_site_info():
     return {
         "site_info": {
             "copyright": "Copyright © 2013-2018 All rights reserved",

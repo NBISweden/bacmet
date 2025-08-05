@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
       <div class="container-fluid justify-content-between">
         <div>
-          <a class="navbar-brand text-white me-1" href="/">{{ site_info.brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
+          <a class="navbar-brand text-white me-1" href="/">{{ site_info.brand_name }}</a> <i class="bi bi-virus text-white"></i>
         </div>
         <div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -27,7 +27,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
               {% for item in navigation %}
-              <li class="nav-item me-2"><a class="nav-link text-white {% if request.path == item.href %}active{% endif %}" href="{{ item.href }}">{{ item.label}}</a>
+              <li class="nav-item me-2"><a class="nav-link text-white {% if request.path == item.href %} active {% endif %}" href="{{ item.href }}">{{ item.label }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -49,7 +49,7 @@
       </div>
       <div class="col-sm p-2">
         <p class="mb-1"><strong>CONTACT</strong></p>
-        <icon class="bi bi-envelope-fill me-2"></icon>
+        <i class="bi bi-envelope-fill me-2"></i>
         {{ site_info.contact }}
       </div>
       <div class="col-sm p-2 fst-italic">
