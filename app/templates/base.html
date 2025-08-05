@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
       <div class="container-fluid justify-content-between">
         <div>
-          <a class="navbar-brand text-white" href="/">{{ site_info.brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
+          <a class="navbar-brand text-white me-1" href="/">{{ site_info.brand_name }}</a> <icon class="bi bi-virus text-white"></icon>
         </div>
         <div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -44,15 +44,15 @@
   <footer class="container-fluid">
     <div class="row small d-flex justify-content-between">
       <div class="col-sm p-2">
-        <p class="mb-1"><strong>{{ site_info.brand_name }}</strong></p>
+        <p class="mb-1 text-uppercase"><strong>{{ site_info.brand_name }}</strong></p>
         {{ site_info.copyright }}
       </div>
       <div class="col-sm p-2">
         <p class="mb-1"><strong>CONTACT</strong></p>
-        <icon class="bi bi-envelope-fill me-1"></icon>
+        <icon class="bi bi-envelope-fill me-2"></icon>
         {{ site_info.contact }}
       </div>
-      <div class="col-sm p-2">
+      <div class="col-sm p-2 fst-italic">
         {{ site_info.attribution }}
       </div>
       <div class="col-sm p-2 d-flex align-items-center justify-content-end">
