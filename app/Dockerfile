@@ -33,4 +33,4 @@ WORKDIR /opt/bacmet
 COPY scripts/start-script.sh ./start-script.sh
 
 USER python
-CMD ./entrypoint.sh
+CMD ./start-script.sh
