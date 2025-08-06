@@ -30,7 +30,7 @@ FROM base AS prod
 
 WORKDIR /opt/bacmet
 
-COPY scripts/entrypoint.sh ./entrypoint.sh
+COPY scripts/start-script.sh ./start-script.sh
 
 USER python
 CMD ./entrypoint.sh
