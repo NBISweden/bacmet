@@ -2,8 +2,7 @@
 FROM python:3.13-alpine AS base
 
 WORKDIR /opt/bacmet/app
-
-COPY . .
+COPY ./app ./
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt

@@ -5,5 +5,5 @@ services:
     build:
       target: dev
     volumes:
-      - ./app:/opt/bacmet/app
+      - ./app/app:/opt/bacmet/app
 
