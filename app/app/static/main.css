@@ -65,3 +65,9 @@ header > .navbar .nav-item {
     color: var(--bs-secondary);
     border-color: var(--bs-secondary);
   }
+
+  legend {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-bottom: 0.5em;
+  }

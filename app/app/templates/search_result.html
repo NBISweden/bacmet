@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="row justify-content-center pt-3">
+<div class="row justify-content-center pt-3 pb-3">
   <div class="col-sm-12 col-md-9 col-lg-7">
     <h2>Advanced search</h2>
     <p>Lorem ipsum dolor sit amet, vince adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
@@ -9,8 +9,8 @@
     dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
     <form action="{{form_target}}">
       {% with field = fields.database %}
-      <fieldset class="form-group">
-        <legend class="border-bottom mb-4">{{ field.label }}</legend>
+      <fieldset class="form-group pt-3 pb-2">
+        <legend>{{ field.label }}:</legend>
         {% for value in field.values %}
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="{{ field.name }}" {% if value.value==field.value
@@ -22,9 +22,8 @@
       {% endwith %}
 
       {% with field = fields.chemical_class %}
-      <fieldset class="form-group pt-2 pb-2">
-        <legend class="border-bottom mb-4">{{ field.label }}</legend>
-        <label class="form-label" for="{{ field.name }}">Select a value</label>
+      <fieldset class="form-group pt-3 pb-2">
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
         <select class="form-control" name="{{ field.name }}">
           {% for value in field.values %}
           <option value="{{ value.value }}" {% if value.value==field.value %}selected{% endif %}>{{ value.label }}
@@ -35,8 +34,8 @@
       {% endwith %}
 
       {% with field = fields.location %}
-      <fieldset class="form-group pt-2 pb-2">
-        <legend class="border-bottom mb-4">{{ field.label }}</legend>
+      <fieldset class="form-group pt-3 pb-2">
+        <legend>{{ field.label }}:</legend>
         {% for value in field.values %}
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="{{ field.name }}" {% if value.value==field.value
@@ -48,28 +47,29 @@
       {% endwith %}
 
       {% with field = fields.protein_description %}
-      <fieldset class="form-group pt-2 pb-2">
-        <legend class="border-bottom mb-4">Protein</legend>
-        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
-        <input class="form-control" type="text" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}">
+      <fieldset class="form-group pt-3 pb-2">
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
+        <input class="form-control" type="text" name="{{ field.name }}" value="{{ field.value }}" id="{{ field.name }}" placeholder="example: resistance">
       </fieldset>
       {% endwith %}
 
-      <fieldset class="form-group pt-2 pb-2">
-        <legend class="border-bottom mb-4">Peptide sequence length</legend>
+      <fieldset class="form-group pt-3 pb-2">
         {% with field = fields.peptide_sequence_length_min %}
-        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
         <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}"
           value="{{ field.value }}" id="{{ field.name }}">
+          <div id="{{ field.name }}" class="form-text">For experimentally confirmed database only.</div>
         {% endwith %}
         {% with field = fields.peptide_sequence_length_max %}
-        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <label class="form-label pt-2" for="{{ field.name }}">{{ field.label }}:</label>
         <input class="form-control" type="number" name="{{ field.name }}" placeholder="{{ field.placeholder }}"
           value="{{ field.value }}" id="{{ field.name }}">
+          <div id="{{ field.name }}" class="form-text">For experimentally confirmed database only.</div>
+
         {% endwith %}
       </fieldset>
 
-      <div class="pt-2 pb-2">
+      <div class="pt-3 pb-2">
         <input class="btn btn-primary" type="submit" value="Search">
       </div>
     </form>
