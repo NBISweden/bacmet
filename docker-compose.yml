@@ -3,8 +3,7 @@ name: bacmet
 services:
   database:
     build:
-      context: .
-      dockerfile: database.Dockerfile
+      context: database
     environment:
       - DATABASE_REINIT
     volumes:
@@ -14,8 +13,7 @@ services:
 
   app:
     build:
-      context: .
-      dockerfile: app.Dockerfile
+      context: app
       target: prod
     ports:
       - 127.0.0.1:${APP_PORT:-5000}:${APP_PORT:-5000}

@@ -2,8 +2,7 @@
 FROM python:3.13-alpine AS base
 
 WORKDIR /opt/bacmet/app
-
-COPY app .
+COPY ./app ./
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt
@@ -30,7 +29,7 @@ FROM base AS prod
 
 WORKDIR /opt/bacmet
 
-COPY start-script.sh start-script.sh
+COPY scripts/start-script.sh ./start-script.sh
 
 USER python
 CMD ./start-script.sh
