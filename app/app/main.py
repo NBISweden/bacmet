@@ -214,7 +214,7 @@ def advanced_search():
                 FormFieldValue(value="chromosome", label="Chromosome"),
                 FormFieldValue(
                     value="plasmid",
-                    label="Plasmid (for EXP confirmed database only)"
+                    label="Plasmid"
                 ),
             ]
         ),
@@ -226,8 +226,7 @@ def advanced_search():
         FormField(
             name="peptide_sequence_length_min",
             label=(
-                "Peptide sequence length greater than "
-                "(for EXP confirmed database only)"
+                "Peptide sequence length greater than"
             ),
             value=peptide_sequence_length_range[0],
             placeholder=50,
@@ -235,8 +234,7 @@ def advanced_search():
         FormField(
             name="peptide_sequence_length_max",
             label=(
-                "Peptide sequence length less than "
-                "(for EXP confirmed database only)"
+                "Peptide sequence length less than"
             ),
             value=peptide_sequence_length_range[1],
             placeholder=2000
