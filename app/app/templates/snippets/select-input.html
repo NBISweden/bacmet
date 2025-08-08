@@ -1,0 +1,11 @@
+{% if field %}
+<fieldset class="form-group pt-3 pb-2">
+  <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
+  <select class="form-control" name="{{ field.name }}" id="{{ field.name }}">
+    {% for value in field.values %}
+    <option value="{{ value.value }}" {% if value.value==field.value %}selected{% endif %}>{{ value.label }}
+    </option>
+    {% endfor %}
+  </select>
+</fieldset>
+{% endif %}

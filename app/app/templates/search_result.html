@@ -23,15 +23,7 @@
       {% endwith %}
 
       {% with field = fields.chemical_class %}
-      <fieldset class="form-group pt-3 pb-2">
-        <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
-        <select class="form-control" name="{{ field.name }}">
-          {% for value in field.values %}
-          <option value="{{ value.value }}" {% if value.value==field.value %}selected{% endif %}>{{ value.label }}
-          </option>
-          {% endfor %}
-        </select>
-      </fieldset>
+      {% include "snippets/select-input.html" %}
       {% endwith %}
 
       {% with field = fields.protein_description %}
@@ -74,27 +66,9 @@
       {% if fields.gene_name %}
       <hr />
       <h3>Additional parameters</h3>
-      {% with field = fields.gene_name %}{% if field %}
-      <fieldset class="form-group pt-3 pb-2">
-        <legend>{{ field.label }}:</legend>
-        <div class="container">
-          <div class="row">
-            {% for value in field.values %}
-            <div class="col col-6">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="{{ field.name }}"
-                  {% if value.value==field.value %}checked{% endif %}
-                  value="{{ value.value }}"
-                  id="{{ field.name }}.{{ value.value }}"
-                >
-                <label class="form-check-label" for="{{ field.name }}.{{ value.value }}">{{ value.label }}</label>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </fieldset>
-      {% endif %}{% endwith %}
+      {% with field = fields.gene_name %}
+      {% include "snippets/select-input.html" %}
+      {% endwith %}
       {% endif %}
 
       <div class="pt-3 pb-2">
