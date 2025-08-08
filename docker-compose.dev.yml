@@ -6,4 +6,3 @@ services:
       target: dev
     volumes:
       - ./app/app:/opt/bacmet/app
-

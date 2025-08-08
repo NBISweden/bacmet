@@ -2,6 +2,7 @@
 
 set -u
 
+# shellcheck disable=SC2153 
 database=$DATABASE
 
 echo 'Importing experimentally validated data.' >&2
@@ -26,6 +27,7 @@ tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 # This data needs to be preprocessed to remove characters that are not
 # UTF-8 and to correct some misspelled terms.
+# shellcheck disable=SC2016
 iconv -c -t UTF-8 "$1" |
 mlr --csv put '
 	$Compound = gssub($Compound,
@@ -84,10 +86,12 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 SQL
 
 # Create the relationships table between "validated" and "compounds".
+# shellcheck disable=SC1010
 mlr --csv cut -f 'BacMet ID,Compound' then \
 	nest -f Compound --evar ', ' "$tmpdir/data.csv" \
 	>"$tmpdir/validated_compounds.csv"
 
+# shellcheck disable=SC2129
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	CREATE TEMPORARY TABLE validated_compounds_tmp (
 		bacmet_id TEXT NOT NULL,

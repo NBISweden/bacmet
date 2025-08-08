@@ -1,35 +1,33 @@
 # syntax=docker/dockerfile:1.4
 FROM python:3.13-alpine AS base
 
-WORKDIR /opt/bacmet/app
-COPY ./app ./
+WORKDIR /opt/bacmet
+
+COPY ./app ./app
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    pip install -r app/requirements.txt
 
 ARG UID=1000
-ARG GID=1000
-RUN addgroup -g "$GID" python && adduser -D -u "$UID" -G python python
+RUN adduser -D -u "$UID" python
 
-EXPOSE ${APP_PORT:-5000}/tcp
+EXPOSE 5000/tcp
 
 
 # Development setup
 FROM base AS dev
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.dev.txt
+    pip install -r app/requirements.dev.txt
 
 USER python
-CMD flask --app main --debug run --host 0.0.0.0 --port "${APP_PORT:-5000}"
+CMD flask --app app/main --debug run --host 0.0.0.0 --port 5000
 
 
 # Production setup
 FROM base AS prod
 
-WORKDIR /opt/bacmet
-
-COPY scripts/start-script.sh ./start-script.sh
+COPY --chmod=755 scripts/start-script.sh ./start-script.sh
 
 USER python
 CMD ./start-script.sh
