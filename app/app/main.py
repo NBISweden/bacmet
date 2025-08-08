@@ -108,6 +108,14 @@ def root():
     )
 
 
+def value_or_default(value, default):
+    return (
+        default
+        if value is None
+        else value
+    )
+
+
 @app.route('/search')
 def advanced_search():
     database = parsers.database(request.args.get("database"))
@@ -202,7 +210,7 @@ def advanced_search():
         FormField(
             name="database",
             label="Select database",
-            value="validated" if database is None else database,
+            value=value_or_default(database, "validated"),
             values=[
                 FormFieldValue(
                     value="validated",
@@ -232,7 +240,7 @@ def advanced_search():
         FormField(
             name="location",
             label="Select location",
-            value="any" if location is None else location,
+            value=value_or_default(location, "any"),
             values=[
                 FormFieldValue(value="any", label="Any"),
                 FormFieldValue(value="chromosome", label="Chromosome"),
@@ -245,14 +253,14 @@ def advanced_search():
         FormField(
             name="protein_description",
             label="Protein description contains text",
-            value="" if protein_description is None else protein_description,
+            value=value_or_default(protein_description, ""),
         ),
         FormField(
             name="peptide_sequence_length_min",
             label=(
                 "Peptide sequence length greater than"
             ),
-            value=peptide_sequence_length_range[0],
+            value=value_or_default(peptide_sequence_length_range[0], ""),
             placeholder=50,
         ),
         FormField(
@@ -260,7 +268,7 @@ def advanced_search():
             label=(
                 "Peptide sequence length less than"
             ),
-            value=peptide_sequence_length_range[1],
+            value=value_or_default(peptide_sequence_length_range[1], ""),
             placeholder=2000
         ),
         *additional_params
