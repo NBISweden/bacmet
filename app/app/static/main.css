@@ -2,8 +2,8 @@
 [data-bs-theme="light"] {
   --bs-primary:#4A6080;
   --bs-primary-rgb: 74, 96, 128;
-  --bs-secondary: #7fa1c3;
-  --bs-secondary-rgb: 127, 161, 195;
+  --bs-secondary: #6482ad;
+  --bs-secondary-rgb: 100, 130, 173;
   --bs-footer: #e2dad6;
   --bs-footer-rgb: 226, 218, 214;
   --bs-gray-100: #f9f9f9;
@@ -45,4 +45,29 @@ header > .navbar .nav-item {
 
   .nav-link.active {
     text-decoration: underline;
+  }
+
+  .btn-primary {
+    --bs-btn-bg: var(--bs-secondary);
+    --bs-btn-border-color: var(--bs-secondary);
+    --bs-btn-hover-bg: var(--bs-primary);
+    --bs-btn-hover-border-color: var(--bs-primary);
+    --bs-btn-active-bg: var(--bs-primary);
+    --bs-btn-active-border-color: var(--bs-primary);
+  }
+
+  .form-check-input:checked {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+  }
+
+  .page-link {
+    color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+  }
+
+  legend {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-bottom: 0.5em;
   }
