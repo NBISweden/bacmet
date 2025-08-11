@@ -14,7 +14,8 @@ from .search import (
     find_in_validated,
     find_in_predicted,
     get_chemical_classes,
-    get_compounds
+    get_compounds,
+    get_additional_search_params
 )
 from typing import Any, Optional, Literal
 from .types import FormField, FormFieldValue
@@ -61,6 +62,7 @@ app = create_app(
     message_root=os.getenv("APP_MESSAGE_ROOT", "/home/bacmet")
 )
 
+
 def get_navigation() -> list[MenuItem]:
     return [
         MenuItem(label=label, href=href)
@@ -74,6 +76,8 @@ def get_navigation() -> list[MenuItem]:
             ("Contact", "#"),
         ]
     ]
+
+
 @app.context_processor
 def inject_site_info():
     return {
@@ -81,9 +85,13 @@ def inject_site_info():
             "copyright": "Copyright © 2013-2018 All rights reserved",
             "brand_name": "BacMet",
             "contact": "info@example.com",
-            "attribution": "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team",
+            "attribution": (
+                "BacMet database/website was developed and designed by Chandan"
+                " Pal and currently maintained by Joakim Larsson's team"
+            ),
         }
     }
+
 
 @app.route('/')
 def root():
@@ -100,6 +108,14 @@ def root():
     )
 
 
+def value_or_default(value, default):
+    return (
+        default
+        if value is None
+        else value
+    )
+
+
 @app.route('/search')
 def advanced_search():
     database = parsers.database(request.args.get("database"))
@@ -112,6 +128,7 @@ def advanced_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
+    gene_name = request.args.get("gene_name")
     page = int(request.args.get("page", "0"))
     page_size = min(100, int(request.args.get("page_size", "25")))
     items, total_count = (
@@ -120,12 +137,14 @@ def advanced_search():
             location=location,
             protein_description=protein_description,
             peptide_sequence_length_range=peptide_sequence_length_range,
+            gene_name=gene_name,
             pagination=(page, page_size)
         ) if database == "validated"
         else find_in_predicted(
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
+            gene_name=gene_name,
             pagination=(page, page_size)
         )
     ) if database else (None, -1)
@@ -140,7 +159,8 @@ def advanced_search():
         None if items is None
         else SearchResult(
             status=(
-                f"Showing {len(items)} of {total_count} items. On page {page + 1} of {last_page + 1}."
+                f"Showing {len(items)} of {total_count} items."
+                f" On page {page + 1} of {last_page + 1}."
                 if len(items) > 0
                 else "No results found."
             ),
@@ -174,11 +194,22 @@ def advanced_search():
         )
     )
 
+    additional_params = (
+        []
+        if items is None
+        else get_additional_search_params(
+            chemical_class=chemical_class,
+            location=location,
+            protein_description=protein_description,
+            gene_name=gene_name,
+        )
+    )
+
     fields = [
         FormField(
             name="database",
             label="Select database",
-            value="validated" if database is None else database,
+            value=value_or_default(database, "validated"),
             values=[
                 FormFieldValue(
                     value="validated",
@@ -208,7 +239,7 @@ def advanced_search():
         FormField(
             name="location",
             label="Select location",
-            value="any" if location is None else location,
+            value=value_or_default(location, "any"),
             values=[
                 FormFieldValue(value="any", label="Any"),
                 FormFieldValue(value="chromosome", label="Chromosome"),
@@ -221,14 +252,14 @@ def advanced_search():
         FormField(
             name="protein_description",
             label="Protein description contains text",
-            value="" if protein_description is None else protein_description,
+            value=value_or_default(protein_description, ""),
         ),
         FormField(
             name="peptide_sequence_length_min",
             label=(
                 "Peptide sequence length greater than"
             ),
-            value=peptide_sequence_length_range[0],
+            value=value_or_default(peptide_sequence_length_range[0], ""),
             placeholder=50,
         ),
         FormField(
@@ -236,9 +267,10 @@ def advanced_search():
             label=(
                 "Peptide sequence length less than"
             ),
-            value=peptide_sequence_length_range[1],
+            value=value_or_default(peptide_sequence_length_range[1], ""),
             placeholder=2000
         ),
+        *additional_params
     ]
     return render_template(
         'search_result.html',

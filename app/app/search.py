@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, collate
 from sqlalchemy.orm import joinedload
 from typing import Optional, Tuple
 from .database import (
@@ -9,7 +9,13 @@ from .database import (
     Compounds,
     ValidatedCompounds
 )
-from .types import LocationOption, OpenRange, ChemicalClass
+from .types import (
+    LocationOption,
+    OpenRange,
+    ChemicalClass,
+    FormField,
+    FormFieldValue,
+)
 from functools import cache
 
 
@@ -19,6 +25,7 @@ def apply_search_filters(
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
+    gene_name: Optional[str] = None
 ):
     if chemical_class:
         chemical_class_type, chemical_class_name = chemical_class
@@ -47,6 +54,10 @@ def apply_search_filters(
             stmt = stmt.filter(
                 Validated.length_aa < max_length
             )
+    if gene_name:
+        stmt = stmt.filter(
+            Validated.gene_name == gene_name
+        )
     return stmt
 
 
@@ -63,11 +74,45 @@ def apply_total_count(stmt):
     return select(func.count()).select_from(stmt.subquery())
 
 
+def get_additional_search_params(
+    chemical_class: Optional[ChemicalClass],
+    location: Optional[LocationOption],
+    protein_description: Optional[str],
+    gene_name: Optional[str]
+):
+    summary_stmt = apply_search_filters(
+        select(Validated.gene_name).order_by(collate(Validated.gene_name, 'NOCASE')),
+        chemical_class,
+        location,
+        protein_description,
+        (None, None)
+    ).distinct()
+    with db_session() as session:
+        gene_names = [
+            FormFieldValue(value="", label="<< No gene name filter >>"),
+            *[
+                FormFieldValue(value=item[0], label=item[0])
+                for item in list(session.execute(summary_stmt))
+            ]
+        ]
+        return [
+            FormField(
+                name="gene_name",
+                label=(
+                    "Gene name"
+                ),
+                values=gene_names,
+                value=gene_name or gene_names[0].value
+            ),
+        ]
+
+
 def find_in_validated(
     chemical_class: Optional[ChemicalClass],
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
+    gene_name: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Validated], int]:
     stmt = apply_search_filters(
@@ -77,7 +122,8 @@ def find_in_validated(
         chemical_class,
         location,
         protein_description,
-        peptide_sequence_length_range
+        peptide_sequence_length_range,
+        gene_name
     )
     with db_session() as session:
         items = session.execute(
@@ -91,6 +137,7 @@ def find_in_predicted(
     chemical_class: Optional[ChemicalClass],
     location: Optional[LocationOption],
     protein_description: Optional[str],
+    gene_name: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:
     stmt = apply_search_filters(
@@ -108,7 +155,8 @@ def find_in_predicted(
         chemical_class,
         location,
         protein_description,
-        (None, None)
+        (None, None),
+        gene_name
     )
     with db_session() as session:
         items = session.execute(apply_pagination(stmt, pagination)).unique().all()

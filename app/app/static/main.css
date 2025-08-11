@@ -38,36 +38,43 @@ header > .navbar .nav-item {
     color: #fff;
     border-color: #fff;
   }
-  
-  .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-  }
 
-  .nav-link.active {
-    text-decoration: underline;
-  }
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
 
-  .btn-primary {
-    --bs-btn-bg: var(--bs-secondary);
-    --bs-btn-border-color: var(--bs-secondary);
-    --bs-btn-hover-bg: var(--bs-primary);
-    --bs-btn-hover-border-color: var(--bs-primary);
-    --bs-btn-active-bg: var(--bs-primary);
-    --bs-btn-active-border-color: var(--bs-primary);
-  }
+.nav-link.active {
+  text-decoration: underline;
+}
 
-  .form-check-input:checked {
-    background-color: var(--bs-secondary);
-    border-color: var(--bs-secondary);
-  }
+.btn-primary {
+  --bs-btn-bg: var(--bs-secondary);
+  --bs-btn-border-color: var(--bs-secondary);
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-active-bg: var(--bs-primary);
+  --bs-btn-active-border-color: var(--bs-primary);
+}
 
-  .page-link {
-    color: var(--bs-secondary);
-    border-color: var(--bs-secondary);
-  }
+.form-check-input:checked {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
 
-  legend {
-    font-size: 1rem;
-    font-weight: normal;
-    margin-bottom: 0.5em;
-  }
+.pagination {
+  --bs-pagination-active-bg: var(--bs-secondary);
+  --bs-pagination-color: var(--bs-secondary);
+  --bs-pagination-active-border-color: var(--bs-secondary);
+  --bs-pagination-hover-color: var(--bs-secondary);
+}
+
+.page-link {
+  color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+legend {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 0.5em;
+}

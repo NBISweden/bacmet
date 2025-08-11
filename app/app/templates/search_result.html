@@ -3,7 +3,7 @@
 
 <div class="row justify-content-center pt-3 pb-3">
   <div class="col-sm-12 col-md-9 col-lg-7">
-    <h2>Advanced search</h2>
+    <h1>Advanced search</h1>
     <p>Lorem ipsum dolor sit amet, vince adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
       aliqua. Utenim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
       irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
@@ -23,15 +23,7 @@
       {% endwith %}
 
       {% with field = fields.chemical_class %}
-      <fieldset class="form-group pt-3 pb-2">
-        <label class="form-label" for="{{ field.name }}">{{ field.label }}:</label>
-        <select class="form-control" name="{{ field.name }}">
-          {% for value in field.values %}
-          <option value="{{ value.value }}" {% if value.value==field.value %}selected{% endif %}>{{ value.label }}
-          </option>
-          {% endfor %}
-        </select>
-      </fieldset>
+      {% include "snippets/select-input.html" %}
       {% endwith %}
 
       {% with field = fields.protein_description %}
@@ -71,6 +63,14 @@
         {% endwith %}
       </fieldset>
 
+      {% if fields.gene_name %}
+      <hr />
+      <h2>Additional parameters</h2>
+      {% with field = fields.gene_name %}
+      {% include "snippets/select-input.html" %}
+      {% endwith %}
+      {% endif %}
+
       <div class="pt-3 pb-2">
         <input class="btn btn-primary" type="submit" value="Search">
       </div>
@@ -86,16 +86,69 @@
 {% if result.items %}
 <hr />
 {% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
-<ul>
-  {% for item in result.items %}{% with validated=item[0], predicted=item[1]%}
-  {% if predicted %}
-  <li>{{ predicted.blast_hit_genome }}, {{ validated.gene_name }}, {{ validated.bacmet_id }}</li>
-  {% else %}
-  <li>{{ validated.gene_name }}, {{ validated.bacmet_id }}{% if validated.compounds %}{% for compound in
-    validated.compounds %}, {{ compound.compound_name }} {% endfor %}{% endif %}</li>
-  {% endif %}
-  {% endwith %}{% endfor %}
-</ul>
+{% with first_predicted=result.items[0][1]%}
+{% if first_predicted %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Gene Name</th>
+      <th scope="col">GI number</th>
+      <th scope="col">GenBank ID</th>
+      <th scope="col">Sequence</th>
+      <th scope="col">Organism</th>
+      <th scope="col">Compound</th>
+      <th scope="col">NCBI annotation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in result.items %}{% with validated=item[0] %}
+    <tr>
+      <td>{{ validated.gene_name }}</td>
+      <td><a href="http://www.ncbi.nlm.nih.gov/protein/{{ validated.protein_accession_uniprot }}" target="_blank">{{ validated.protein_accession_uniprot }}</a></td>
+      <td>...</td>
+      <td><a href="http://www.ncbi.nlm.nih.gov/protein/{{ validated.protein_accession_uniprot }}?report=fasta" target="_blank">FASTA</a></td>
+      <td>{{ validated.organism }}</td>
+      <td>{% for compound in validated.compounds %}{% if not loop.first %}, {% endif %}{{ compound.compound_name }}{% endfor%}</td>
+      <td>...</td>
+    </tr>
+    {% endwith %}{% endfor %}
+  </tbody>
+</table>
+{% else %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Gene Name</th>
+      <th scope="col">Experimentally Verified Resistance Gene Information</th>
+      <th scope="col">Predicted Resistance Gene Information</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in result.items %}{% with validated=item[0] %}
+    <tr>
+      <td>{{ validated.gene_name }}</td>
+      <td>
+        <table class="table">
+          <tr><th scope="row">BacMet ID:</th><td>{{ validated.bacmet_id }}</td></tr>
+          <tr><th scope="row">Code for:</th><td>{{ validated.code_for }}</td></tr>
+          <tr><th scope="row">Family:</th><td>{{ validated.family }}</td></tr>
+          <tr><th scope="row">Sequence:</th><td>...</td></tr>
+          <tr><th scope="row">Cross-database information:</th><td>...</td></tr>
+          <tr><th scope="row">Organism:</th><td><em>{{ validated.organism }}</em></td></tr>
+          <tr><th scope="row">Location:</th><td>{{ validated.location }}</td></tr>
+          <tr><th scope="row">Compound:</th><td>{% for compound in validated.compounds %}{% if not loop.first %}, {% endif %}{{ compound.compound_name }}{% endfor%}</td></tr>
+          <tr><th scope="row">Description:</th><td>{{ validated.description }}</td></tr>
+          <tr><th scope="row">Length (amino acid):</th><td>{{ validated.length_aa }}</td></tr>
+          <tr><th scope="row">Reference:</th><td>{{ validated.reference }}</td></tr>
+        </table>
+      </td>
+      <td>...</td>
+    </tr>
+    {% endwith %}{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endwith %}
 {% with pages = result.pages %}{% include "snippets/pagination.html" %}{% endwith %}
 {% endif %}
 {% endif %}
