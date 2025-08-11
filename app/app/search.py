@@ -78,7 +78,6 @@ def get_additional_search_params(
     chemical_class: Optional[ChemicalClass],
     location: Optional[LocationOption],
     protein_description: Optional[str],
-    peptide_sequence_length_range: Optional[OpenRange],
     gene_name: Optional[str]
 ):
     summary_stmt = apply_search_filters(

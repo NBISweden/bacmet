@@ -201,7 +201,6 @@ def advanced_search():
             chemical_class=chemical_class,
             location=location,
             protein_description=protein_description,
-            peptide_sequence_length_range=peptide_sequence_length_range,
             gene_name=gene_name,
         )
     )
