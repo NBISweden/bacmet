@@ -20,9 +20,6 @@ FROM base AS dev
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r app/requirements.dev.txt
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install html5validator
-
 RUN apk add openjdk17
 
 USER python
