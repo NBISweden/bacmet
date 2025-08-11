@@ -18,43 +18,17 @@ from .search import (
     get_additional_search_params
 )
 from typing import Any, Optional, Literal
-from .types import FormField, FormFieldValue
+from .types import (
+    FormField,
+    FormFieldValue,
+    ResultPage,
+    SearchResult,
+    MenuItem,
+)
+from .core import create_app
 
 
 logger = logging.getLogger(__name__)
-
-
-@dataclasses.dataclass
-class MenuItem:
-    href: str
-    label: str
-
-
-@dataclasses.dataclass
-class ResultPage:
-    state: Optional[Literal["active", "disabled"]] = None
-    label: Optional[str] = None
-    url: Optional[str] = None
-
-
-@dataclasses.dataclass
-class SearchResult:
-    status: Optional[str] = None
-    items: Optional[Any] = None
-    pages: Optional[list[ResultPage]] = None
-
-
-def create_app(
-    secret_key: str,
-    message_root: str,
-):
-    app = Flask(
-        __name__,
-        static_folder="static"
-    )
-    app.secret_key = secret_key
-    app.config["MESSAGE_ROOT"] = message_root
-    return app
 
 
 app = create_app(

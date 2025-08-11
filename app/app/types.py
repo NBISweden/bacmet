@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Any
 
 
 @dataclasses.dataclass
@@ -30,3 +30,23 @@ LocationOption = Literal["chromosome", "plasmid"]
 
 
 OpenRange = Tuple[int | None, int | None]
+
+
+@dataclasses.dataclass
+class MenuItem:
+    href: str
+    label: str
+
+
+@dataclasses.dataclass
+class ResultPage:
+    state: Optional[Literal["active", "disabled"]] = None
+    label: Optional[str] = None
+    url: Optional[str] = None
+
+
+@dataclasses.dataclass
+class SearchResult:
+    status: Optional[str] = None
+    items: Optional[Any] = None
+    pages: Optional[list[ResultPage]] = None

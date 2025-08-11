@@ -20,6 +20,11 @@ FROM base AS dev
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r app/requirements.dev.txt
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install html5validator
+
+RUN apk add openjdk17
+
 USER python
 CMD flask --app app/main --debug run --host 0.0.0.0 --port 5000
 
@@ -31,3 +36,4 @@ COPY --chmod=755 scripts/start-script.sh ./start-script.sh
 
 USER python
 CMD ./start-script.sh
+
