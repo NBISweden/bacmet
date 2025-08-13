@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center bg-image position-relative"
+  style="background-image: url({{ url_for('static', filename='img/hero-image.jpg') }});">
+  <div class="d-flex justify-content-center align-items-center h-100">
+    <div class="bg-dark bg-opacity-75 px-4 py-3">
+      <p class="hero-image-text">{{ index_info.hero_text| safe }}</p>
+    </div>
+  </div>
+</div>
+<div class="container my-5">
+  <div class="row gx-5">
+    <div class="col-12 col-lg-8 order-1">
+      <div class="p-3">
+        <h1 class="text-center">{{ index_info.title }}</h1>
+        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Rerum dolorem debitis adipisci, accusamus quos autem? Praesentium quis possimus, veniam a autem eveniet voluptatibus eos maiores eius ratione veritatis nobis? Quasi repellat atque eligendi mollitia perferendis ad aliquid quo tempore autem cum beatae soluta facilis amet ex esse quis eum similique sed animi, exercitationem placeat, officia eos? Molestiae perferendis, molestias sequi vel nesciunt expedita harum deserunt consequuntur hic itaque qui omnis?</p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4 order-2">
+      <div class="p-3 border bg-white">
+        <h2>{{ index_info.search_title }}</h2>
+        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima quibusdam quae vel consequuntur quis veritatis debitis cumque minus sequi nisi? Illo magnam ipsum accusantium, vel ex omnis minima soluta voluptatibus!</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
