@@ -6,8 +6,8 @@
   --bs-secondary-rgb: 100, 130, 173;
   --bs-footer: #e2dad6;
   --bs-footer-rgb: 226, 218, 214;
-  --bs-gray-100: #f9f9f9;
-  --bs-gray-100-rgb: 249, 249, 249;
+  --bs-gray-100: #fbfbfb;
+  --bs-gray-100-rgb: 251, 251, 251;
 }
 
 body {
@@ -77,4 +77,49 @@ legend {
   font-size: 1rem;
   font-weight: normal;
   margin-bottom: 0.5em;
+}
+
+.nav-link.active {
+  text-decoration: underline;
+}
+
+.bg-image {
+  height: 350px;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  position: relative;
+  background-size: cover;
+  background-position: 70% 20%;
+
+}
+
+.hero-image-text {
+  max-width: 38rem;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .bg-image {
+    height: 250px;
+  }
+
+  .hero-image-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .bg-image {
+    height: 150px;
+  }
+  .hero-image-text {
+    font-size: 1rem;
+  }
 }

@@ -76,9 +76,18 @@ def root():
         print(session)
         print("ja")
 
+    index_info = {
+        "hero_text": "BacMet is an easy-to-use bioinformatics resource of antibacterial biocide- and metal-resistance genes.",
+        "title": "BacMet Antibacterial Biocide & Metal Resistance Genes Database",
+        "search_title": (
+            "Quick search"
+        ),
+    }
+
     return render_template(
-        'base.html',
+        'index.html',
         navigation=get_navigation(),
+        index_info=index_info,
     )
 
 
