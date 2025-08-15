@@ -47,7 +47,7 @@ def get_navigation() -> list[MenuItem]:
             ("Download", "#"),
             ("FAQ", "#"),
             ("About BacMet", "#"),
-            ("Contact", "#"),
+            ("Contact", "/contact"),
         ]
     ]
 
@@ -265,6 +265,77 @@ def advanced_search():
         form_target="search",
         navigation=get_navigation(),
     )
+
+@app.route('/contact')
+def contact():
+
+    contact_info = [
+        {
+            "image": "img/avatar.png",
+            "name": "Test Testsson",
+            "job_title": "Professor",
+            "workplace": "Department of Infectious Diseases",
+            "university": "University of Gothenburg",
+            "email": "test.testsson@xx.se",
+            "phone": "+xx xxx xx xx",
+        },
+        {
+            "image": "img/avatar.png",
+            "name": "Testy Testskog",
+            "job_title": "PhD student",
+            "workplace": "Department of Biology",
+            "university": "University of Uppsala",
+            "email": "x@x.se",
+            "phone": "+xx xxx xx xx",
+        },
+        {
+            "image": "img/avatar.png",
+            "name": "Test Testingsson",
+            "job_title": "Teacher",
+            "workplace": "Department of Infectious Diseases",
+            "university": "University of Stockholm",
+            "email": "testingsson@xx.com",
+            "phone": "+xx xxx xx xx",
+        },
+        {
+            "image": "img/avatar.png",
+            "name": "Test Testingsson",
+            "job_title": "Teacher",
+            "workplace": "Department of Infectious Diseases",
+            "university": "University of Stockholm",
+            "email": "testingsson@xx.com",
+            "phone": "+xx xxx xx xx",
+        },
+        {
+            "image": "img/avatar.png",
+            "name": "Test Testingsson",
+            "job_title": "Teacher",
+            "workplace": "Department of Infectious Diseases",
+            "university": "University of Stockholm",
+            "email": "testingsson@xx.com",
+            "phone": "+xx xxx xx xx",
+        }
+    ]
+    
+    contact_description = "If you have any questions or need assistance, please reach out to us in the Bacmet team."
+    page_title= "Contact us"
+
+    return render_template(
+        'contact.html',
+        contact_info=contact_info,
+        contact_description=contact_description,
+        page_title=page_title,
+        navigation=get_navigation(),
+    )
+
+
+def value_or_default(value, default):
+    return (
+        default
+        if value is None
+        else value
+    )
+
 
 
 if __name__ == '__main__':

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center pt-3">
+  <h1>{{ page_title }}</h1>
+  <p>{{ contact_description }}</p>
+</div>
+<div class="row justify-content-center">
+  {% for contact in contact_info %}
+  <div class="col-lg-4 col-md-6 col-sm-12 mb-4 text-center p-4">
+    <img src="{{ url_for('static', filename=contact.image) }}" class="rounded-circle mb-3 mx-auto d-block"
+      alt="{{ contact.name }}" style="width: 125px; height: 125px; object-fit: cover;">
+    <h2 class="mb-1 fs-6">{{ contact.name }}</h3>
+    <h3 class="text-muted mb-2 fs-6">{{ contact.job_title }}</h3>
+    <p class="mb-0">{{ contact.workplace }}</p>
+    <p class="mb-0">{{ contact.university }}</p>
+    <p class="mb-0"><strong>Email:</strong> {{ contact.email }}</p>
+    <p class="mb-0"><strong>Phone:</strong> {{ contact.phone }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
