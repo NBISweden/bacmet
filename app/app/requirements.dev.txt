@@ -1,3 +1,2 @@
 commitizen
 pytest
-html5validator
