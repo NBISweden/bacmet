@@ -25,6 +25,7 @@ from .types import (
     Item,
 )
 from .core import create_app
+from flask_cors import cross_origin
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ app = create_app(
 
 
 @app.route('/api/search/predicted')
+@cross_origin()
 def predicted_search():
     chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
     location = parsers.location(request.args.get("location"), "predicted")
@@ -95,6 +97,7 @@ def predicted_search():
 
 
 @app.route('/api/search/validated')
+@cross_origin()
 def validated_search():
     chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
     location = parsers.location(request.args.get("location"), "validated")
@@ -163,6 +166,7 @@ def validated_search():
 
 
 @app.route('/api/aggregated/chemical_class')
+@cross_origin()
 def aggregated_chemical_class():
     chemical_classes = get_chemical_classes()
 
@@ -179,6 +183,7 @@ def aggregated_chemical_class():
 
 
 @app.route('/api/aggregated/compound')
+@cross_origin()
 def aggregated_compound():
     compounds = get_compounds()
 
@@ -195,6 +200,7 @@ def aggregated_compound():
 
 
 @app.route('/api/aggregated/gene_name')
+@cross_origin()
 def aggregated_gene_name():
     chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
     location = parsers.location(request.args.get("location"), "validated")
