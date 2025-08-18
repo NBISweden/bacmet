@@ -6,3 +6,11 @@ services:
       target: dev
     volumes:
       - ./app/app:/opt/bacmet/app
+
+  frontend:
+    build:
+      context: frontend
+    ports:
+      - ${APP_HOST:-127.0.0.1}:${APP_PORT:-3000}:3000
+    volumes:
+      - ./frontend/bacmet:/opt/bacmet/frontend
