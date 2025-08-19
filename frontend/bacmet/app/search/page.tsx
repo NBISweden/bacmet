@@ -1,6 +1,7 @@
 'use client'
-import {useEffect, useState, useId, FormEventHandler} from "react";
+import {useCallback, useEffect, useState, useId, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
+import {useSearchParams, useRouter, usePathname} from 'next/navigation'
 
 type FieldValue<T=unknown> = {
   value: T;
@@ -134,8 +135,43 @@ const FieldSet = ({children}: {children: React.ReactNode}) => {
   )
 }
 
-export default function Search() {
+const Pagination = ({pages, currentPage, label}: {pages: Link[], currentPage?: string, label?: string}) => {
+  return (
+    <nav aria-label={label || "Pagination"}>
+      <ul className="pagination">
+        {pages.map((page, index) => (
+          <li key={index} className={`page-item ${ page.rel === currentPage ? "active" : "" }`}>
+            <a className="page-link" href={ page.href }>{ page.rel }</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+const SearchBase = (
+  {values}: {
+    values: {
+      [x: string]: string | null
+    }
+  }
+) => {
   const {apiRoot} = useConfig();
+  const [
+    selectedDatabase,
+    selectedLocation,
+    selectedChemicalClass,
+    selectedProteinDescription,
+    selectedPeptideSequenceLengthMin,
+    selectedPeptideSequenceLengthMax,
+  ] = [
+    "database",
+    "location",
+    "chemical_class",
+    "protein_description",
+    "peptide_sequence_length_min",
+    "peptide_sequence_length_max",
+  ].map(key => values[key] === undefined ? null : values[key]);
   const [params, setParams] = useState<SearchParams>({
     chemicalClasses: [],
     compounds: [],
@@ -144,7 +180,7 @@ export default function Search() {
   const database: Field<string> = {
     label: "Select database",
     name: "database",
-    value: "validated",
+    value: selectedDatabase || "validated",
     values: [
       {
         label: "Validated",
@@ -159,7 +195,7 @@ export default function Search() {
   const location: Field<string> = {
     label: "Select location",
     name: "location",
-    value: "any",
+    value: selectedLocation || "any",
     values: [
       {
         value: "any",
@@ -178,7 +214,7 @@ export default function Search() {
   const chemicalClassOrCompound: Field<string> = {
     label: "Select 'chemical class' / 'compound' (resistant to)",
     name: "chemical_class",
-    value: "",
+    value: selectedChemicalClass || "",
     values: [
       {
         value: "",
@@ -191,21 +227,28 @@ export default function Search() {
   const proteinDescription: Field = {
     label: "Protein description contains text",
     name: "protein_description",
+    value: selectedProteinDescription || undefined,
     placeholder: "example: resistance",
     values: []
   }
   const peptideSequenceLengthMin: Field = {
     label: "Peptide sequence length greater than",
     name: "peptide_sequence_length_min",
+    value: selectedPeptideSequenceLengthMin || undefined,
     placeholder: "50",
     values: [],
   }
   const peptideSequenceLengthMax: Field = {
     label: "Peptide sequence length less than",
     name: "peptide_sequence_length_max",
+    value: selectedPeptideSequenceLengthMax || undefined,
     placeholder: "2000",
     values: [],
   }
+
+  const router = useRouter()
+  const pathname = usePathname()
+
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -226,31 +269,60 @@ export default function Search() {
     fetchData();
   }, [apiRoot, setParams]);
 
-  const handleSubmit: FormEventHandler = (event) => {
+  useEffect(() => {
+    if (
+      selectedDatabase !== null &&
+      selectedLocation !== null &&
+      selectedChemicalClass !== null &&
+      selectedProteinDescription !== null &&
+      selectedPeptideSequenceLengthMin !== null &&
+      selectedPeptideSequenceLengthMax !== null
+    ) {
+      const fetchResult = async () => {
+        const url = new URL(`${apiRoot}/search/${selectedDatabase}`);
+        url.search = (new URLSearchParams({
+          location: selectedLocation,
+          chemical_class: selectedChemicalClass,
+          protein_description: selectedProteinDescription,
+          peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
+          peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
+        })).toString();
+        const resultData = await (await fetch(url.toString())).json();
+        setResult({type: selectedDatabase, ...resultData});
+      }
+      fetchResult()
+    }
+  }, [
+    selectedDatabase,
+    selectedLocation,
+    selectedChemicalClass,
+    selectedProteinDescription,
+    selectedPeptideSequenceLengthMin,
+    selectedPeptideSequenceLengthMax,
+  ])
+
+  const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
     event.stopPropagation();
     const target = (event.target as unknown as {[id: string]: {type: string, checked: boolean, value: string | number}});
     const values = [
-      location,
-      chemicalClassOrCompound,
-      proteinDescription,
-      peptideSequenceLengthMin,
-      peptideSequenceLengthMax,
-    ].reduce<{[x: string]: string}>((acc, fd) => {
-        const selectedTarget = target[fd.name];
+      "database",
+      "location",
+      "chemical_class",
+      "protein_description",
+      "peptide_sequence_length_min",
+      "peptide_sequence_length_max",
+    ].reduce<{[x: string]: string}>((acc, fieldName) => {
+        const selectedTarget = target[fieldName];
         const value = selectedTarget.type === "checkbox" ? !!selectedTarget.checked : selectedTarget.value;
-        acc[fd.name] = `${value}`;
+        acc[fieldName] = `${value}`;
         return acc;
     }, {});
-    const selectedDatabase = target["database"].value;
-    const fetchResult = async () => {
-      const url = new URL(`${apiRoot}/search/${selectedDatabase}`);
-      url.search = (new URLSearchParams(values)).toString();
-      const resultData = await (await fetch(url.toString())).json();
-      setResult({type: selectedDatabase, ...resultData});
-    }
-    fetchResult()
-  };
+    const params = new URLSearchParams(values);
+    router.push(pathname + '?' + params.toString());
+  }, [
+    router,
+  ]);
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
@@ -280,6 +352,7 @@ export default function Search() {
         {result ? (
           <>
             <hr/>
+            <Pagination pages={result._links} />
             {result.type === "validated" ? (
               <table className="table">
                 <thead>
@@ -343,9 +416,36 @@ export default function Search() {
                 </tbody>
               </table>
             )}
+            <Pagination pages={result._links} />
           </>
         ) : <></>}
       </div>
     </div>
   );
+}
+
+
+const SearchWithSearchParams = () => {
+  const searchParams = useSearchParams();
+  const values = [
+    "database",
+    "location",
+    "chemical_class",
+    "protein_description",
+    "peptide_sequence_length_min",
+    "peptide_sequence_length_max",
+  ].reduce<{[x: string]: string | null}>((acc, key) => {
+    acc[key] = searchParams.get(key)
+    return acc;
+  }, {});
+  return <SearchBase values={values} />
+}
+
+
+export default function Search() {
+  return (
+    <Suspense fallback={<SearchBase values={{}}/>}>
+      <SearchWithSearchParams />
+    </Suspense>
+  )
 }
