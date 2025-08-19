@@ -135,13 +135,26 @@ const FieldSet = ({children}: {children: React.ReactNode}) => {
   )
 }
 
-const Pagination = ({pages, currentPage, label}: {pages: Link[], currentPage?: string, label?: string}) => {
+const Pagination = (
+  {pages, currentPage, label, onNavigate}: {pages: Link[], currentPage?: string, label?: string, onNavigate: (page: Link) => void}
+) => {
+  const maxPages = 5;
+  const first: Link = pages[0]
+  const last: Link = pages[pages.length - 1]
+  const currentIndex = pages.findIndex((link) => link.href === currentPage);
+  const firstIndex = Math.ceil(Math.max(1, currentIndex - maxPages / 2));
+  const lastIndex = Math.min(pages.length - 1, firstIndex + maxPages);
+  const pageList = [
+    ...(first === undefined ? [] : [{...first, rel: "First"}]),
+    ...pages.slice(firstIndex, lastIndex),
+    ...(last === undefined ? [] : [{...last, rel: "Last"}])
+  ]
   return (
     <nav aria-label={label || "Pagination"}>
       <ul className="pagination">
-        {pages.map((page, index) => (
-          <li key={index} className={`page-item ${ page.rel === currentPage ? "active" : "" }`}>
-            <a className="page-link" href={ page.href }>{ page.rel }</a>
+        {pageList.map((page, index) => (
+          <li key={index} className={`page-item ${ page.href === currentPage ? "active" : "" }`}>
+            <span className="page-link" onClick={() => onNavigate(page)}>{ page.rel }</span>
           </li>
         ))}
       </ul>
@@ -299,7 +312,17 @@ const SearchBase = (
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
-  ])
+    setResult,
+    apiRoot
+  ]);
+
+  const handlePageNavigation = useCallback((page: Link) => {
+    const fetchResult = async () => {
+      const resultData = await (await fetch(page.href)).json();
+      setResult({type: selectedDatabase, ...resultData});
+    }
+    fetchResult()
+  }, [selectedDatabase, setResult])
 
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
@@ -322,7 +345,10 @@ const SearchBase = (
     router.push(pathname + '?' + params.toString());
   }, [
     router,
+    pathname,
   ]);
+  const currentPageHref = result?._links.filter(l => l.rel === "self")[0]?.href;
+  const pages = (result?._links || []).filter(link => !["self", "next", "prev"].includes(link.rel))
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
@@ -352,7 +378,7 @@ const SearchBase = (
         {result ? (
           <>
             <hr/>
-            <Pagination pages={result._links} />
+            <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
             {result.type === "validated" ? (
               <table className="table">
                 <thead>
@@ -416,7 +442,7 @@ const SearchBase = (
                 </tbody>
               </table>
             )}
-            <Pagination pages={result._links} />
+            <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
           </>
         ) : <></>}
       </div>
