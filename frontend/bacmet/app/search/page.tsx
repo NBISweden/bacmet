@@ -1,5 +1,5 @@
 'use client'
-import {useEffect, useState} from "react";
+import {useEffect, useState, useId} from "react";
 import {useConfig} from "../../contexts/config";
 
 type FieldValue<T=unknown> = {
@@ -10,8 +10,9 @@ type FieldValue<T=unknown> = {
 type Field<T=unknown> = {
   label: string;
   name: string;
-  value: T;
+  value?: T;
   values: FieldValue<T>[];
+  placeholder?: string;
 }
 
 type SearchParams = {
@@ -19,16 +20,68 @@ type SearchParams = {
   compounds: FieldValue<string>[];
 }
 
-const SelectField = ({field}: {field: Field<unknown>}) => {
+const SelectField = ({field}: {field: Field<unknown>,}) => {
+  const fieldId = useId();
   return (
-    <fieldset className="form-group pt-3 pb-2">
-      <label className="form-label" htmlFor={field.name}>{ field.label }:</label>
-      <select className="form-control" name={field.name} id={field.name} defaultValue={field.value + ""}>
+    <>
+      <label className="form-label" htmlFor={fieldId}>{ field.label }:</label>
+      <select className="form-control" name={field.name} id={fieldId} defaultValue={field.value + ""}>
         {field.values.map(value => (
           <option key={value.value + ""} value={value.value + ""}>{value.label}</option>
         ))}
       </select>
-    </fieldset>
+    </>
+  )
+}
+
+const RadioSelectField = ({field}: {field: Field<unknown>}) => {
+  const fieldId = useId();
+  return (
+    <>
+      <legend>{ field.label }:</legend>
+      {field.values.map(value => {
+        const valueId = `${fieldId}-${value.value}`;
+        return (
+          <div key={value.value + ""} className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name={field.name}
+              defaultChecked={value.value==field.value} 
+              value={value.value + ""}
+              id={valueId}
+              />
+            <label
+              className="form-check-label"
+              htmlFor={valueId}
+            >{ value.label }</label>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+const TextField = ({field}: {field: Field<unknown>}) => {
+  const fieldId = useId();
+  return (
+    <>
+      <label className="form-label" htmlFor={fieldId}>{field.label}:</label>
+      <input
+        className="form-control"
+        type="text"
+        name={field.name}
+        defaultValue={field.value !== undefined ? field.value + "" : undefined}
+        id={fieldId}
+        placeholder={field.placeholder}
+      />
+    </>
+  )
+}
+
+const FieldSet = ({children}: {children: React.ReactNode}) => {
+  return (
+    <fieldset className="form-group pt-3 pb-2">{children}</fieldset>
   )
 }
 
@@ -39,7 +92,7 @@ export default function Search() {
     compounds: [],
   })
   const database: Field<string> = {
-    label: "Database",
+    label: "Select database",
     name: "database",
     value: "validated",
     values: [
@@ -53,19 +106,52 @@ export default function Search() {
       }
     ]
   }
-  const chemicalClass: Field<string> = {
-    label: "Chemical Class",
+  const location: Field<string> = {
+    label: "Select location",
+    name: "location",
+    value: "any",
+    values: [
+      {
+        value: "any",
+        label: "Any"
+      },
+      {
+        value: "chromosome",
+        label: "Chromosome"
+      },
+      {
+        value: "plasmid",
+        label: "Plasmid"
+      }
+    ]
+  }
+  const chemicalClassOrCompound: Field<string> = {
+    label: "Select 'chemical class' / 'compound' (resistant to)",
     name: "chemical_class",
     value: params.chemicalClasses[0]?.value,
-    values: params.chemicalClasses
+    values: [
+      ...params.chemicalClasses,
+      ...params.compounds
+    ]
   }
-  const compound: Field<string> = {
-    label: "Compound",
-    name: "compound",
-    value: params.compounds[0]?.value,
-    values: params.compounds
+  const proteinDescription: Field = {
+    label: "Protein description contains text",
+    name: "protein_description",
+    placeholder: "example: resistance",
+    values: []
   }
-
+  const peptideSequenceLengthMin: Field = {
+    label: "Peptide sequence length greater than",
+    name: "peptide_sequence_length_min",
+    placeholder: "50",
+    values: [],
+  }
+  const peptideSequenceLengthMax: Field = {
+    label: "Peptide sequence length less than",
+    name: "peptide_sequence_length_max",
+    placeholder: "2000",
+    values: [],
+  }
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -93,18 +179,19 @@ export default function Search() {
           aliqua. Utenim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form>
-          <fieldset className="form-group pt-3 pb-2">
-            <legend>{ database.label }:</legend>
-            {database.values.map(value => (
-              <div key={value.value} className="form-check form-check-inline">
-                <input className="form-check-input" type="radio" name={database.name} defaultChecked={value.value==database.value} 
-                  value={value.value} id={`${database.name}.${value.value}`} />
-                <label className="form-check-label" htmlFor={`${database.name}.${value.value}`}>{ value.label }</label>
-              </div>
-            ))}
-          </fieldset>
-          <SelectField field={chemicalClass}/>
-          <SelectField field={compound}/>
+          <FieldSet><RadioSelectField field={database}/></FieldSet>
+          <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
+          <FieldSet><TextField field={proteinDescription}/></FieldSet>
+          <FieldSet>
+            <RadioSelectField field={location}/>
+            <div className="form-text">For experimentally confirmed database only.</div>
+          </FieldSet>
+          <FieldSet>
+            <TextField field={peptideSequenceLengthMin}/>
+            <div className="form-text">For experimentally confirmed database only.</div>
+            <TextField field={peptideSequenceLengthMax}/>
+            <div className="form-text">For experimentally confirmed database only.</div>
+          </FieldSet>
         </form>
       </div>
     </div>
