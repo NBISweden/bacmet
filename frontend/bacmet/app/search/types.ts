@@ -64,3 +64,8 @@ export type ValidatedResult = {
 export type PredictedResult = {
   type: "predicted"
 } & Result<Predicted>
+
+export type ErrorResult = {
+  type: "error";
+  error: string;
+}

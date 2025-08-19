@@ -2,7 +2,7 @@
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
-import {SearchParams, ValidatedResult, PredictedResult, Field, Link} from "./types";
+import {SearchParams, ValidatedResult, PredictedResult, ErrorResult, Field, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
@@ -38,7 +38,7 @@ const SearchBase = (
     chemicalClasses: [],
     compounds: [],
   });
-  const [result, setResult] = useState<ValidatedResult | PredictedResult | undefined>(undefined);
+  const [result, setResult] = useState<ValidatedResult | PredictedResult | ErrorResult | undefined>(undefined);
   const database: Field<string> = {
     label: "Select database",
     name: "database",
@@ -150,8 +150,13 @@ const SearchBase = (
           peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
           peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
         })).toString();
-        const resultData = await (await fetch(url.toString())).json();
-        setResult({type: selectedDatabase, ...resultData});
+        try {
+          const resultData = await (await fetch(url.toString())).json();
+          setResult({type: selectedDatabase, ...resultData});
+        } catch (e) {
+          console.warn(e);
+          setResult({type: "error", error: `Failed to get data from the backend: ${e}`})
+        }
       }
       fetchResult()
     }
@@ -200,8 +205,9 @@ const SearchBase = (
     router,
     pathname,
   ]);
-  const currentPageHref = result?._links.filter(l => l.rel === "self")[0]?.href;
-  const pages = (result?._links || []).filter(link => !["self", "next", "prev"].includes(link.rel))
+  const allPages = (result && "_links" in result ? result._links : []);
+  const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
+  const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
@@ -233,69 +239,83 @@ const SearchBase = (
           <>
             <hr/>
             <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
-            {result.type === "validated" ? (
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Gene Name</th>
-                    <th scope="col">Experimentally Verified Resistance Gene Information</th>
-                    <th scope="col">Predicted Resistance Gene Information</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{ item.gene_name }</td>
-                      <td>
-                        <table className="table">
-                          <tbody>
-                            <tr><th scope="row">BacMet ID:</th><td>{ item.bacmet_id }</td></tr>
-                            <tr><th scope="row">Code for:</th><td>{ item.code_for }</td></tr>
-                            <tr><th scope="row">Family:</th><td>{ item.family }</td></tr>
-                            <tr><th scope="row">Sequence:</th><td>...</td></tr>
-                            <tr><th scope="row">Cross-database information:</th><td>...</td></tr>
-                            <tr><th scope="row">Organism:</th><td><em>{ item.organism }</em></td></tr>
-                            <tr><th scope="row">Location:</th><td>{ item.location }</td></tr>
-                            <tr><th scope="row">Compound:</th><td>{item.compounds.map(c => c.compound_name).join(", ")}</td></tr>
-                            <tr><th scope="row">Description:</th><td>{ item.description }</td></tr>
-                            <tr><th scope="row">Length (amino acid):</th><td>{ item.length_aa }</td></tr>
-                            <tr><th scope="row">Reference:</th><td>{ item.reference }</td></tr>
-                          </tbody>
-                        </table>
-                      </td>
-                      <td>...</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Gene Name</th>
-                    <th scope="col">GI number</th>
-                    <th scope="col">GenBank ID</th>
-                    <th scope="col">Sequence</th>
-                    <th scope="col">Organism</th>
-                    <th scope="col">Compound</th>
-                    <th scope="col">NCBI annotation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{ item.gene_name }</td>
-                      <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}`} target="_blank">{ item.protein_accession_uniprot }</a></td>
-                      <td>...</td>
-                      <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}?report=fasta`} target="_blank">FASTA</a></td>
-                      <td>{ item.organism }</td>
-                      <td>{item.compounds.map(c => c.compound_name).join(", ")}</td>
-                      <td>...</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            {(() => {
+              switch(result.type) {
+                case "validated": {
+                  return (
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Gene Name</th>
+                          <th scope="col">Experimentally Verified Resistance Gene Information</th>
+                          <th scope="col">Predicted Resistance Gene Information</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.items.map((item, index) => (
+                          <tr key={index}>
+                            <td>{ item.gene_name }</td>
+                            <td>
+                              <table className="table">
+                                <tbody>
+                                  <tr><th scope="row">BacMet ID:</th><td>{ item.bacmet_id }</td></tr>
+                                  <tr><th scope="row">Code for:</th><td>{ item.code_for }</td></tr>
+                                  <tr><th scope="row">Family:</th><td>{ item.family }</td></tr>
+                                  <tr><th scope="row">Sequence:</th><td>...</td></tr>
+                                  <tr><th scope="row">Cross-database information:</th><td>...</td></tr>
+                                  <tr><th scope="row">Organism:</th><td><em>{ item.organism }</em></td></tr>
+                                  <tr><th scope="row">Location:</th><td>{ item.location }</td></tr>
+                                  <tr><th scope="row">Compound:</th><td>{item.compounds.map(c => c.compound_name).join(", ")}</td></tr>
+                                  <tr><th scope="row">Description:</th><td>{ item.description }</td></tr>
+                                  <tr><th scope="row">Length (amino acid):</th><td>{ item.length_aa }</td></tr>
+                                  <tr><th scope="row">Reference:</th><td>{ item.reference }</td></tr>
+                                </tbody>
+                              </table>
+                            </td>
+                            <td>...</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                }
+                case "predicted": {
+                  return (
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Gene Name</th>
+                          <th scope="col">GI number</th>
+                          <th scope="col">GenBank ID</th>
+                          <th scope="col">Sequence</th>
+                          <th scope="col">Organism</th>
+                          <th scope="col">Compound</th>
+                          <th scope="col">NCBI annotation</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.items.map((item, index) => (
+                          <tr key={index}>
+                            <td>{ item.gene_name }</td>
+                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}`} target="_blank">{ item.protein_accession_uniprot }</a></td>
+                            <td>...</td>
+                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}?report=fasta`} target="_blank">FASTA</a></td>
+                            <td>{ item.organism }</td>
+                            <td>{item.compounds.map(c => c.compound_name).join(", ")}</td>
+                            <td>...</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                }
+                case "error": {
+                  return (
+                    <div>{result.error}</div>
+                  )
+                }
+              }
+            })()}
             <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
           </>
         ) : <></>}
