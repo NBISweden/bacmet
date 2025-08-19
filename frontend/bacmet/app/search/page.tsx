@@ -147,7 +147,7 @@ const Pagination = (
   const pageList = [
     ...(first === undefined ? [] : [{...first, rel: "First"}]),
     ...pages.slice(firstIndex, lastIndex),
-    ...(last === undefined ? [] : [{...last, rel: "Last"}])
+    ...(last === undefined ? [] : [{...last, rel: `Last (${last.rel})`}])
   ]
   return (
     <nav aria-label={label || "Pagination"}>
