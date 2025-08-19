@@ -18,6 +18,7 @@ const SearchBase = (
 ) => {
   const {apiRoot} = useConfig();
   const [
+    selectedPage,
     selectedDatabase,
     selectedLocation,
     selectedChemicalClass,
@@ -25,6 +26,7 @@ const SearchBase = (
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
   ] = [
+    "page",
     "database",
     "location",
     "chemical_class",
@@ -141,6 +143,7 @@ const SearchBase = (
       const fetchResult = async () => {
         const url = new URL(`${apiRoot}/search/${selectedDatabase}`);
         url.search = (new URLSearchParams({
+          page: selectedPage || "0",
           location: selectedLocation,
           chemical_class: selectedChemicalClass,
           protein_description: selectedProteinDescription,
@@ -153,6 +156,7 @@ const SearchBase = (
       fetchResult()
     }
   }, [
+    selectedPage,
     selectedDatabase,
     selectedLocation,
     selectedChemicalClass,
@@ -164,18 +168,20 @@ const SearchBase = (
   ]);
 
   const handlePageNavigation = useCallback((page: Link) => {
-    const fetchResult = async () => {
-      const resultData = await (await fetch(page.href)).json();
-      setResult({type: selectedDatabase, ...resultData});
+    if (selectedDatabase !== null) {
+      const url = new URL(page.href);
+      const params = url.searchParams;
+      params.set("database", selectedDatabase);
+      router.push(pathname + '?' + params.toString());
     }
-    fetchResult()
-  }, [selectedDatabase, setResult])
+  }, [selectedDatabase, setResult, pathname, router])
 
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
     event.stopPropagation();
     const target = (event.target as unknown as {[id: string]: {type: string, checked: boolean, value: string | number}});
     const values = [
+      "page",
       "database",
       "location",
       "chemical_class",
@@ -204,6 +210,7 @@ const SearchBase = (
           aliqua. Utenim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
+          <input type="hidden" name="page" value="0" />
           <FieldSet><RadioSelectField field={database}/></FieldSet>
           <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
@@ -301,6 +308,7 @@ const SearchBase = (
 const SearchWithSearchParams = () => {
   const searchParams = useSearchParams();
   const values = [
+    "page",
     "database",
     "location",
     "chemical_class",
