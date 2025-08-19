@@ -37,6 +37,34 @@ app = create_app(
 )
 
 
+def pagination_for(endpoint: str, page: int, last_page: int, args: dict):
+    return [
+        Link(
+            rel="self",
+            href=url_for(endpoint, _external=True, **{**args, "page": page})
+        ),
+        *([] if page - 1 < 0 else [
+            Link(
+                rel="prev",
+                href=url_for(endpoint, _external=True, **{**args, "page": page - 1})
+            )
+        ]),
+        *([] if page + 1 > last_page else [
+            Link(
+                rel="next",
+                href=url_for(endpoint, _external=True, **{**args, "page": page + 1})
+            )
+        ]),
+        *[
+            Link(
+                rel=f"{i + 1}",
+                href=url_for(endpoint, _external=True, **{**args, "page": i})
+            )
+            for i in range(0, last_page)
+        ]
+    ]
+
+
 @app.route('/api/search/predicted')
 @cross_origin()
 def predicted_search():
@@ -77,20 +105,7 @@ def predicted_search():
             )
             for (item, _predicted) in items
         ],
-        _links=[
-            Link(
-                rel="self",
-                href=url_for("predicted_search", **{**args, "page": page})
-            ),
-            Link(
-                rel="next",
-                href=url_for("predicted_search", **{**args, "page": max(0, page - 1)})
-            ),
-            Link(
-                rel="prev",
-                href=url_for("predicted_search", **{**args, "page": min(last_page, page + 1)})
-            ),
-        ]
+        _links=pagination_for("predicted_search", page, last_page, args)
     )
 
     return jsonify(dataclasses.asdict(search_result))
@@ -111,6 +126,7 @@ def validated_search():
     gene_name = request.args.get("gene_name")
     page = max(0, int(request.args.get("page", "0")))
     page_size = 100
+
     items, total_count = find_in_validated(
         chemical_class=chemical_class,
         location=location,
@@ -146,20 +162,7 @@ def validated_search():
             )
             for (item,) in items
         ],
-        _links=[
-            Link(
-                rel="self",
-                href=url_for("validated_search", **{**args, "page": page})
-            ),
-            Link(
-                rel="next",
-                href=url_for("validated_search", **{**args, "page": max(0, page - 1)})
-            ),
-            Link(
-                rel="prev",
-                href=url_for("validated_search", **{**args, "page": min(last_page, page + 1)})
-            ),
-        ]
+        _links=pagination_for("validated_search", page, last_page, args)
     )
 
     return jsonify(dataclasses.asdict(search_result))
