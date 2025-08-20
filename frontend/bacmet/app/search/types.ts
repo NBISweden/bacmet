@@ -42,6 +42,7 @@ export type Predicted = {
 
 export type Meta = {
   totalRecords: number;
+  totalPages: number;
   page: number;
   count: number;
 }
@@ -53,7 +54,7 @@ export type Link = {
 
 export type Result<T> = {
   items: T[];
-  _meta: Meta[];
+  _meta: Meta;
   _links: Link[];
 }
 

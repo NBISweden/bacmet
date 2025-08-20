@@ -206,6 +206,7 @@ const SearchBase = (
     pathname,
   ]);
   const allPages = (result && "_links" in result ? result._links : []);
+  const pageCount = (result && "_meta" in result ? result._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
   const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
   return (
@@ -238,7 +239,7 @@ const SearchBase = (
         {result ? (
           <>
             <hr/>
-            <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
+            <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
             {(() => {
               switch(result.type) {
                 case "validated": {
@@ -316,7 +317,7 @@ const SearchBase = (
                 }
               }
             })()}
-            <Pagination pages={pages} currentPage={currentPageHref} onNavigate={handlePageNavigation}/>
+            <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
           </>
         ) : <></>}
       </div>

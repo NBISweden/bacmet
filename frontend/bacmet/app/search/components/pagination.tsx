@@ -1,18 +1,22 @@
 import {Link} from "../types";
 
 export const Pagination = (
-  {pages, currentPage, label, onNavigate}: {pages: Link[], currentPage?: string, label?: string, onNavigate: (page: Link) => void}
+  {pages, currentPage, label, pageCount, onNavigate}: {
+    pages: Link[],
+    currentPage?: string,
+    label?: string,
+    onNavigate: (page: Link) => void,
+    pageCount?: number
+  }
 ) => {
   const maxPages = 5;
-  const first: Link = pages[0]
-  const last: Link = pages[pages.length - 1]
-  const currentIndex = pages.findIndex((link) => link.href === currentPage);
-  const firstIndex = Math.ceil(Math.max(1, currentIndex - maxPages / 2));
-  const lastIndex = Math.min(pages.length - 1, firstIndex + maxPages);
+  const first: Link = pages.filter(p => p.rel === "first")[0]
+  const last: Link = pages.filter(p => p.rel === "last")[0]
+  const otherPages = pages.filter(p => !["first", "last"].includes(p.rel))
   const pageList = [
     ...(first === undefined ? [] : [{...first, rel: "First"}]),
-    ...pages.slice(firstIndex, lastIndex),
-    ...(last === undefined ? [] : [{...last, rel: `Last (${last.rel})`}])
+    ...otherPages,
+    ...(last === undefined ? [] : [{...last, rel: pageCount ? `Last (${pageCount})` : "Last"}])
   ]
   return (
     <nav aria-label={label || "Pagination"}>
