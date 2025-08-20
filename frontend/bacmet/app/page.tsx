@@ -7,7 +7,7 @@ import React from "react";
 export default function Home() {
   const filePath = path.join(process.cwd(), "public/markdown-content/index.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
-  const { content, data } = matter(fileContent);
+  const { data } = matter(fileContent);
 
   return (
     <>

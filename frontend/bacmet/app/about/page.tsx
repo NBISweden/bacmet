@@ -1,17 +1,25 @@
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import ReactMarkdown from "react-markdown";
+import React from "react";
 import Image from "next/image";
-import bacmetWorkflow from "../../public/img/bacmetworkflow.png"
+
 
 export default function About() {
-  const page_title = "About BacMet";
+    const filePath = path.join(process.cwd(), "public/markdown-content/about.md");
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    const { data } = matter(fileContent);
 
   return (
     <div className="text-center pt-3">
-      <h1>{page_title}</h1>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam exercitationem reiciendis esse assumenda error eius voluptas temporibus! Nemo voluptas ad asperiores illum commodi veniam, adipisci repellendus amet totam ipsum nam. Aliquam architecto facere cumque natus tempora laborum, ipsum minus labore, consectetur earum sunt culpa inventore deserunt qui excepturi nulla numquam.</p>
+      <ReactMarkdown>{data.text}</ReactMarkdown>
       <Image
-      src={bacmetWorkflow}
-      alt="BacMet workflow"
-      className="img-fluid mt-3 mb-3"
+        src={data.bacmetImage}
+        alt="BacMet workflow"
+        className="img-fluid mt-3 mb-3"
+        width={575}
+        height={539}
       />
     </div>
   );

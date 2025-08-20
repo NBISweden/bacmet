@@ -7,6 +7,6 @@ databaseDescription: |
   - A manually curated database of genes with experimentally confirmed resistance function
   - A database of predicted resistance genes based on sequence similarity to genes with experimentally confirmed function
 quickSearchInstructions: |
-  # Quick search
+  ## Quick search
   Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima quibusdam quae vel consequuntur quis
 ---
