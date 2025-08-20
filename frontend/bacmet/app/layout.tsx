@@ -24,7 +24,7 @@ export default function RootLayout({
     ["Download", "#"],
     ["FAQ", "#"],
     ["About BacMet", "/about"],
-    ["Contact", "#"],
+    ["Contact", "/contact"],
   ].map(([label, href]) => ({label, href}));
   return (
     <html lang="en">
