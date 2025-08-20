@@ -1,5 +1,5 @@
 export type Contact = {
-  image: string;
+  image?: string;
   name: string;
   job_title: string;
   workplace: string;

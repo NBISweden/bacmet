@@ -3,10 +3,11 @@ import ContactCard from "../components/contact-card";
 export default function Contact() {
   const page_title = "Contact Us";
   const contact_description = "If you have any questions or need assistance, please reach out to us in the Bacmet team."
+  
 
   const contact_info = [
     {
-      "image": "img/avatar.png",
+      "image": "img/character.png",
       "name": "Test Testsson",
       "job_title": "Professor",
       "workplace": "Department of Infectious Diseases",
@@ -15,7 +16,7 @@ export default function Contact() {
       "phone": "+xx xxx xx xx",
     },
     {
-      "image": "img/avatar.png",
+      "image": "",
       "name": "Testy Testskog",
       "job_title": "PhD student",
       "workplace": "Department of Biology",
@@ -24,7 +25,7 @@ export default function Contact() {
       "phone": "+xx xxx xx xx",
     },
     {
-      "image": "img/avatar.png",
+      "image": "",
       "name": "Test Testingsson",
       "job_title": "Teacher",
       "workplace": "Department of Infectious Diseases",
@@ -33,7 +34,7 @@ export default function Contact() {
       "phone": "+xx xxx xx xx",
     },
     {
-      "image": "img/avatar.png",
+      "image": "",
       "name": "Test Testingsson",
       "job_title": "Teacher",
       "workplace": "Department of Infectious Diseases",
@@ -42,7 +43,7 @@ export default function Contact() {
       "phone": "+xx xxx xx xx",
     },
     {
-      "image": "img/avatar.png",
+      "image": "",
       "name": "Test Testingsson",
       "job_title": "Teacher",
       "workplace": "Department of Infectious Diseases",
