@@ -32,6 +32,7 @@ class Link:
 @dataclasses.dataclass
 class Meta:
     totalRecords: int
+    totalPages: int
     page: int
     count: int
 

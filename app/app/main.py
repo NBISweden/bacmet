@@ -37,7 +37,12 @@ app = create_app(
 )
 
 
-def pagination_for(endpoint: str, page: int, last_page: int, args: dict):
+def pagination_for(endpoint: str, page: int, last_page: int, args: dict, pages_to_list=5):
+    page_list_start = max(1, page - int(pages_to_list / 2))
+    page_range = (
+        page_list_start,
+        min(page_list_start + pages_to_list, last_page)
+    )
     return [
         Link(
             rel="self",
@@ -55,13 +60,21 @@ def pagination_for(endpoint: str, page: int, last_page: int, args: dict):
                 href=url_for(endpoint, _external=True, **{**args, "page": page + 1})
             )
         ]),
+        Link(
+            rel="first",
+            href=url_for(endpoint, _external=True, **{**args, "page": 0})
+        ),
         *[
             Link(
                 rel=f"{i + 1}",
                 href=url_for(endpoint, _external=True, **{**args, "page": i})
             )
-            for i in range(0, last_page)
-        ]
+            for i in range(*page_range)
+        ],
+        Link(
+            rel="last",
+            href=url_for(endpoint, _external=True, **{**args, "page": last_page})
+        ),
     ]
 
 
@@ -90,6 +103,7 @@ def predicted_search():
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,
+            totalPages=last_page + 1,
             page=page,
             count=len(items)
         ),
@@ -141,6 +155,7 @@ def validated_search():
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,
+            totalPages=last_page + 1,
             page=page,
             count=len(items)
         ),
