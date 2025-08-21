@@ -11,12 +11,7 @@ export default function Home() {
 
   return (
     <>
-      <div
-        className="text-center bg-image position-relative"
-        style={{
-          backgroundImage: `url('${data.heroImage || "/img/hero-image.jpg"}')`,
-        }}
-      >
+      <div className="text-center bg-image position-relative" style={{ backgroundImage: `url('${data.heroImage || "/img/hero-image.jpg"}')`}}>
         <div className="d-flex justify-content-center align-items-center h-100">
           <div className="bg-dark bg-opacity-75 px-4 py-3">
             <p className="hero-image-text">{data.heroText}</p>

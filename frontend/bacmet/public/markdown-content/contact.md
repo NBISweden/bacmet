@@ -12,7 +12,6 @@ contact_info:
     workplace: "Department of Biology"
     university: "University of Uppsala"
     email: "x@x.se"
-    phone: "+xx xxx xx xx"
   - name: "Test Testingsson"
     job_title: "Teacher"
     workplace: "Department of Infectious Diseases"

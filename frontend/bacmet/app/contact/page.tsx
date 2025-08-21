@@ -6,13 +6,26 @@ import ReactMarkdown from "react-markdown";
 import ContactCard from "../components/contact-card";
 import type { Contact } from "../types";
 
+function parseContacts(value: unknown): Contact[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is Contact =>
+    item &&
+    typeof item === "object" &&
+    typeof item.name === "string" &&
+    typeof item.job_title === "string" &&
+    typeof item.workplace === "string" &&
+    typeof item.university === "string" &&
+    typeof item.email === "string"
+  )
+}
+
 export default function Contact() {
 
   const filePath = path.join(process.cwd(), "public/markdown-content/contact.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(fileContent);
 
-  const contacts = data.contact_info as Contact[];
+  const contacts = parseContacts(data.contact_info);
 
   return (
     <>
