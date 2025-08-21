@@ -1,3 +1,5 @@
+import Sidebar from "../components/sidebar/sidebar";
+
 export default function FAQPage() {
   const title = "Frequently Asked Questions";
   const faqData = [
@@ -50,23 +52,23 @@ export default function FAQPage() {
       </div>
       <div className="row row-gap-3">
         <div className="col-md-4 order-md-last">
-          <div className="position-sticky" style={{ top: "2rem" }}>
+          <Sidebar>
             <div className="list-group">
               {faqData.map((item, index) => (
                 <a
                   key={index}
                   className="list-group-item list-group-item-action"
-                  href={`#list-item-${index + 1}`}
+                  href={`#question-${index + 1}`}
                 >
                   {`${index + 1}. ${item.question}`}
                 </a>
               ))}
             </div>
-          </div>
+          </Sidebar>
         </div>
         <div className="col-md-8 order-md-first">
           {faqData.map((item, index) => (
-            <article key={index} id={`list-item-${index + 1}`} className="mb-4">
+            <article key={index} id={`question-${index + 1}`} className="mb-4">
               <h2 className="h5">{`${index + 1}. ${item.question}`}</h2>
               <p>{item.answer}</p>
             </article>
