@@ -13,8 +13,6 @@ from .types import (
     LocationOption,
     OpenRange,
     ChemicalClass,
-    FormField,
-    FormFieldValue,
 )
 from functools import cache
 
@@ -72,39 +70,6 @@ def apply_pagination(stmt, pagination: Tuple[int, int]):
 
 def apply_total_count(stmt):
     return select(func.count()).select_from(stmt.subquery())
-
-
-def get_additional_search_params(
-    chemical_class: Optional[ChemicalClass],
-    location: Optional[LocationOption],
-    protein_description: Optional[str],
-    gene_name: Optional[str]
-):
-    summary_stmt = apply_search_filters(
-        select(Validated.gene_name).order_by(collate(Validated.gene_name, 'NOCASE')),
-        chemical_class,
-        location,
-        protein_description,
-        (None, None)
-    ).distinct()
-    with db_session() as session:
-        gene_names = [
-            FormFieldValue(value="", label="<< No gene name filter >>"),
-            *[
-                FormFieldValue(value=item[0], label=item[0])
-                for item in list(session.execute(summary_stmt))
-            ]
-        ]
-        return [
-            FormField(
-                name="gene_name",
-                label=(
-                    "Gene name"
-                ),
-                values=gene_names,
-                value=gene_name or gene_names[0].value
-            ),
-        ]
 
 
 def find_in_validated(
@@ -185,4 +150,25 @@ def get_compounds() -> list[Tuple[str, str]]:
         return [
             (cn, f"compound:{cn}")
             for cn, in compound_names
+        ]
+
+
+@cache
+def get_gene_names(
+    chemical_class: Optional[ChemicalClass],
+    location: Optional[LocationOption],
+    protein_description: Optional[str],
+    gene_name: Optional[str]
+):
+    summary_stmt = apply_search_filters(
+        select(Validated.gene_name).order_by(collate(Validated.gene_name, 'NOCASE')),
+        chemical_class,
+        location,
+        protein_description,
+        (None, None)
+    ).distinct()
+    with db_session() as session:
+        return [
+            item[0]
+            for item in list(session.execute(summary_stmt))
         ]

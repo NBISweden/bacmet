@@ -2,21 +2,6 @@ import dataclasses
 from typing import Literal, Optional, Tuple, Any
 
 
-@dataclasses.dataclass
-class FormFieldValue:
-    value: str
-    label: str
-
-
-@dataclasses.dataclass
-class FormField:
-    name: str
-    label: str
-    value: str
-    placeholder: Optional[str] = None
-    values: Optional[list[FormFieldValue]] = None
-
-
 ChemicalClassType = Literal["class", "compound"]
 
 
@@ -33,20 +18,54 @@ OpenRange = Tuple[int | None, int | None]
 
 
 @dataclasses.dataclass
-class MenuItem:
-    href: str
+class Item:
     label: str
+    value: str
 
 
 @dataclasses.dataclass
-class ResultPage:
-    state: Optional[Literal["active", "disabled"]] = None
-    label: Optional[str] = None
-    url: Optional[str] = None
+class Link:
+    href: str
+    rel: str
+
+
+@dataclasses.dataclass
+class Meta:
+    totalRecords: int
+    totalPages: int
+    page: int
+    count: int
 
 
 @dataclasses.dataclass
 class SearchResult:
-    status: Optional[str] = None
     items: Optional[Any] = None
-    pages: Optional[list[ResultPage]] = None
+    _meta: Optional[Meta] = None
+    _links: Optional[list[Link]] = None
+
+
+@dataclasses.dataclass
+class Compound:
+    compound_name: str
+
+
+@dataclasses.dataclass
+class ValidatedResult:
+    gene_name: str
+    bacmet_id: str
+    code_for: str
+    family: str
+    organism: str
+    location: str
+    compounds: list[Compound]
+    description: str
+    length_aa: str
+    reference: str
+
+
+@dataclasses.dataclass
+class PredictedResult:
+    gene_name: str
+    protein_accession_uniprot: str
+    organism: str
+    compounds: list[Compound]

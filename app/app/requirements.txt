@@ -1,3 +1,4 @@
 Flask==3.0.3
 gunicorn==23.0.0
 sqlalchemy==2.0.41
+flask-cors==6.0.1
