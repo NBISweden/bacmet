@@ -16,7 +16,7 @@ export default function About() {
       <ReactMarkdown>{data.text}</ReactMarkdown>
       <Image
         src={data.bacmetImage}
-        alt="BacMet workflow"
+        alt={data.bacmetImageAlt}
         className="img-fluid mt-3 mb-3"
         width={575}
         height={539}
