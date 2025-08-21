@@ -7,14 +7,14 @@ import React from "react";
 export default function Home() {
   const filePath = path.join(process.cwd(), "public/markdown-content/index.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
-  const { data } = matter(fileContent);
+  const { content, data } = matter(fileContent);
 
   return (
     <>
       <div
         className="text-center bg-image position-relative"
         style={{
-          backgroundImage: `url('${data.image || "/img/hero-image.jpg"}')`,
+          backgroundImage: `url('${data.heroImage || "/img/hero-image.jpg"}')`,
         }}
       >
         <div className="d-flex justify-content-center align-items-center h-100">
@@ -27,12 +27,12 @@ export default function Home() {
         <div className="row gx-5">
           <div className="col-12 col-lg-8 order-1">
             <div className="p-3">
-              <ReactMarkdown>{data.databaseDescription}</ReactMarkdown>
+              <ReactMarkdown>{content}</ReactMarkdown>
             </div>
           </div>
           <div className="col-12 col-lg-4 order-2">
             <div className="p-3 border bg-white">
-              <ReactMarkdown>{data.quickSearchInstructions}</ReactMarkdown>
+              <ReactMarkdown>{data.sidebar[0].text}</ReactMarkdown>
             </div>
           </div>
         </div>
