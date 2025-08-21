@@ -2,12 +2,13 @@
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
-import {SearchParams, ValidatedResult, PredictedResult, ErrorResult, Field, Link} from "./types";
+import {SearchParams, Result, Validated, Predicted, ValidatedResult, PredictedResult, ErrorResult, Field, FieldValue, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
 import {SelectField} from "./components/select-field";
 import {TextField} from "./components/text-field";
+import {ConfigContext} from "../../contexts/config";
 
 const SearchBase = (
   {values}: {
@@ -16,7 +17,7 @@ const SearchBase = (
     }
   }
 ) => {
-  const {apiRoot} = useConfig();
+  const {apiFetch} = useConfig();
   const [
     selectedPage,
     selectedDatabase,
@@ -117,8 +118,9 @@ const SearchBase = (
         chemicalClassData,
         compoundData,
       ] = await Promise.all([
-        (await fetch(`${apiRoot}/aggregated/chemical_class`)).json(),
-        (await fetch(`${apiRoot}/aggregated/compound`)).json()
+
+        apiFetch<Result<FieldValue<string>>>("/aggregated/chemical_class"),
+        apiFetch<Result<FieldValue<string>>>("/aggregated/compound")
       ]);
       setParams((p) => {
         return {
@@ -129,7 +131,7 @@ const SearchBase = (
       })
     }
     fetchData();
-  }, [apiRoot, setParams]);
+  }, [apiFetch, setParams]);
 
   useEffect(() => {
     if (
@@ -141,18 +143,28 @@ const SearchBase = (
       selectedPeptideSequenceLengthMax !== null
     ) {
       const fetchResult = async () => {
-        const url = new URL(`${apiRoot}/search/${selectedDatabase}`);
-        url.search = (new URLSearchParams({
-          page: selectedPage || "0",
-          location: selectedLocation,
-          chemical_class: selectedChemicalClass,
-          protein_description: selectedProteinDescription,
-          peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
-          peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
-        })).toString();
         try {
-          const resultData = await (await fetch(url.toString())).json();
-          setResult({type: selectedDatabase, ...resultData});
+          const args = {
+            page: selectedPage || "0",
+            location: selectedLocation,
+            chemical_class: selectedChemicalClass,
+            protein_description: selectedProteinDescription,
+            peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
+            peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
+          }
+          const currentDatabase = selectedDatabase === "validated" ? "validated" : "predicted";
+          const resultData: ValidatedResult | PredictedResult = await (
+            currentDatabase === "validated"
+            ? {
+              type: "validated",
+              ...await apiFetch<Result<Validated>>(`/search/validated`, args)
+            }
+            : {
+              type: "predicted",
+              ...await apiFetch<Result<Predicted>>(`/search/predicted`, args)
+            }
+          );
+          setResult(resultData);
         } catch (e) {
           console.warn(e);
           setResult({type: "error", error: `Failed to get data from the backend: ${e}`})
@@ -169,7 +181,7 @@ const SearchBase = (
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
     setResult,
-    apiRoot
+    apiFetch
   ]);
 
   const handlePageNavigation = useCallback((page: Link) => {
