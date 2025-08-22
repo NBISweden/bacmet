@@ -22,7 +22,7 @@ export default function RootLayout({
     ["Advanced search", "#"],
     ["BLAST", "#"],
     ["Download", "#"],
-    ["FAQ", "#"],
+    ["FAQ", "/faq"],
     ["About BacMet", "/about"],
     ["Contact", "/contact"],
   ].map(([label, href]) => ({label, href}));
