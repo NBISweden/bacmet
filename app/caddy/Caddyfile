@@ -1,1 +1,14 @@
-# TODO: Write production Caddyfile
+:8080 {
+	log {
+		output stderr
+		format console
+		level WARN
+	}
+
+	handle /api/* {
+		reverse_proxy app:5000
+	}
+
+	root * ./frontend
+	file_server
+}
