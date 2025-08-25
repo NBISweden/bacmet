@@ -1,0 +1,13 @@
+:8080 {
+	log {
+		output stderr
+		format console
+		level INFO
+	}
+
+	handle /api/* {
+		reverse_proxy app:5000
+	}
+
+	reverse_proxy frontend:3000
+}
