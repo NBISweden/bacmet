@@ -34,10 +34,7 @@ USER runner
 
 
 # Production build setup
-FROM base AS prod-build
-
-RUN --mount=type=cache,target=/etc/apk/cache \
-    apk add nodejs npm
+FROM node:22-alpine3.22 as prod-build
 
 WORKDIR /opt/bacmet/frontend
 COPY frontend/bacmet/ ./
