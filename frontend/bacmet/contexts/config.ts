@@ -5,7 +5,7 @@ export type Config = {
 }
 
 export const ConfigContext = createContext<Config>({
-    apiRoot: "http://localhost:5000/api",
+    apiRoot: "/api",
 })
 
 export const useConfig = () => {

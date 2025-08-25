@@ -141,17 +141,17 @@ const SearchBase = (
       selectedPeptideSequenceLengthMax !== null
     ) {
       const fetchResult = async () => {
-        const url = new URL(`${apiRoot}/search/${selectedDatabase}`);
-        url.search = (new URLSearchParams({
+	const params = new URLSearchParams({
           page: selectedPage || "0",
           location: selectedLocation,
           chemical_class: selectedChemicalClass,
           protein_description: selectedProteinDescription,
           peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
           peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
-        })).toString();
+        });
         try {
-          const resultData = await (await fetch(url.toString())).json();
+	  const response = await fetch(`${apiRoot}/search/${selectedDatabase}?${params}`);
+          const resultData = await response.json();
           setResult({type: selectedDatabase, ...resultData});
         } catch (e) {
           console.warn(e);
