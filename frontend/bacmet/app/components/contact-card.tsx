@@ -4,7 +4,7 @@ interface ContactCardProps {
   contact: Contact;
 }
 
-const DEFAULT_AVATAR = "img/avatar.png";
+const DEFAULT_AVATAR = "/img/avatar.png";
 
 export default function ContactCard({ contact }: ContactCardProps) {
   const imageSrc = contact.image ? contact.image : DEFAULT_AVATAR;
@@ -22,7 +22,9 @@ export default function ContactCard({ contact }: ContactCardProps) {
       <p className="mb-0">{contact.workplace}</p>
       <p className="mb-0">{contact.university}</p>
       <p className="mb-0"><strong>Email:</strong> {contact.email}</p>
-      <p className="mb-0"><strong>Phone:</strong> {contact.phone}</p>
+      {contact.phone && (
+        <p className="mb-0"><strong>Phone:</strong> {contact.phone}</p>
+      )}
     </div>
   );
 }

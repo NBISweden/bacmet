@@ -5,5 +5,5 @@ export type Contact = {
   workplace: string;
   university: string;
   email: string;
-  phone: string;
+  phone?: string;
 };
