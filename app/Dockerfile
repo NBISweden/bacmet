@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1.4
 FROM python:3.13-alpine AS base
 
+RUN --mount=type=cache,target=/etc/apk/cache \
+    apk add caddy
+
 WORKDIR /opt/bacmet
 
 COPY ./app ./app
