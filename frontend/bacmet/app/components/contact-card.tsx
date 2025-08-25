@@ -4,7 +4,7 @@ interface ContactCardProps {
   contact: Contact;
 }
 
-const DEFAULT_AVATAR = "img/avatar.png";
+const DEFAULT_AVATAR = "/img/avatar.png";
 
 export default function ContactCard({ contact }: ContactCardProps) {
   const imageSrc = contact.image ? contact.image : DEFAULT_AVATAR;

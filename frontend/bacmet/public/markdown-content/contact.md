@@ -1,6 +1,6 @@
 ---
 contact_info:
-  - image: "img/character.png"
+  - image: "/img/character.png"
     name: "Test Testsson"
     job_title: "Professor"
     workplace: "Department of Infectious Diseases"
