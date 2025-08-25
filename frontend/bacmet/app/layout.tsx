@@ -16,7 +16,7 @@ export default function RootLayout({
   const copyright = "Copyright © 2013-2018 All rights reserved";
   const contact = "info@example.com";
   const attribution = "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team";
-  const navigation: {label: string, href: string}[] = [
+  const navigation: { label: string, href: string }[] = [
     ["Browse & Search", "/search"],
     ["Advanced search", "#"],
     ["BLAST", "#"],
@@ -24,7 +24,7 @@ export default function RootLayout({
     ["FAQ", "/faq"],
     ["About BacMet", "/about"],
     ["Contact", "/contact"],
-  ].map(([label, href]) => ({label, href}));
+  ].map(([label, href]) => ({ label, href }));
   return (
     <html lang="en">
       <head>
@@ -52,7 +52,7 @@ export default function RootLayout({
                   <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mr-auto">
                       {navigation.map((item, index) => (
-                        <li key={index} className="nav-item me-2"><Link className="nav-link text-white" href={ item.href }>{ item.label }</Link></li>
+                        <li key={index} className="nav-item me-2"><Link className="nav-link text-white" href={item.href}>{item.label}</Link></li>
                       ))}
                     </ul>
                   </div>
@@ -67,16 +67,16 @@ export default function RootLayout({
         <footer className="container-fluid">
           <div className="row small d-flex justify-content-between">
             <div className="col-sm p-2">
-              <p className="mb-1 text-uppercase"><strong>{ brandName }</strong></p>
-              { copyright }
+              <p className="mb-1 text-uppercase"><strong>{brandName}</strong></p>
+              {copyright}
             </div>
             <div className="col-sm p-2">
               <p className="mb-1"><strong>CONTACT</strong></p>
               <i className="bi bi-envelope-fill me-2"></i>
-              { contact }
+              {contact}
             </div>
             <div className="col-sm p-2 fst-italic">
-              { attribution }
+              {attribution}
             </div>
             <div className="col-sm p-2 d-flex align-items-center justify-content-end">
               <Image
@@ -84,7 +84,7 @@ export default function RootLayout({
                 alt="Chalmers and Gothenburg university logo"
                 width={400}
                 height={64}
-                className="img-fluid" style={{maxHeight: "32px"}}
+                className="img-fluid" style={{ maxHeight: "32px" }}
               />
             </div>
           </div>

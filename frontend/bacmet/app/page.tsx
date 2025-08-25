@@ -16,7 +16,7 @@ function parseIndexData(data: unknown): IndexProps {
     heroImage: "/img/hero-image.jpg",
     quickSearchDescription: "Quick search for antibacterial biocide- and metal-resistance genes.",
   };
-  
+
   const getString = (key: keyof IndexProps) =>
     data && typeof data === "object" && typeof (data as IndexProps)[key] === "string"
       ? (data as IndexProps)[key]
@@ -37,7 +37,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="text-center bg-image position-relative" style={{ backgroundImage: `url('${indexProps.heroImage}')`}}>
+      <div className="text-center bg-image position-relative" style={{ backgroundImage: `url('${indexProps.heroImage}')` }}>
         <div className="d-flex justify-content-center align-items-center h-100">
           <div className="bg-dark bg-opacity-75 px-4 py-3">
             <p className="hero-image-text">{indexProps.heroText}</p>
