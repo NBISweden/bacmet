@@ -14,7 +14,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ARG UID=1000
 RUN adduser -D -u "$UID" python
 
-EXPOSE 5000/tcp
+RUN mkdir -m 755 /caddy && chown -R python /caddy
+
+CMD ./start-script.sh
+
+EXPOSE 8080/tcp
 
 
 # Development setup
@@ -23,15 +27,16 @@ FROM base AS dev
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r app/requirements.dev.txt
 
+COPY --chmod=644 caddy/Caddyfile.dev ./Caddyfile
+COPY --chmod=755 scripts/start-script.dev.sh ./start-script.sh
+
 USER python
-CMD flask --app app/main --debug run --host 0.0.0.0 --port 5000
 
 
 # Production setup
 FROM base AS prod
 
+COPY --chmod=644 caddy/Caddyfile ./Caddyfile
 COPY --chmod=755 scripts/start-script.sh ./start-script.sh
 
 USER python
-CMD ./start-script.sh
-
