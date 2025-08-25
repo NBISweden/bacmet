@@ -9,6 +9,6 @@ services:
 
   frontend:
     build:
-      context: frontend
+      dockerfile: frontend/Dockerfile
     volumes:
       - ./frontend/bacmet:/opt/bacmet/frontend
