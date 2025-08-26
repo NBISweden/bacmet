@@ -7,3 +7,8 @@ export type Contact = {
   email: string;
   phone?: string;
 };
+
+export type FAQItem = {
+  question: string;
+  answer: string;
+};
