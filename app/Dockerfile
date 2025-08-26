@@ -34,7 +34,7 @@ USER runner
 
 
 # Production build setup
-FROM node:22-alpine3.22 as prod-build
+FROM node:24-alpine as prod-build
 
 WORKDIR /opt/bacmet/frontend
 COPY frontend/bacmet/ ./

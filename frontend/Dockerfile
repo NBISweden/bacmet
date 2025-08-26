@@ -1,9 +1,6 @@
-########################################
-FROM node:22-alpine3.22 AS dev
-ARG FRONTEND_SRC_DIR=/opt/bacmet/frontend
+FROM node:24-alpine AS dev
 
-RUN mkdir -p "$FRONTEND_SRC_DIR"
-WORKDIR "$FRONTEND_SRC_DIR"
+WORKDIR /opt/bacmet/frontend
 
-USER 1000:1000
+USER 1000
 CMD npm ci && npm run dev
