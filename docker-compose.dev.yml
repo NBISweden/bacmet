@@ -1,5 +1,3 @@
-name: bacmet
-
 services:
   app:
     build:
@@ -9,8 +7,6 @@ services:
 
   frontend:
     build:
-      context: frontend
-    ports:
-      - ${APP_HOST:-127.0.0.1}:${APP_PORT:-3000}:3000
+      dockerfile: frontend/Dockerfile
     volumes:
       - ./frontend/bacmet:/opt/bacmet/frontend

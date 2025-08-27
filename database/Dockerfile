@@ -7,24 +7,16 @@ RUN apk add --no-cache \
 ARG UID=1000
 RUN adduser -D -u "$UID" database
 
-RUN mkdir -m 775 /data
-RUN chown database /data
+RUN mkdir -m 755 /data && chown -R database /data
 
-USER database
 WORKDIR /home/database
 
-RUN mkdir scripts
-RUN mkdir sql
-
-COPY --chmod=644 sql/schema.sql sql/
-COPY --chmod=755 scripts/start-script.sh ./
-COPY --chmod=755 scripts/import-validated.sh scripts/
-COPY --chmod=755 scripts/import-validated-compounds.sh scripts/
-COPY --chmod=755 scripts/import-validated-pdb-files.sh scripts/
-COPY --chmod=755 scripts/import-predicted-unique-homologues.sh scripts/
-COPY --chmod=755 scripts/import-predicted-groups.sh scripts/
-COPY --chmod=755 scripts/import-sensitivity-distributions.sh scripts/
+COPY sql/ ./sql/
+COPY scripts/ ./scripts/
+RUN chmod 755 scripts/*.sh
+RUN mv scripts/start-script.sh .
 
 ENV DATABASE=/data/database.db
 
+USER database
 CMD ./start-script.sh
