@@ -1,54 +1,32 @@
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import React from "react";
+import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/sidebar/sidebar";
+import type { FAQItem } from "../types";
+
+function parseFAQData(value: unknown): FAQItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is FAQItem =>
+    item && 
+    typeof item === "object" &&
+    typeof item.question === "string" && 
+    typeof item.answer === "string"
+  );
+}
 
 export default function FAQPage() {
-  const title = "Frequently Asked Questions";
-  const faqData = [
-    {
-      question: "What is BacMet?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "How does BacMet work?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "What are the benefits of using BacMet?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "Is BacMet easy to use?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "What is the pricing model for BacMet?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "How can I get support for BacMet?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "Can I integrate BacMet with other tools?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-    {
-      question: "What are the system requirements for BacMet?",
-      answer:
-        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-    },
-  ];
+  const filePath = path.join(process.cwd(), "public/markdown-content/faq.md");
+  const fileContent = fs.readFileSync(filePath, "utf8");
+  const { content, data } = matter(fileContent);
+
+  const faqData = parseFAQData(data.faqData);
 
   return (
     <>
       <div className="text-center py-3">
-        <h1>{title}</h1>
+        <ReactMarkdown>{content}</ReactMarkdown>
       </div>
       <div className="row row-gap-3">
         <div className="col-md-4 order-md-last">
