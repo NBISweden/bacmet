@@ -84,6 +84,12 @@ def pagination_for(endpoint: str, page: int, last_page: int, args: dict, pages_t
     ]
 
 
+@app.route('/api/health-check')
+@cross_origin()
+def health_check():
+    return jsonify({"status": "ok"}), 200
+
+
 @app.route('/api/search/predicted')
 @cross_origin()
 def predicted_search():
