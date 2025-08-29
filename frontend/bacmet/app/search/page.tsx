@@ -8,6 +8,8 @@ import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
 import {SelectField} from "./components/select-field";
 import {TextField} from "./components/text-field";
+import {default as NextLink} from 'next/link'
+import ValidatedEntry from "./components/validated-entry";
 
 const SearchBase = (
   {values}: {
@@ -230,23 +232,9 @@ const SearchBase = (
                           <tr key={index}>
                             <td>{ item.gene_name }</td>
                             <td>
-                              <table className="table">
-                                <tbody>
-                                  <tr><th scope="row">BacMet ID:</th><td>{ item.bacmet_id }</td></tr>
-                                  <tr><th scope="row">Code for:</th><td>{ item.code_for }</td></tr>
-                                  <tr><th scope="row">Family:</th><td>{ item.family }</td></tr>
-                                  <tr><th scope="row">Sequence:</th><td>...</td></tr>
-                                  <tr><th scope="row">Cross-database information:</th><td>...</td></tr>
-                                  <tr><th scope="row">Organism:</th><td><em>{ item.organism }</em></td></tr>
-                                  <tr><th scope="row">Location:</th><td>{ item.location }</td></tr>
-                                  <tr><th scope="row">Compound:</th><td>{item.compounds.map(c => c.compound_name).join(", ")}</td></tr>
-                                  <tr><th scope="row">Description:</th><td>{ item.description }</td></tr>
-                                  <tr><th scope="row">Length (amino acid):</th><td>{ item.length_aa }</td></tr>
-                                  <tr><th scope="row">Reference:</th><td>{ item.reference }</td></tr>
-                                </tbody>
-                              </table>
+                              <ValidatedEntry entry={item}/>
                             </td>
-                            <td>...</td>
+                            <td><NextLink href={`/search/entry/${item.bacmet_id}`}>View entries</NextLink></td>
                           </tr>
                         ))}
                       </tbody>

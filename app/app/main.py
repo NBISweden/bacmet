@@ -1,7 +1,8 @@
 from flask import (  # type: ignore
     request,
     url_for,
-    jsonify
+    jsonify,
+    make_response,
 )
 import os
 import logging
@@ -14,6 +15,7 @@ from .search import (
     get_chemical_classes,
     get_compounds,
     get_gene_names,
+    get_from_validated,
 )
 from .types import (
     SearchResult,
@@ -35,6 +37,10 @@ app = create_app(
     secret_key=os.getenv("APP_SECRET_KEY", os.urandom(24).hex()),
     message_root=os.getenv("APP_MESSAGE_ROOT", "/home/bacmet")
 )
+
+
+def make_error(message):
+    return make_response(jsonify({"error": message}), 404)
 
 
 def pagination_for(endpoint: str, page: int, last_page: int, args: dict, pages_to_list=5):
@@ -87,6 +93,7 @@ def predicted_search():
         request.args.get("protein_description")
     )
     gene_name = request.args.get("gene_name")
+    bacmet_id = request.args.get("bacmet_id")
     page = max(0, int(request.args.get("page", "0")))
     page_size = 100
 
@@ -95,6 +102,7 @@ def predicted_search():
         location=location,
         protein_description=protein_description,
         gene_name=gene_name,
+        bacmet_id=bacmet_id,
         pagination=(page, page_size)
     )
 
@@ -181,6 +189,30 @@ def validated_search():
     )
 
     return jsonify(dataclasses.asdict(search_result))
+
+
+@app.route('/api/validated/<entry_id>')
+@cross_origin()
+def validated_entry(entry_id: str):
+    item = get_from_validated(entry_id)
+    if item is None:
+        return make_error(f"No entry found for: {entry_id}")
+    result = ValidatedResult(
+        gene_name=item.gene_name,
+        bacmet_id=item.bacmet_id,
+        code_for=item.code_for,
+        family=item.family,
+        organism=item.organism,
+        location=item.location,
+        compounds=[
+            Compound(compound_name=compound.compound_name)
+            for compound in item.compounds
+        ],
+        description=item.description,
+        length_aa=item.length_aa,
+        reference=item.reference,
+    )
+    return jsonify(dataclasses.asdict(result))
 
 
 @app.route('/api/aggregated/chemical_class')

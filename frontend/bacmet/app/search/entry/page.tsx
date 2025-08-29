@@ -1,26 +1,58 @@
 "use client"
 import Sidebar from "../../components/sidebar/sidebar";
-import { Suspense } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useState, useMemo, ReactNode, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from 'next/dynamic'
 import { usePathLoader } from "./path-loader";
+import ValidatedEntry from "../components/validated-entry";
+import { Validated } from "../types";
 
 const PathLoader = dynamic(() => import('./path-loader'), { ssr: false })
 
-function EntryView({entryId}: {entryId: string | null}) {
-  return <div>{entryId}</div>
-}
 
 function EntryViewWithParams() {
   const match = usePathLoader();
   const searchParams = useSearchParams();
+  const [validated, setValidated] = useState<Validated | null>(null);
   
   const entryIdFromPath = match && match[1];
   const entryIdFromSearchParams = searchParams.get("entry_id");
   const entryId = entryIdFromPath || entryIdFromSearchParams;
 
-  return <EntryView entryId={entryId} />
+  const validatedEntry = useMemo(
+    () => {
+      const loadingText = <span>{`Loading data... ${entryId}`}</span>;
+      const placeholder: Record<keyof Validated, ReactNode>= {
+        gene_name: loadingText,
+        bacmet_id: loadingText,
+        code_for: loadingText,
+        family: loadingText,
+        organism: loadingText,
+        location: loadingText,
+        compounds: loadingText,
+        description: loadingText,
+        length_aa: loadingText,
+        reference: loadingText,
+      }
+      return validated ? validated : placeholder
+    },
+    [validated, entryId]
+  );
+  useEffect(() => {
+    const fetchEntry = async () => {
+      const response = await fetch(`/api/validated/${entryId}`)
+      const data = await response.json()
+      setValidated(data)
+    }
+    fetchEntry()
+  }, [entryId, setValidated])
+
+  return (
+    <>
+      <ValidatedEntry entry={validatedEntry} />
+      <hr />
+    </>
+  )
 }
 
 export default function EntryPage() {
@@ -38,8 +70,8 @@ export default function EntryPage() {
           </Sidebar>
         </div>
         <div className="col-md-8 order-md-first">
-          <Suspense fallback={<EntryView entryId={null}/>}>
-            <PathLoader match={/^\/search\/entry\/(.*)$/}><EntryViewWithParams /></PathLoader>
+          <Suspense fallback={<ValidatedEntry entry={{} as any}/>}>
+            <PathLoader match={/^\/search\/entry\/(.*?)(\/.*)?$/}><EntryViewWithParams /></PathLoader>
           </Suspense>
         </div>
       </div>
