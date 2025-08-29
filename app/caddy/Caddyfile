@@ -9,6 +9,11 @@
 		reverse_proxy app:5000
 	}
 
+	handle /search/entry/* {
+		rewrite * /search/entry/
+		file_server
+	}
+
 	root * ./frontend
 	file_server
 }
