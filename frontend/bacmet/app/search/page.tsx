@@ -159,7 +159,7 @@ const SearchBase = (
       const url = new URL(page.href);
       const params = url.searchParams;
       router.push(pathname + '?' + params.toString());
-  }, [setResult, pathname, router])
+  }, [pathname, router])
 
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
