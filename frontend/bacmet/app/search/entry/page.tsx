@@ -1,17 +1,18 @@
 "use client"
-import Sidebar from "../../components/sidebar/sidebar";
+import { useConfig } from "../../../contexts/config";
 import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
-import {SearchParams, PredictedResult, ErrorResult, Field, Link} from "../types";
+import {PredictedResult, ErrorResult, Link, Validated} from "../types";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import dynamic from 'next/dynamic'
 import ValidatedEntry from "../components/validated-entry";
-import { Validated } from "../types";
 import { Pagination } from "../components/pagination";
+
 
 const ClientRender = dynamic(() => import('./client-render'), { ssr: false })
 
 
 function EntryViewWithParams() {
+  const {apiRoot} = useConfig();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const match = pathname.match(/^\/search\/entry\/(.*?)(\/.*)?$/);
@@ -46,7 +47,7 @@ function EntryViewWithParams() {
   );
   useEffect(() => {
     const fetchEntry = async () => {
-      const response = await fetch(`/api/validated/${entryId}`)
+      const response = await fetch(`${apiRoot}/validated/${entryId}`)
       const data = await response.json()
       setValidated(data)
     }
@@ -55,7 +56,7 @@ function EntryViewWithParams() {
 
   useEffect(() => {
     const fetchEntry = async () => {
-      const predictedResponse = await fetch(`/api/search/predicted?bacmet_id=${entryId}&page=${predictedPage}`)
+      const predictedResponse = await fetch(`${apiRoot}/search/predicted?bacmet_id=${entryId}&page=${predictedPage}`)
       const predictedData = await predictedResponse.json()
       setPredictedResult({type: "predicted", ...predictedData})
     }
@@ -72,7 +73,7 @@ function EntryViewWithParams() {
   const allPages = (predictedResult && "_links" in predictedResult ? predictedResult._links : []);
   const pageCount = (predictedResult && "_meta" in predictedResult ? predictedResult._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
-  const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
+  const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel));
   return (
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
