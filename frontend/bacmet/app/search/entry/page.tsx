@@ -1,18 +1,18 @@
 "use client"
 import Sidebar from "../../components/sidebar/sidebar";
 import { Suspense, useState, useMemo, ReactNode, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import dynamic from 'next/dynamic'
-import { usePathLoader } from "./path-loader";
 import ValidatedEntry from "../components/validated-entry";
 import { Validated } from "../types";
 
-const PathLoader = dynamic(() => import('./path-loader'), { ssr: false })
+const ClientRender = dynamic(() => import('./client-render'), { ssr: false })
 
 
 function EntryViewWithParams() {
-  const match = usePathLoader();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const match = pathname.match(/^\/search\/entry\/(.*?)(\/.*)?$/);
   const [validated, setValidated] = useState<Validated | null>(null);
   
   const entryIdFromPath = match && match[1];
@@ -71,7 +71,7 @@ export default function EntryPage() {
         </div>
         <div className="col-md-8 order-md-first">
           <Suspense fallback={<ValidatedEntry entry={{} as any}/>}>
-            <PathLoader match={/^\/search\/entry\/(.*?)(\/.*)?$/}><EntryViewWithParams /></PathLoader>
+            <ClientRender><EntryViewWithParams /></ClientRender>
           </Suspense>
         </div>
       </div>
