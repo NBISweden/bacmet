@@ -118,10 +118,8 @@ def find_in_predicted(
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:
     base_stmt = select(
-        Validated,
+        Validated.bacmet_id,
         PredictedUniqueHomologues,
-    ).options(
-        joinedload(Validated.compounds)
     ).order_by(
         PredictedUniqueHomologues.predicted_unique_homologue_id
     ).join(

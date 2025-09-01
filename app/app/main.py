@@ -117,7 +117,7 @@ def predicted_search():
         ),
         items=[
             PredictedResult(
-                bacmet_id=item.bacmet_id,
+                bacmet_id=bacmet_id,
                 blast_hit_genome=predicted.blast_hit_genome,
                 start_alignment_query=predicted.start_alignment_query,
                 end_alignment_query=predicted.end_alignment_query,
@@ -138,7 +138,7 @@ def predicted_search():
                 alntmscore=predicted.alntmscore,
                 rmsd=predicted.rmsd,
             )
-            for (item, predicted) in items
+            for (bacmet_id, predicted) in items
         ],
         _links=pagination_for("predicted_search", page, last_page, args)
     )
