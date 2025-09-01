@@ -2,7 +2,7 @@
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
-import {SearchParams, ValidatedResult, PredictedResult, ErrorResult, Field, Link} from "./types";
+import {SearchParams, ValidatedResult, ErrorResult, Field, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
@@ -38,7 +38,7 @@ const SearchBase = (
     chemicalClasses: [],
     compounds: [],
   });
-  const [result, setResult] = useState<ValidatedResult | PredictedResult | ErrorResult | undefined>(undefined);
+  const [result, setResult] = useState<ValidatedResult | ErrorResult | undefined>(undefined);
   const location: Field<string> = {
     label: "Select location",
     name: "location",
@@ -125,7 +125,7 @@ const SearchBase = (
       selectedPeptideSequenceLengthMax !== null
     ) {
       const fetchResult = async () => {
-	const params = new URLSearchParams({
+      const params = new URLSearchParams({
           page: selectedPage || "0",
           location: selectedLocation,
           chemical_class: selectedChemicalClass,
