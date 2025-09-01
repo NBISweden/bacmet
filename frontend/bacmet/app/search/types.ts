@@ -11,6 +11,10 @@ export type Field<T=unknown> = {
   placeholder?: string;
 }
 
+export type MultiValueField<T=unknown> = Omit<Field<T>, "value"> & {
+  value: T[];
+}
+
 export type SearchParams = {
   chemicalClasses: FieldValue<string>[];
   compounds: FieldValue<string>[];
