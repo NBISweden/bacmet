@@ -75,7 +75,9 @@ function EntryViewWithParams() {
   const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
   return (
     <>
-      <ValidatedEntry entry={validatedEntry} />
+      <div className="col-sm-12 col-md-9 col-lg-7">
+        <ValidatedEntry entry={validatedEntry} />
+      </div>
       {predictedResult ? (
           <>
             <hr/>
@@ -87,23 +89,49 @@ function EntryViewWithParams() {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th scope="col">Gene Name</th>
-                          <th scope="col">GI number</th>
-                          <th scope="col">GenBank ID</th>
-                          <th scope="col">Sequence</th>
-                          <th scope="col">Organism</th>
-                          <th scope="col">NCBI annotation</th>
+                          <th scope="col">blast_hit_genome</th>
+                          <th scope="col">start_alignment_query</th>
+                          <th scope="col">end_alignment_query</th>
+                          <th scope="col">fident</th>
+                          <th scope="col">alnlen</th>
+                          <th scope="col">mismatch</th>
+                          <th scope="col">gapopen</th>
+                          <th scope="col">qstart</th>
+                          <th scope="col">qend</th>
+                          <th scope="col">qlen</th>
+                          <th scope="col">tstart</th>
+                          <th scope="col">tend</th>
+                          <th scope="col">tlen</th>
+                          <th scope="col">evalue</th>
+                          <th scope="col">bits</th>
+                          <th scope="col">prob</th>
+                          <th scope="col">lddt</th>
+                          <th scope="col">alntmscore</th>
+                          <th scope="col">rmsd</th>
                         </tr>
                       </thead>
                       <tbody>
                         {predictedResult ? predictedResult.items.map((item, index) => (
                           <tr key={index}>
-                            <td>{ item.gene_name }</td>
-                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}`} target="_blank">{ item.protein_accession_uniprot }</a></td>
-                            <td>...</td>
-                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}?report=fasta`} target="_blank">FASTA</a></td>
-                            <td>{ item.organism }</td>
-                            <td>...</td>
+                            <td>{item.blast_hit_genome}</td>
+                            <td>{item.start_alignment_query}</td>
+                            <td>{item.end_alignment_query}</td>
+                            <td>{item.fident}</td>
+                            <td>{item.alnlen}</td>
+                            <td>{item.mismatch}</td>
+                            <td>{item.gapopen}</td>
+                            <td>{item.qstart}</td>
+                            <td>{item.qend}</td>
+                            <td>{item.qlen}</td>
+                            <td>{item.tstart}</td>
+                            <td>{item.tend}</td>
+                            <td>{item.tlen}</td>
+                            <td>{item.evalue}</td>
+                            <td>{item.bits}</td>
+                            <td>{item.prob}</td>
+                            <td>{item.lddt}</td>
+                            <td>{item.alntmscore}</td>
+                            <td>{item.rmsd}</td>
                           </tr>
                         )) : <></>}
                       </tbody>
@@ -127,11 +155,9 @@ function EntryViewWithParams() {
 export default function EntryPage() {
   return (
     <div className="row justify-content-center pt-3 pb-3">
-      <div className="col-sm-12 col-md-9 col-lg-7">
-          <Suspense fallback={<ValidatedEntry entry={{} as any}/>}>
-            <ClientRender><EntryViewWithParams /></ClientRender>
-          </Suspense>
-      </div>
+      <Suspense fallback={<ValidatedEntry entry={{} as any}/>}>
+        <ClientRender><EntryViewWithParams /></ClientRender>
+      </Suspense>
     </div>
   );
 }

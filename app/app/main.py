@@ -117,15 +117,28 @@ def predicted_search():
         ),
         items=[
             PredictedResult(
-                gene_name=item.gene_name,
-                protein_accession_uniprot=item.protein_accession_uniprot,
-                organism=item.organism,
-                compounds=[
-                    Compound(compound_name=compound.compound_name)
-                    for compound in item.compounds
-                ],
+                bacmet_id=item.bacmet_id,
+                blast_hit_genome=predicted.blast_hit_genome,
+                start_alignment_query=predicted.start_alignment_query,
+                end_alignment_query=predicted.end_alignment_query,
+                fident=predicted.fident,
+                alnlen=predicted.alnlen,
+                mismatch=predicted.mismatch,
+                gapopen=predicted.gapopen,
+                qstart=predicted.qstart,
+                qend=predicted.qend,
+                qlen=predicted.qlen,
+                tstart=predicted.tstart,
+                tend=predicted.tend,
+                tlen=predicted.tlen,
+                evalue=predicted.evalue,
+                bits=predicted.bits,
+                prob=predicted.prob,
+                lddt=predicted.lddt,
+                alntmscore=predicted.alntmscore,
+                rmsd=predicted.rmsd,
             )
-            for (item, _predicted) in items
+            for (item, predicted) in items
         ],
         _links=pagination_for("predicted_search", page, last_page, args)
     )
