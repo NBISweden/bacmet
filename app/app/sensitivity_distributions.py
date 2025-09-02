@@ -37,6 +37,26 @@ bucket_tuples = {
 
 
 @cache
+def get_unique_values(value_column):
+    stmt = select(value_column).distinct()
+
+    with db_session() as session:
+        items = session.execute(stmt)
+        return [
+            item[0]
+            for item in items
+        ]
+
+
+def get_biocides():
+    return get_unique_values(SensitivityDistributions.biocide)
+
+
+def get_species():
+    return get_unique_values(SensitivityDistributions.species)
+
+
+@cache
 def get_sensitivity_histogram(
     species: str,
     biocide: str,
