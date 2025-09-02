@@ -9,7 +9,6 @@ export const Pagination = (
     pageCount?: number
   }
 ) => {
-  const maxPages = 5;
   const first: Link = pages.filter(p => p.rel === "first")[0]
   const last: Link = pages.filter(p => p.rel === "last")[0]
   const otherPages = pages.filter(p => !["first", "last"].includes(p.rel))

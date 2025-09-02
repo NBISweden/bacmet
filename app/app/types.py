@@ -65,7 +65,23 @@ class ValidatedResult:
 
 @dataclasses.dataclass
 class PredictedResult:
-    gene_name: str
-    protein_accession_uniprot: str
-    organism: str
-    compounds: list[Compound]
+    bacmet_id: str
+    blast_hit_genome: str
+    start_alignment_query: int
+    end_alignment_query: int
+    fident: float
+    alnlen: int
+    mismatch: int
+    gapopen: int
+    qstart: int
+    qend: int
+    qlen: int
+    tstart: int
+    tend: int
+    tlen: int
+    evalue: float
+    bits: int
+    prob: int
+    lddt: float
+    alntmscore: float
+    rmsd: float

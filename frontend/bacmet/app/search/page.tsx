@@ -2,12 +2,14 @@
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
-import {SearchParams, ValidatedResult, PredictedResult, ErrorResult, Field, Link} from "./types";
+import {SearchParams, ValidatedResult, ErrorResult, Field, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
 import {SelectField} from "./components/select-field";
 import {TextField} from "./components/text-field";
+import {default as NextLink} from 'next/link'
+import ValidatedEntry from "./components/validated-entry";
 
 const SearchBase = (
   {values}: {
@@ -19,7 +21,6 @@ const SearchBase = (
   const {apiRoot} = useConfig();
   const [
     selectedPage,
-    selectedDatabase,
     selectedLocation,
     selectedChemicalClass,
     selectedProteinDescription,
@@ -27,7 +28,6 @@ const SearchBase = (
     selectedPeptideSequenceLengthMax,
   ] = [
     "page",
-    "database",
     "location",
     "chemical_class",
     "protein_description",
@@ -38,22 +38,7 @@ const SearchBase = (
     chemicalClasses: [],
     compounds: [],
   });
-  const [result, setResult] = useState<ValidatedResult | PredictedResult | ErrorResult | undefined>(undefined);
-  const database: Field<string> = {
-    label: "Select database",
-    name: "database",
-    value: selectedDatabase || "validated",
-    values: [
-      {
-        label: "Validated",
-        value: "validated"
-      },
-      {
-        label: "Predicted",
-        value: "predicted"
-      }
-    ]
-  }
+  const [result, setResult] = useState<ValidatedResult | ErrorResult | undefined>(undefined);
   const location: Field<string> = {
     label: "Select location",
     name: "location",
@@ -133,7 +118,6 @@ const SearchBase = (
 
   useEffect(() => {
     if (
-      selectedDatabase !== null &&
       selectedLocation !== null &&
       selectedChemicalClass !== null &&
       selectedProteinDescription !== null &&
@@ -141,7 +125,7 @@ const SearchBase = (
       selectedPeptideSequenceLengthMax !== null
     ) {
       const fetchResult = async () => {
-	const params = new URLSearchParams({
+      const params = new URLSearchParams({
           page: selectedPage || "0",
           location: selectedLocation,
           chemical_class: selectedChemicalClass,
@@ -150,9 +134,9 @@ const SearchBase = (
           peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
         });
         try {
-	  const response = await fetch(`${apiRoot}/search/${selectedDatabase}?${params}`);
+	  const response = await fetch(`${apiRoot}/search/validated?${params}`);
           const resultData = await response.json();
-          setResult({type: selectedDatabase, ...resultData});
+          setResult({type: "validated", ...resultData});
         } catch (e) {
           console.warn(e);
           setResult({type: "error", error: `Failed to get data from the backend: ${e}`})
@@ -162,7 +146,6 @@ const SearchBase = (
     }
   }, [
     selectedPage,
-    selectedDatabase,
     selectedLocation,
     selectedChemicalClass,
     selectedProteinDescription,
@@ -173,13 +156,10 @@ const SearchBase = (
   ]);
 
   const handlePageNavigation = useCallback((page: Link) => {
-    if (selectedDatabase !== null) {
       const url = new URL(page.href);
       const params = url.searchParams;
-      params.set("database", selectedDatabase);
       router.push(pathname + '?' + params.toString());
-    }
-  }, [selectedDatabase, setResult, pathname, router])
+  }, [pathname, router])
 
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
@@ -187,7 +167,6 @@ const SearchBase = (
     const target = (event.target as unknown as {[id: string]: {type: string, checked: boolean, value: string | number}});
     const values = [
       "page",
-      "database",
       "location",
       "chemical_class",
       "protein_description",
@@ -218,18 +197,14 @@ const SearchBase = (
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
           <input type="hidden" name="page" value="0" />
-          <FieldSet><RadioSelectField field={database}/></FieldSet>
           <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>
             <RadioSelectField field={location}/>
-            <div className="form-text">For experimentally confirmed database only.</div>
           </FieldSet>
           <FieldSet>
             <TextField field={peptideSequenceLengthMin}/>
-            <div className="form-text">For experimentally confirmed database only.</div>
             <TextField field={peptideSequenceLengthMax}/>
-            <div className="form-text">For experimentally confirmed database only.</div>
           </FieldSet>
           <div className="pt-3 pb-2">
             <input className="btn btn-primary" type="submit" value="Search" />
@@ -257,53 +232,9 @@ const SearchBase = (
                           <tr key={index}>
                             <td>{ item.gene_name }</td>
                             <td>
-                              <table className="table">
-                                <tbody>
-                                  <tr><th scope="row">BacMet ID:</th><td>{ item.bacmet_id }</td></tr>
-                                  <tr><th scope="row">Code for:</th><td>{ item.code_for }</td></tr>
-                                  <tr><th scope="row">Family:</th><td>{ item.family }</td></tr>
-                                  <tr><th scope="row">Sequence:</th><td>...</td></tr>
-                                  <tr><th scope="row">Cross-database information:</th><td>...</td></tr>
-                                  <tr><th scope="row">Organism:</th><td><em>{ item.organism }</em></td></tr>
-                                  <tr><th scope="row">Location:</th><td>{ item.location }</td></tr>
-                                  <tr><th scope="row">Compound:</th><td>{item.compounds.map(c => c.compound_name).join(", ")}</td></tr>
-                                  <tr><th scope="row">Description:</th><td>{ item.description }</td></tr>
-                                  <tr><th scope="row">Length (amino acid):</th><td>{ item.length_aa }</td></tr>
-                                  <tr><th scope="row">Reference:</th><td>{ item.reference }</td></tr>
-                                </tbody>
-                              </table>
+                              <ValidatedEntry entry={item}/>
                             </td>
-                            <td>...</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  );
-                }
-                case "predicted": {
-                  return (
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Gene Name</th>
-                          <th scope="col">GI number</th>
-                          <th scope="col">GenBank ID</th>
-                          <th scope="col">Sequence</th>
-                          <th scope="col">Organism</th>
-                          <th scope="col">Compound</th>
-                          <th scope="col">NCBI annotation</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.items.map((item, index) => (
-                          <tr key={index}>
-                            <td>{ item.gene_name }</td>
-                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}`} target="_blank">{ item.protein_accession_uniprot }</a></td>
-                            <td>...</td>
-                            <td><a href={`http://www.ncbi.nlm.nih.gov/protein/${item.protein_accession_uniprot}?report=fasta`} target="_blank">FASTA</a></td>
-                            <td>{ item.organism }</td>
-                            <td>{item.compounds.map(c => c.compound_name).join(", ")}</td>
-                            <td>...</td>
+                            <td><NextLink href={`/search/entry/${item.bacmet_id}`}>View entries</NextLink></td>
                           </tr>
                         ))}
                       </tbody>
@@ -330,7 +261,6 @@ const SearchWithSearchParams = () => {
   const searchParams = useSearchParams();
   const values = [
     "page",
-    "database",
     "location",
     "chemical_class",
     "protein_description",
