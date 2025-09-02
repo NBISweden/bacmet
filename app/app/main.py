@@ -26,6 +26,8 @@ from .types import (
     PredictedResult,
     Compound,
     Item,
+    Histogram,
+    HistogramBucket
 )
 from .core import create_app
 from flask_cors import cross_origin
@@ -301,18 +303,22 @@ def sensitivity_distributions_histogram():
         species=species,
         biocide=biocide
     )
-    result = {
-        "species": species,
-        "biocide": biocide,
-        "buckets": [
-            {
-                "range": bucket_range,
-                "count": bucket_count
-            }
+    result = Histogram(
+        params={
+            "species": species,
+            "biocide": biocide,
+        },
+        type="MIC",
+        unit="µg/mL",
+        buckets=[
+            HistogramBucket(
+                range=bucket_range,
+                count=bucket_count
+            )
             for (bucket_range, bucket_count) in buckets
         ]
-    }
-    return jsonify(result)
+    )
+    return jsonify(dataclasses.asdict(result))
 
 
 if __name__ == '__main__':
