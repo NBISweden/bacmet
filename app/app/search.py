@@ -72,6 +72,17 @@ def apply_total_count(stmt):
     return select(func.count()).select_from(stmt.subquery())
 
 
+def get_from_validated(
+    bacmet_id
+) -> Validated:
+    stmt = select(Validated).options(
+        joinedload(Validated.compounds)
+    ).order_by(Validated.validated_id).filter(Validated.bacmet_id == bacmet_id)
+    with db_session() as session:
+        (value,) = session.execute(stmt).first()
+        return value
+
+
 def find_in_validated(
     chemical_class: Optional[ChemicalClass],
     location: Optional[LocationOption],
@@ -103,20 +114,22 @@ def find_in_predicted(
     location: Optional[LocationOption],
     protein_description: Optional[str],
     gene_name: Optional[str],
+    bacmet_id: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:
+    base_stmt = select(
+        Validated.bacmet_id,
+        PredictedUniqueHomologues,
+    ).order_by(
+        PredictedUniqueHomologues.predicted_unique_homologue_id
+    ).join(
+        Validated,
+        PredictedUniqueHomologues.validated_id == Validated.validated_id
+    )
+    if bacmet_id:
+        base_stmt = base_stmt.filter(Validated.bacmet_id == bacmet_id)
     stmt = apply_search_filters(
-        select(
-            Validated,
-            PredictedUniqueHomologues,
-        ).options(
-            joinedload(Validated.compounds)
-        ).order_by(
-            PredictedUniqueHomologues.predicted_unique_homologue_id
-        ).join(
-            Validated,
-            PredictedUniqueHomologues.validated_id == Validated.validated_id
-        ),
+        base_stmt,
         chemical_class,
         location,
         protein_description,

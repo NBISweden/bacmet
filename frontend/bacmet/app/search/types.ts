@@ -11,6 +11,10 @@ export type Field<T=unknown> = {
   placeholder?: string;
 }
 
+export type MultiValueField<T=unknown> = Omit<Field<T>, "value"> & {
+  value: T[];
+}
+
 export type SearchParams = {
   chemicalClasses: FieldValue<string>[];
   compounds: FieldValue<string>[];
@@ -34,10 +38,26 @@ export type Validated = {
 }
 
 export type Predicted = {
-  gene_name: string;
-  protein_accession_uniprot: string;
-  organism: string;
-  compounds: Compound[];
+  bacmet_id: string;
+  blast_hit_genome: string;
+  start_alignment_query: number;
+  end_alignment_query: number;
+  fident: number;
+  alnlen: number;
+  mismatch: number;
+  gapopen: number;
+  qstart: number;
+  qend: number;
+  qlen: number;
+  tstart: number;
+  tend: number;
+  tlen: number;
+  evalue: number;
+  bits: number;
+  prob: number;
+  lddt: number;
+  alntmscore: number;
+  rmsd: number;
 }
 
 export type Meta = {
