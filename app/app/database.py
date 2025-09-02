@@ -6,7 +6,7 @@ import os
 
 Base = automap_base()
 engine = create_engine(
-    os.getenv("APP_DATABASE_CONFIG", "sqlite:////data/database.db")
+    os.getenv("APP_DATABASE_CONFIG", "sqlite:///data/database.db")
 )
 db_session = scoped_session(
     sessionmaker(

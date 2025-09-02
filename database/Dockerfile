@@ -5,18 +5,20 @@ RUN apk add --no-cache \
 	miller~6
 
 ARG UID=1000
-RUN adduser -D -u "$UID" database
+RUN adduser -D -u "$UID" bacmet
 
-RUN mkdir -m 755 /data && chown -R database /data
+USER "$UID"
 
-WORKDIR /home/database
+WORKDIR /home/bacmet
 
-COPY sql/ ./sql/
-COPY scripts/ ./scripts/
+# Data volume mount point.
+RUN install -d -o "$UID" data/
+
+COPY --chown=$UID sql/ ./sql/
+COPY --chown=$UID scripts/ ./scripts/
 RUN chmod 755 scripts/*.sh
 RUN mv scripts/start-script.sh .
 
-ENV DATABASE=/data/database.db
+ENV DATABASE=/home/bacmet/data/database.db
 
-USER database
 CMD ./start-script.sh

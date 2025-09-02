@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/sh -
+
+set -u
 
 PATH=$HOME/scripts:$PATH
 

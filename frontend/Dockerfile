@@ -1,6 +1,9 @@
 FROM node:24-alpine AS dev
 
-WORKDIR /opt/bacmet/frontend
+ARG UID=1000
+ENV NEXT_TELEMETRY_DISABLED 1
 
-USER 1000
+WORKDIR /home/bacmet/frontend
+
+USER $UID
 CMD npm ci && npm run dev
