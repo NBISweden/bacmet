@@ -17,6 +17,7 @@ from .search import (
     get_gene_names,
     get_from_validated,
 )
+from .sensitivity_distributions import get_sensitivity_histogram
 from .types import (
     SearchResult,
     Link,
@@ -288,6 +289,30 @@ def aggregated_gene_name():
         ]
     )
     return jsonify(dataclasses.asdict(result))
+
+
+@app.route('/api/sensitivity_distributions/histogram')
+@cross_origin()
+def sensitivity_distributions_histogram():
+    species = request.args.get("species")
+    biocide = request.args.get("biocide")
+
+    buckets = get_sensitivity_histogram(
+        species=species,
+        biocide=biocide
+    )
+    result = {
+        "species": species,
+        "biocide": biocide,
+        "buckets": [
+            {
+                "range": bucket_range,
+                "count": bucket_count
+            }
+            for (bucket_range, bucket_count) in buckets
+        ]
+    }
+    return jsonify(result)
 
 
 if __name__ == '__main__':
