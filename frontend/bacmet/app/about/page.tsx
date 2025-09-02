@@ -11,7 +11,18 @@ export default function About() {
 
   return (
     <div className="text-center pt-3">
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown
+        components={{
+          img: ({ node, ...props }) => (
+            <img
+              {...props}
+              className="img-fluid"
+            />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
