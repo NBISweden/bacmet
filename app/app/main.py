@@ -303,6 +303,9 @@ def sensitivity_distributions_histogram():
     species = request.args.get("species")
     biocide = request.args.get("biocide")
 
+    if species is None or biocide is None:
+        return make_error(f"Missing parameter biocide or species.", 400)
+
     buckets = get_sensitivity_histogram(
         species=species,
         biocide=biocide
