@@ -85,3 +85,17 @@ class PredictedResult:
     lddt: float
     alntmscore: float
     rmsd: float
+
+
+@dataclasses.dataclass
+class HistogramBucket:
+    range: tuple[float, float]
+    count: int
+
+
+@dataclasses.dataclass
+class Histogram:
+    params: dict[str, str]
+    type: str
+    unit: str
+    buckets: list[HistogramBucket]
