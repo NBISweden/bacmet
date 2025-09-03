@@ -3,6 +3,7 @@ import path from "path";
 import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import React from "react";
+import Markdown from "./components/markdown-util";
 
 type IndexProps = {
   heroText: string;
@@ -48,7 +49,7 @@ export default function Home() {
         <div className="row gx-5">
           <div className="col-12 col-lg-8 order-1">
             <div className="p-3">
-              <ReactMarkdown>{content}</ReactMarkdown>
+              <Markdown>{content}</Markdown>
             </div>
           </div>
           <div className="col-12 col-lg-4 order-2">
