@@ -17,6 +17,11 @@ from .search import (
     get_gene_names,
     get_from_validated,
 )
+from .sensitivity_distributions import (
+    get_sensitivity_histogram,
+    get_species,
+    get_biocides,
+)
 from .types import (
     SearchResult,
     Link,
@@ -25,6 +30,8 @@ from .types import (
     PredictedResult,
     Compound,
     Item,
+    Histogram,
+    HistogramBucket
 )
 from .core import create_app
 from flask_cors import cross_origin
@@ -39,8 +46,8 @@ app = create_app(
 )
 
 
-def make_error(message):
-    return make_response(jsonify({"error": message}), 404)
+def make_error(message: str, status: int = 404):
+    return make_response(jsonify({"error": message}), status)
 
 
 def pagination_for(endpoint: str, page: int, last_page: int, args: dict, pages_to_list=5):
@@ -291,6 +298,72 @@ def aggregated_gene_name():
                 value=value
             )
             for value in gene_names
+        ]
+    )
+    return jsonify(dataclasses.asdict(result))
+
+
+@app.route('/api/sensitivity_distributions/histogram')
+@cross_origin()
+def sensitivity_distributions_histogram():
+    species = request.args.get("species")
+    biocide = request.args.get("biocide")
+
+    if species is None or biocide is None:
+        return make_error(f"Missing parameter biocide or species.", 400)
+
+    buckets = get_sensitivity_histogram(
+        species=species,
+        biocide=biocide
+    )
+    result = Histogram(
+        params={
+            "species": species,
+            "biocide": biocide,
+        },
+        type="MIC",
+        unit="µg/mL",
+        buckets=[
+            HistogramBucket(
+                range=bucket_range,
+                count=bucket_count
+            )
+            for (bucket_range, bucket_count) in buckets
+        ]
+    )
+    return jsonify(dataclasses.asdict(result))
+
+
+@app.route('/api/sensitivity_distributions/aggregated/<param>')
+@cross_origin()
+def sensitivity_distributions_aggregated(param: str):
+    aggregators = {
+        "biocide": get_biocides,
+        "species": get_species
+    }
+    if param not in aggregators:
+        return make_error(f"Aggregate not available: {param}", 404)
+
+    aggregated_values = aggregators[param]()
+    result = SearchResult(
+        _links=[
+            Link(
+                rel="self",
+                href=url_for("sensitivity_distributions_aggregated", _external=True, **{"param": param})
+            ),
+        ],
+        _meta=Meta(
+            totalRecords=len(aggregated_values),
+            totalPages=1,
+            page=0,
+            count=len(aggregated_values)
+        ),
+        items=[
+            Item(
+                label=value,
+                value=value
+            )
+            for value in aggregated_values
         ]
     )
     return jsonify(dataclasses.asdict(result))

@@ -33,13 +33,11 @@ done
 # This data needs to be preprocessed:
 # * Rename "strain" column to "Strain",
 # * Rename "Incubation time ()" to "Incubation time (h)",
-# * Remove duplicated records,
 # * Move comments from the unnamed field "Unnamed: 13" to the "Comment" field,
 # * Remove empty columns.
 # shellcheck disable=SC1010,SC2016
 mlr --csv \
 	rename 'strain,Strain,Incubation time (),Incubation time (h)' then \
-	uniq -a then \
 	put 'is_empty($Comment) { $["Unnamed: 13"] = $Comment; $["Unnamed: 13"] = ""; }' then \
 	remove-empty-columns \
 	"$tmpdir"/*.csv >"$tmpdir/data.csv"
