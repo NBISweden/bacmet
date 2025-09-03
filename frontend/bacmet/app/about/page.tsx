@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import ReactMarkdown from "react-markdown";
 import React from "react";
+import Markdown from "../components/markdown-util";
 
 export default function About() {
   const filePath = path.join(process.cwd(), "public/markdown-content/about.md");
@@ -11,18 +11,7 @@ export default function About() {
 
   return (
     <div className="text-center pt-3">
-      <ReactMarkdown
-        components={{
-          img: ({ node, ...props }) => (
-            <img
-              {...props}
-              className="img-fluid"
-            />
-          ),
-        }}
-      >
-        {content}
-      </ReactMarkdown>
+      <Markdown>{content}</Markdown>
     </div>
   );
 }
