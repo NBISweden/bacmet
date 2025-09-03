@@ -17,8 +17,8 @@ WORKDIR /home/bacmet
 # The caddy and data volume mount points.
 RUN install -d -o "$UID" caddy/ data/
 
-# Other important directories that need to be owned by our service user.
-RUN install -d -o "$UID" app/ frontend/
+# The "app" directory.
+RUN install -d -o "$UID" app/
 
 # Install Python dependencies.
 COPY --chmod=444 app/app/requirements.txt app/
