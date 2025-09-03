@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import Markdown from "../components/markdown-util";
 import ContactCard from "../components/contact-card";
 import type { Contact } from "../types";
 
@@ -29,7 +29,7 @@ export default function Contact() {
   return (
     <>
       <div className="text-center pt-3">
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <Markdown>{content}</Markdown>
       </div>
       <div className="row justify-content-center">
         {contacts.map((contact, index) => (

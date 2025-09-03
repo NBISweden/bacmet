@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import Markdown from "../components/markdown-util";
 import Sidebar from "../components/sidebar/sidebar";
 import type { FAQItem } from "../types";
 
@@ -26,7 +26,7 @@ export default function FAQPage() {
   return (
     <>
       <div className="text-center py-3">
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <Markdown>{content}</Markdown>
       </div>
       <div className="row row-gap-3">
         <div className="col-md-4 order-md-last">
