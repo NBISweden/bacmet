@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/sh -
 
-XDG_DATA_HOME=/caddy caddy run --config ./Caddyfile &
-gunicorn -w "${APP_WORKERS:-4}" app:app -b 0.0.0.0:5000 &
+set -u
 
-wait
+export XDG_CONFIG_HOME="$HOME/caddy/config"
+export XDG_DATA_HOME="$HOME/caddy/data"
+
+# Create the above directories if they don't exist.
+install -d "$XDG_CONFIG_HOME"
+install -d "$XDG_DATA_HOME"
+
+caddy start --config ./Caddyfile
+exec gunicorn -w "${APP_WORKERS:-4}" app:app -b 0.0.0.0:5000
