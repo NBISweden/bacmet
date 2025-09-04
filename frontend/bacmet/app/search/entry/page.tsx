@@ -2,12 +2,11 @@
 import { useConfig } from "../../../contexts/config";
 import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback, useId, ChangeEventHandler } from "react";
 import {PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField} from "../types";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import dynamic from 'next/dynamic'
+import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
+import {navigateInPage} from "../../utils";
 
-const ClientRender = dynamic(() => import('./client-render'), { ssr: false })
 
 const MultiSelectField = ({field, value, onChange}: {field: MultiValueField<unknown>, value: unknown[], onChange: (value: unknown[]) => void}) => {
   const fieldId = useId();
@@ -96,15 +95,10 @@ const EmptyValidatedEntry: Validated = {
 function EntryViewWithParams() {
   const {apiRoot} = useConfig();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const match = pathname.match(/^\/search\/entry\/(.*?)(\/.*)?$/);
   const [validated, setValidated] = useState<Validated | null>(null);
-  
-  const entryIdFromPath = match && match[1];
-  const entryIdFromSearchParams = searchParams.get("entry_id");
-  const entryId = entryIdFromPath || entryIdFromSearchParams;
 
-  const router = useRouter();
+  const entryId = searchParams.get("entry_id");
+
   const [predictedResult, setPredictedResult] = useState<PredictedResult | ErrorResult | undefined>(undefined);
   const predictedPage = searchParams.get("page") || "0";
 
@@ -148,8 +142,10 @@ function EntryViewWithParams() {
   const handlePageNavigation = useCallback((page: Link) => {
       const url = new URL(page.href);
       const pageNumber = url.searchParams.get("page") || "0";
-      router.push(pathname + `?page=${pageNumber}`);
-  }, [pathname, router])
+      if (entryId) {
+        navigateInPage({entry_id: entryId, page: pageNumber});
+      }
+  }, [entryId])
 
 
   const allPages = (predictedResult && "_links" in predictedResult ? predictedResult._links : []);
@@ -238,7 +234,7 @@ export default function EntryPage() {
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <Suspense fallback={<ValidatedEntry entry={EmptyValidatedEntry}/>}>
-        <ClientRender><EntryViewWithParams /></ClientRender>
+        <EntryViewWithParams />
       </Suspense>
     </div>
   );

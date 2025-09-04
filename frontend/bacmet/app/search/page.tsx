@@ -1,7 +1,7 @@
 'use client'
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
-import {useSearchParams, useRouter, usePathname} from "next/navigation";
+import {useSearchParams, usePathname} from "next/navigation";
 import {SearchParams, ValidatedResult, ErrorResult, Field, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
@@ -10,6 +10,7 @@ import {SelectField} from "./components/select-field";
 import {TextField} from "./components/text-field";
 import {default as NextLink} from 'next/link'
 import ValidatedEntry from "./components/validated-entry";
+import {navigateInPage} from "../utils";
 
 const SearchBase = (
   {values}: {
@@ -93,7 +94,6 @@ const SearchBase = (
     values: [],
   }
 
-  const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
@@ -158,8 +158,8 @@ const SearchBase = (
   const handlePageNavigation = useCallback((page: Link) => {
       const url = new URL(page.href);
       const params = url.searchParams;
-      router.push(pathname + '?' + params.toString());
-  }, [pathname, router])
+      navigateInPage(params);
+  }, [])
 
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
@@ -178,12 +178,8 @@ const SearchBase = (
         acc[fieldName] = `${value}`;
         return acc;
     }, {});
-    const params = new URLSearchParams(values);
-    router.push(pathname + '?' + params.toString());
-  }, [
-    router,
-    pathname,
-  ]);
+    navigateInPage(values);
+  }, []);
   const allPages = (result && "_links" in result ? result._links : []);
   const pageCount = (result && "_meta" in result ? result._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
@@ -234,7 +230,7 @@ const SearchBase = (
                             <td>
                               <ValidatedEntry entry={item}/>
                             </td>
-                            <td><NextLink href={`/search/entry/${item.bacmet_id}`}>View entries</NextLink></td>
+                            <td><NextLink href={`/search/entry/?entry_id=${item.bacmet_id}`}>View entries</NextLink></td>
                           </tr>
                         ))}
                       </tbody>
