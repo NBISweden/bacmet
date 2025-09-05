@@ -1,61 +1,12 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
-import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback, useId, ChangeEventHandler } from "react";
+import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
 import {PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField} from "../types";
 import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
 import {navigateInPage} from "../../utils";
-
-
-const MultiSelectField = ({field, value, onChange}: {field: MultiValueField<unknown>, value: unknown[], onChange: (value: unknown[]) => void}) => {
-  const fieldId = useId();
-  const [current, setCurrent] = useState<unknown[]>(value);
-  const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>((event) => {
-    const singleValue: unknown  = event.target.value;
-    if (singleValue !== undefined) {
-      setCurrent((value) => {
-        if (value.includes(singleValue)) {
-          return value.filter(v => v !== singleValue)
-        } else {
-          return [...value, singleValue]
-        }
-      })
-    }
-  }, [setCurrent]);
-
-  useEffect(() => {
-    onChange(current);
-  }, [onChange, current])
-
-  return (
-    <>
-      <legend>{ field.label }:</legend>
-      <div className="row mb-3 px-3">
-      {field.values.map(value => {
-        const valueId = `${fieldId}-${value.value}`;
-        return (
-          <div key={value.value + ""} className="form-check col-md-4">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              name={field.name}
-              onChange={handleChange}
-              checked={current.includes(value.value)} 
-              value={value.value + ""}
-              id={valueId}
-              />
-            <label
-              className="form-check-label"
-              htmlFor={valueId}
-            >{ value.label }</label>
-          </div>
-        )
-      })}
-      </div>
-    </>
-  )
-}
+import { MultiSelectField } from "../components/multi-select-field"
 
 const PredictedTableItems: (keyof Predicted)[] = [
   "blast_hit_genome",
@@ -164,7 +115,7 @@ function EntryViewWithParams() {
   const tableItemsField: MultiValueField<keyof Predicted> = {
     label: "Select visible fields",
     name: "visible_fields",
-    value: [],
+    value: selectedTableItems,
     values: PredictedTableItems.map(item => ({
       value: item,
       label: item
@@ -180,7 +131,7 @@ function EntryViewWithParams() {
           <>
             <div className="col-sm-12 col-md-9 col-lg-7">
               <hr/>
-              <MultiSelectField field={tableItemsField} value={selectedTableItems} onChange={handleSelectedTableItemsChange}/>
+              <MultiSelectField field={tableItemsField} onChange={handleSelectedTableItemsChange}/>
               <hr/>
             </div>
             {(() => {
