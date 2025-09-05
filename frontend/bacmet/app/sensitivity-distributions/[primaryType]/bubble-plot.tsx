@@ -48,13 +48,14 @@ export default function BubblePlot(
         xaxis: {
           title: {text: xLabel},
           tickvals: xVals,
-          ticktext: horizontalLabels
+          ticktext: horizontalLabels,
         },
         yaxis: {
           title: {text: yLabel},
           tickvals: yVals,
           scaleanchor: "x",
-          ticktext: verticalLabels
+          ticktext: verticalLabels,
+          zeroline: false,
         },
         margin: {
           l: maxVerticalLabels * 7,
