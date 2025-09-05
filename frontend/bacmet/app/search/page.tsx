@@ -1,7 +1,7 @@
 'use client'
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
-import {useSearchParams, usePathname} from "next/navigation";
+import {useSearchParams} from "next/navigation";
 import {SearchParams, ValidatedResult, ErrorResult, Field, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
@@ -93,8 +93,6 @@ const SearchBase = (
     placeholder: "2000",
     values: [],
   }
-
-  const pathname = usePathname()
 
   useEffect(() => {
     const fetchData = async () => {

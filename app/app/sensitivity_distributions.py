@@ -37,23 +37,30 @@ bucket_tuples = {
 
 
 @cache
-def get_unique_values(value_column):
-    stmt = select(value_column).distinct()
+def get_unique_values(value_column, row_filter=None):
+    stmt = select(value_column)
+    stmt = stmt if row_filter is None else stmt.filter(row_filter)
 
     with db_session() as session:
-        items = session.execute(stmt)
+        items = session.execute(stmt.distinct())
         return [
             item[0]
             for item in items
         ]
 
 
-def get_biocides():
-    return get_unique_values(SensitivityDistributions.biocide)
+def get_biocides(species: str | None = None):
+    return get_unique_values(
+        SensitivityDistributions.biocide,
+        None if species is None else func.lower(SensitivityDistributions.species) == species.lower()
+    )
 
 
-def get_species():
-    return get_unique_values(SensitivityDistributions.species)
+def get_species(biocide: str | None = None):
+    return get_unique_values(
+        SensitivityDistributions.species,
+        None if biocide is None else func.lower(SensitivityDistributions.biocide) == biocide.lower()
+    )
 
 
 @cache
