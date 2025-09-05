@@ -11,17 +11,22 @@
   "dependencies": {
     "gray-matter": "^4.0.3",
     "next": "15.4.7",
+    "plotly.js": "^3.1.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-plotly.js": "^2.6.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "i": "^0.3.7",
+    "npm": "^11.6.0",
     "typescript": "^5"
   }
 }

@@ -7,6 +7,8 @@ import { SelectField } from "../../search/components/select-field";
 import { MultiSelectField } from "../../search/components/multi-select-field";
 import { FieldSet } from "../../search/components/fieldset";
 import { navigateInPage, usePromiseData, fetchData } from "../../utils";
+import BubblePlot from "./dynamic-bubble-plot";
+
 
 type HistogramData = {
   params: {[x: string]: string};
@@ -34,6 +36,10 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
     "species": "biocide",
     "biocide": "species",
   }[primaryType + ""];
+  const typeLabels: Record<string, string> = {
+    "species": "Species",
+    "biocide": "Biocide"
+  }
   const primaryIdentifier = searchParams.get(primaryType)
   const secondaryIdentifiers = useMemo(() => {
     return secondaryType ? searchParams.getAll(secondaryType) : []
@@ -55,10 +61,13 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
   );
   const valueLists = usePromiseData(valueListsFetcher, null);
   const histogramData = usePromiseData(histogramFetcher, null);
-  const [primaryValues, secondaryValues] = valueLists ? valueLists : [[], []]
+  const [primaryValues, secondaryValues] = valueLists ? valueLists : [[], []];
+
+  const primaryLabel = primaryType && typeLabels[primaryType];
+  const secondaryLabel = secondaryType && typeLabels[secondaryType] || "...";
 
   const primaryField: Field = {
-    label: primaryType + "",
+    label: primaryLabel,
     name: primaryType + "",
     value: primaryIdentifier,
     values: [
@@ -71,7 +80,7 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
   }
 
   const secondaryField: MultiValueField = {
-    label: secondaryType + "",
+    label: secondaryLabel,
     name: secondaryType + "",
     value: secondaryIdentifiers,
     values: secondaryValues,
@@ -123,7 +132,7 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
   const usedSecondaryValues = secondaryValues.filter(v => secondaryIdentifiers.includes(v.value + ""));
   const verticalLabels = usedSecondaryValues.map(v => v.label);
   const xLabel = histogramData && histogramData.length > 0 ? `${histogramData[0].type} (${histogramData[0].unit})` : "Waiting for data";
-  const yLabel = secondaryType || "Waiting for data";
+  const yLabel = secondaryLabel || "Waiting for data";
   const title = primaryIdentifier ? `MIC Distribution for ${primaryIdentifier}` : "Waiting for data";
   const valuesMap = secondaryType && histogramData ? histogramData.reduce<{[x: string]: number}>((acc, hist) => {
     for (const bucket of hist.buckets) {
@@ -139,12 +148,21 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
   return (
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
+        <h1>Sensitivity distributions for {primaryLabel}</h1>
         <FieldSet><SelectField field={primaryField} onChange={handlePrimarySelect}/></FieldSet>
         <FieldSet><MultiSelectField field={secondaryField} onChange={handleSecondarySelect} /></FieldSet>
         <hr />
       </div>
       {primaryIdentifier && secondaryIdentifiers.length > 0 ? (
         <div className="col-sm-12 text-center">
+          <BubblePlot
+            values={values}
+            title={title}
+            xLabel={xLabel}
+            yLabel={yLabel}
+            horizontalLabels={horizontalLabels}
+            verticalLabels={verticalLabels}
+          />
         </div>
       ) : <div className="col-sm-12 col-md-9 col-lg-7">Make a selection to view bubble plot</div>}
     </>
