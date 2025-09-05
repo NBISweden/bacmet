@@ -338,8 +338,8 @@ def sensitivity_distributions_histogram():
 @cross_origin()
 def sensitivity_distributions_aggregated(param: str):
     aggregators = {
-        "biocide": get_biocides,
-        "species": get_species
+        "biocide": lambda: get_biocides(request.args.get("species")),
+        "species": lambda: get_species(request.args.get("biocide"))
     }
     if param not in aggregators:
         return make_error(f"Aggregate not available: {param}", 404)
