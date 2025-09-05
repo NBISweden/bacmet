@@ -24,8 +24,9 @@ export default function BubblePlot(
   const yVals = verticalLabels.map((_, i) => i);
   const flatValues = values.flatMap(subvals => subvals.map(v => v))
   const maxVal = Math.max(...flatValues, 1);
-  const markerSizes = flatValues.map(v => 20 * v / maxVal);
+  const markerSizes = flatValues.map(v => 40 * v / maxVal);
   const maxVerticalLabels = Math.max(...verticalLabels.map(l => l.length), 10);
+  const rowSize = 60;
   return (
     <Plot
       style={{maxWidth: "100%"}}
@@ -52,6 +53,7 @@ export default function BubblePlot(
         yaxis: {
           title: {text: yLabel},
           tickvals: yVals,
+          scaleanchor: "x",
           ticktext: verticalLabels
         },
         margin: {
@@ -59,6 +61,7 @@ export default function BubblePlot(
           r:50
         },
         showlegend: false,
+        height: verticalLabels.length * rowSize + 4 * rowSize,
       }}
     />
   )
