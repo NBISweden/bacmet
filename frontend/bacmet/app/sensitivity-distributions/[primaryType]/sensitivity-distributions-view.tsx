@@ -90,10 +90,9 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
     if (primaryType && primaryValue && secondaryType) {
       navigateInPage({
         [primaryType]: primaryValue + "",
-        [secondaryType]: secondaryIdentifiers.map(v => v + "")
       })
     }
-  }, [primaryType, secondaryType, secondaryIdentifiers])
+  }, [primaryType, secondaryType])
 
   const handleSecondarySelect = useCallback((selectedSecondary: unknown[]) => {
     if (primaryIdentifier && secondaryType) {
