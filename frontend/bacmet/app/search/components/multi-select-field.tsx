@@ -1,24 +1,26 @@
 "use client"
-import { useState, useCallback, useId, ChangeEventHandler } from "react";
+import { useState, useCallback, useId, ChangeEventHandler, useMemo } from "react";
 import { MultiValueField } from "../../search/types";
 
 export const MultiSelectField = ({field, onChange}: {field: MultiValueField<unknown>, onChange?: (value: unknown[]) => void}) => {
   const fieldId = useId();
   const [current, setCurrent] = useState<unknown[]>(field.value);
+  const usedValue = useMemo(() => onChange ? field.value : current, [onChange, field.value, current])
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>((event) => {
     const singleValue: unknown  = event.target.value;
     if (singleValue !== undefined) {
-      const nextCurrent = (
-        current.includes(singleValue)
-        ? current.filter(v => v !== singleValue)
-        : [...current, singleValue]
+      const nextValue = (
+        usedValue.includes(singleValue)
+        ? usedValue.filter(v => v !== singleValue)
+        : [...usedValue, singleValue]
       );
-      setCurrent(nextCurrent);
       if (onChange) {
-        onChange(nextCurrent);
+        onChange(nextValue);
+      } else {
+        setCurrent(nextValue);
       }
     }
-  }, [current, setCurrent, onChange]);
+  }, [usedValue, setCurrent, onChange]);
 
   return (
     <>
@@ -33,7 +35,7 @@ export const MultiSelectField = ({field, onChange}: {field: MultiValueField<unkn
               type="checkbox"
               name={field.name}
               onChange={handleChange}
-              checked={current.includes(value.value)} 
+              checked={usedValue.includes(value.value)} 
               value={value.value + ""}
               id={valueId}
               />
