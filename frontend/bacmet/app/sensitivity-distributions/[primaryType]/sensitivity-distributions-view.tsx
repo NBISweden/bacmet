@@ -1,12 +1,12 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { FieldValue, MultiValueField, Field } from "../../search/types";
 import { SelectField } from "../../search/components/select-field";
 import { MultiSelectField } from "../../search/components/multi-select-field";
 import { FieldSet } from "../../search/components/fieldset";
-import { navigateInPage } from "../../utils";
+import { navigateInPage, usePromiseData, fetchData } from "../../utils";
 
 type HistogramData = {
   params: {[x: string]: string};
@@ -16,32 +16,6 @@ type HistogramData = {
     range: [number, number];
     count: number;
   }[]
-}
-
-function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, defaultValue: D): T | D {
-  const [data, setData] = useState<T | null>(null);
-  const ref = useRef<() => Promise<T> | null>(null);
-
-  useEffect(() => {
-    ref.current = promiseGenerator;
-    const fetchData = async () => {
-      const result = await promiseGenerator();
-      if (ref.current === promiseGenerator) {
-        setData(result);
-      }
-    }
-    fetchData();
-    return () => {
-      ref.current = null;
-    };
-  }, [setData, promiseGenerator]);
-
-  return data || defaultValue;
-}
-
-async function fetchData<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  return await response.json() as T
 }
 
 async function fetchValue<T, K extends keyof T>(promise: Promise<T>, key: K): Promise<T[K]> {
