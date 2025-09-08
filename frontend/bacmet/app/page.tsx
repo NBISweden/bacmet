@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import React from "react";
 import Markdown from "./components/markdown-util";
+import QuickSearchForm from "./components/quick-search-form";
 
 type IndexProps = {
   heroText: string;
@@ -55,6 +56,7 @@ export default function Home() {
           <div className="col-12 col-lg-4 order-2">
             <div className="p-3 border bg-white">
               <ReactMarkdown>{indexProps.quickSearchDescription}</ReactMarkdown>
+              <QuickSearchForm />
             </div>
           </div>
         </div>
