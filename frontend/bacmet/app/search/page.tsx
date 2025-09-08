@@ -27,6 +27,7 @@ const SearchBase = (
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
+    selectedFreeText
   ] = [
     "page",
     "location",
@@ -34,6 +35,7 @@ const SearchBase = (
     "protein_description",
     "peptide_sequence_length_min",
     "peptide_sequence_length_max",
+    "free_text"
   ].map(key => values[key] === undefined ? null : values[key]);
   const [params, setParams] = useState<SearchParams>({
     chemicalClasses: [],
@@ -93,6 +95,13 @@ const SearchBase = (
     placeholder: "2000",
     values: [],
   }
+  const freeText: Field = {
+    label: "Free text search",
+    name: "free_text",
+    value: selectedFreeText || undefined,
+    placeholder: "example: gene name, compound name, chemical class",
+    values: []
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,7 +129,8 @@ const SearchBase = (
       selectedChemicalClass !== null &&
       selectedProteinDescription !== null &&
       selectedPeptideSequenceLengthMin !== null &&
-      selectedPeptideSequenceLengthMax !== null
+      selectedPeptideSequenceLengthMax !== null &&
+      selectedFreeText !== null
     ) {
       const fetchResult = async () => {
       const params = new URLSearchParams({
@@ -130,6 +140,7 @@ const SearchBase = (
           protein_description: selectedProteinDescription,
           peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
           peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
+          free_text: selectedFreeText
         });
         try {
 	  const response = await fetch(`${apiRoot}/search/validated?${params}`);
@@ -149,8 +160,9 @@ const SearchBase = (
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
+    selectedFreeText,
     setResult,
-    apiRoot
+    apiRoot,
   ]);
 
   const handlePageNavigation = useCallback((page: Link) => {
@@ -170,6 +182,7 @@ const SearchBase = (
       "protein_description",
       "peptide_sequence_length_min",
       "peptide_sequence_length_max",
+      "free_text"
     ].reduce<{[x: string]: string}>((acc, fieldName) => {
         const selectedTarget = target[fieldName];
         const value = selectedTarget.type === "checkbox" ? !!selectedTarget.checked : selectedTarget.value;
@@ -191,6 +204,7 @@ const SearchBase = (
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
           <input type="hidden" name="page" value="0" />
+          <FieldSet><TextField field={freeText}/></FieldSet>
           <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>
@@ -260,6 +274,7 @@ const SearchWithSearchParams = () => {
     "protein_description",
     "peptide_sequence_length_min",
     "peptide_sequence_length_max",
+    "free_text"
   ].reduce<{[x: string]: string | null}>((acc, key) => {
     acc[key] = searchParams.get(key)
     return acc;
