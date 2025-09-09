@@ -23,7 +23,7 @@ export default function QuickSearchForm() {
         type="text"
         name="free_text"
         id="quick-search-input"
-        placeholder="ex. gene name, compound name, chemical class"
+        placeholder="gene name, compound name, chemical class"
       />
       <button className="btn btn-primary mt-2" type="submit">
         Search

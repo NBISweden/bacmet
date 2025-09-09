@@ -3,7 +3,7 @@ heroText: BacMet is an easy-to-use bioinformatics resource of antibacterial bioc
 heroImage: /img/hero-image.jpg
 quickSearchDescription: |
   ## Quick search
-  You can search the BacMet database using any full term, including for example gene names (e.g. copA), name of biocides (e.g. Triclosan), metals (e.g. Arsenic) or chemical classes (e.g. Acridine). You will redirected to the search page.
+  You can search the BacMet database using any full term, including for example gene names (e.g. copA), name of biocides (e.g. Triclosan), metals (e.g. Arsenic) or chemical classes (ex. Acridine). You will be redirected to the search page.
 ---
 
 # Bacmet Database
