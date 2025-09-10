@@ -17,12 +17,11 @@ export default function RootLayout({
   const contact = "info@example.com";
   const attribution = "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team";
   const navigation: { label: string, href: string }[] = [
-    ["Browse & Search", "/search"],
-    ["Advanced search", "#"],
+    ["Search", "/search"],
     ["BLAST", "#"],
     ["Download", "#"],
     ["FAQ", "/faq"],
-    ["About BacMet", "/about"],
+    ["About", "/about"],
     ["Contact", "/contact"],
   ].map(([label, href]) => ({ label, href }));
   return (
