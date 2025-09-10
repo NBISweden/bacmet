@@ -8,6 +8,7 @@ export type BubblePlotProps = {
     verticalLabels: string[];
     horizontalLabels: string[];
     values: number[][];
+    formatValue?: (v: number) => string;
 }
 
 export default function BubblePlot(
@@ -17,14 +18,15 @@ export default function BubblePlot(
     xLabel,
     verticalLabels,
     horizontalLabels,
-    values
+    values,
+    formatValue
   }: BubblePlotProps
 ) {
   const xVals = horizontalLabels.map((_, i) => i);
   const yVals = verticalLabels.map((_, i) => i);
   const flatValues = values.flatMap(subvals => subvals.map(v => v))
   const maxVal = Math.max(...flatValues, 1);
-  const markerSizes = flatValues.map(v => 40 * v / maxVal);
+  const markerSizes = flatValues.map(v => 40 * Math.sqrt(v / maxVal));
   const maxVerticalLabels = Math.max(...verticalLabels.map(l => l.length), 10);
   const rowSize = 60;
   return (
@@ -35,6 +37,7 @@ export default function BubblePlot(
           x: values.flatMap(subvals => subvals.map((_, xi) => xi)),
           y: values.flatMap((subvals, yi) => subvals.map(() => yi)),
           mode: 'markers',
+          text: formatValue ? flatValues.map(formatValue) : undefined,
           marker: {
             size: markerSizes,
           }

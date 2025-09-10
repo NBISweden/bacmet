@@ -161,6 +161,7 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
             yLabel={yLabel}
             horizontalLabels={horizontalLabels}
             verticalLabels={verticalLabels}
+            formatValue={v => `Count: ${v}`}
           />
         </div>
       ) : <div className="col-sm-12 col-md-9 col-lg-7">Make a selection to view bubble plot</div>}
