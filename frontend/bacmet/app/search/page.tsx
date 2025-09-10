@@ -239,6 +239,8 @@ const SearchBase = (
           <>
             <hr/>
             <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
+            <hr/>
+            {result.type === "validated" ? `Viewing ${result._meta.count} of ${result._meta.totalRecords}` : <></>}
             {(() => {
               switch(result.type) {
                 case "validated": {
