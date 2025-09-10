@@ -172,6 +172,8 @@ def validated_search():
         request.args.get("peptide_sequence_length_max")
     ))
     gene_name = request.args.get("gene_name")
+    free_text = request.args.get("free_text")
+
     page = max(0, int(request.args.get("page", "0")))
     page_size = 100
 
@@ -181,6 +183,7 @@ def validated_search():
         protein_description=protein_description,
         peptide_sequence_length_range=peptide_sequence_length_range,
         gene_name=gene_name,
+        free_text=free_text,
         pagination=(page, page_size)
     )
 

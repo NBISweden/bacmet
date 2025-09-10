@@ -23,7 +23,8 @@ def apply_search_filters(
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
-    gene_name: Optional[str] = None
+    gene_name: Optional[str] = None,
+    free_text: Optional[str] = None
 ):
     if chemical_class:
         chemical_class_type, chemical_class_name = chemical_class
@@ -55,6 +56,13 @@ def apply_search_filters(
     if gene_name:
         stmt = stmt.filter(
             Validated.gene_name == gene_name
+        )
+    if free_text:
+        search_pattern = f"%{free_text}%"
+        stmt = stmt.filter(
+            (Validated.gene_name.ilike(search_pattern)) |
+            (Validated.compounds.any(Compounds.compound_name.ilike(search_pattern))) |
+            (Validated.compounds.any(Compounds.chemical_class.ilike(search_pattern)))
         )
     return stmt
 
@@ -89,7 +97,8 @@ def find_in_validated(
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
     gene_name: Optional[str],
-    pagination: Tuple[int, int]
+    pagination: Tuple[int, int],
+    free_text: Optional[str] = None
 ) -> Tuple[list[Validated], int]:
     stmt = apply_search_filters(
         select(Validated).options(
@@ -99,7 +108,8 @@ def find_in_validated(
         location,
         protein_description,
         peptide_sequence_length_range,
-        gene_name
+        gene_name,
+        free_text
     )
     with db_session() as session:
         items = session.execute(

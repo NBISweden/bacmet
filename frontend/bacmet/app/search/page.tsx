@@ -27,6 +27,7 @@ const SearchBase = (
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
+    selectedFreeText
   ] = [
     "page",
     "location",
@@ -34,6 +35,7 @@ const SearchBase = (
     "protein_description",
     "peptide_sequence_length_min",
     "peptide_sequence_length_max",
+    "free_text"
   ].map(key => values[key] === undefined ? null : values[key]);
   const [params, setParams] = useState<SearchParams>({
     chemicalClasses: [],
@@ -93,6 +95,13 @@ const SearchBase = (
     placeholder: "2000",
     values: [],
   }
+  const freeText: Field = {
+    label: "Free text search",
+    name: "free_text",
+    value: selectedFreeText || undefined,
+    placeholder: "gene name, compound name, chemical class",
+    values: []
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,32 +124,27 @@ const SearchBase = (
   }, [apiRoot, setParams]);
 
   useEffect(() => {
-    if (
-      selectedLocation !== null &&
-      selectedChemicalClass !== null &&
-      selectedProteinDescription !== null &&
-      selectedPeptideSequenceLengthMin !== null &&
-      selectedPeptideSequenceLengthMax !== null
-    ) {
+    const params = new URLSearchParams();
+    if (selectedPage) params.append("page", selectedPage || "0");
+    if (selectedLocation) params.append("location", selectedLocation);
+    if (selectedChemicalClass) params.append("chemical_class", selectedChemicalClass);
+    if (selectedProteinDescription) params.append("protein_description", selectedProteinDescription);
+    if (selectedPeptideSequenceLengthMin) params.append("peptide_sequence_length_min", selectedPeptideSequenceLengthMin);
+    if (selectedPeptideSequenceLengthMax) params.append("peptide_sequence_length_max", selectedPeptideSequenceLengthMax);
+    if (selectedFreeText) params.append("free_text", selectedFreeText);
+
+    if (params.size > 0) {
       const fetchResult = async () => {
-      const params = new URLSearchParams({
-          page: selectedPage || "0",
-          location: selectedLocation,
-          chemical_class: selectedChemicalClass,
-          protein_description: selectedProteinDescription,
-          peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
-          peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
-        });
         try {
-	  const response = await fetch(`${apiRoot}/search/validated?${params}`);
+          const response = await fetch(`${apiRoot}/search/validated?${params.toString()}`);
           const resultData = await response.json();
-          setResult({type: "validated", ...resultData});
+          setResult({ type: "validated", ...resultData });
         } catch (e) {
           console.warn(e);
-          setResult({type: "error", error: `Failed to get data from the backend: ${e}`})
+          setResult({ type: "error", error: `Failed to get data from the backend: ${e}` });
         }
-      }
-      fetchResult()
+      };
+      fetchResult();
     }
   }, [
     selectedPage,
@@ -149,8 +153,9 @@ const SearchBase = (
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
+    selectedFreeText,
     setResult,
-    apiRoot
+    apiRoot,
   ]);
 
   const handlePageNavigation = useCallback((page: Link) => {
@@ -170,6 +175,7 @@ const SearchBase = (
       "protein_description",
       "peptide_sequence_length_min",
       "peptide_sequence_length_max",
+      "free_text"
     ].reduce<{[x: string]: string}>((acc, fieldName) => {
         const selectedTarget = target[fieldName];
         const value = selectedTarget.type === "checkbox" ? !!selectedTarget.checked : selectedTarget.value;
@@ -191,6 +197,7 @@ const SearchBase = (
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
           <input type="hidden" name="page" value="0" />
+          <FieldSet><TextField field={freeText}/></FieldSet>
           <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>
@@ -260,6 +267,7 @@ const SearchWithSearchParams = () => {
     "protein_description",
     "peptide_sequence_length_min",
     "peptide_sequence_length_max",
+    "free_text"
   ].reduce<{[x: string]: string | null}>((acc, key) => {
     acc[key] = searchParams.get(key)
     return acc;
