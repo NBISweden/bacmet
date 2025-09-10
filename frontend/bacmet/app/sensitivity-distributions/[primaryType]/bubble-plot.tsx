@@ -26,7 +26,7 @@ export default function BubblePlot(
   const yVals = verticalLabels.map((_, i) => i);
   const flatValues = values.flatMap(subvals => subvals.map(v => v))
   const maxVal = Math.max(...flatValues, 1);
-  const markerSizes = flatValues.map(v => 40 * v / maxVal);
+  const markerSizes = flatValues.map(v => 40 * Math.sqrt(v / maxVal));
   const maxVerticalLabels = Math.max(...verticalLabels.map(l => l.length), 10);
   const rowSize = 60;
   return (
