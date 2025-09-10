@@ -39,6 +39,7 @@ done
 mlr --csv \
 	rename 'strain,Strain,Incubation time (),Incubation time (h)' then \
 	put 'is_empty($Comment) { $["Unnamed: 13"] = $Comment; $["Unnamed: 13"] = ""; }' then \
+	clean-whitespace then \
 	remove-empty-columns \
 	"$tmpdir"/*.csv >"$tmpdir/data.csv"
 

@@ -29,7 +29,13 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
-echo 'Loading files into database...' >&2
+echo 'Preprocessing CSV files...' >&2
+printf '%s\0' "$tmpdir"/*.csv |
+xargs -0 -P "$(nproc)" -n 50 sh -c '
+	mlr -I --csv clean-whitespace "$@"
+	' sh
+
+echo 'Loading CSV files into database...' >&2
 
 cat <<-'SQL' >"$tmpdir/import.sql"
 	.mode csv
