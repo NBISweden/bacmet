@@ -2,41 +2,62 @@
 import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams} from "next/navigation";
-import {SearchParams, ValidatedResult, ErrorResult, Field, Link} from "./types";
+import {SearchParams, ValidatedResult, ErrorResult, Field, MultiValueField, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
-import {SelectField} from "./components/select-field";
 import {TextField} from "./components/text-field";
+import {MultiSelectField} from "./components/multi-select-field";
 import {default as NextLink} from 'next/link'
 import ValidatedEntry from "./components/validated-entry";
 import {navigateInPage} from "../utils";
 
+type SingleValueFields = {
+  page: string,
+  location: string,
+  protein_description: string,
+  peptide_sequence_length_min: string,
+  peptide_sequence_length_max: string,
+  free_text: string,
+}
+
+type MultiValueFields = {
+  chemical_class: string[],
+  compound: string[],
+}
+
+type SearchFields = SingleValueFields & MultiValueFields;
+
+const singleValueFieldIds: (keyof SingleValueFields)[] = [
+  "page",
+  "location",
+  "protein_description",
+  "peptide_sequence_length_min",
+  "peptide_sequence_length_max",
+  "free_text"
+]
+
+const multiValueFieldIds: (keyof MultiValueFields)[] = [
+  "chemical_class",
+  "compound",
+]
+
 const SearchBase = (
   {values}: {
-    values: {
-      [x: string]: string | null
-    }
+    values: Partial<SearchFields>
   }
 ) => {
   const {apiRoot} = useConfig();
-  const [
-    selectedPage,
-    selectedLocation,
-    selectedChemicalClass,
-    selectedProteinDescription,
-    selectedPeptideSequenceLengthMin,
-    selectedPeptideSequenceLengthMax,
-    selectedFreeText
-  ] = [
-    "page",
-    "location",
-    "chemical_class",
-    "protein_description",
-    "peptide_sequence_length_min",
-    "peptide_sequence_length_max",
-    "free_text"
-  ].map(key => values[key] === undefined ? null : values[key]);
+  const {
+    page: selectedPage,
+    location: selectedLocation,
+    protein_description: selectedProteinDescription,
+    peptide_sequence_length_min: selectedPeptideSequenceLengthMin,
+    peptide_sequence_length_max: selectedPeptideSequenceLengthMax,
+    free_text: selectedFreeText,
+    chemical_class: selectedChemicalClasses,
+    compound: selectedCompounds,
+ } = values;
   const [params, setParams] = useState<SearchParams>({
     chemicalClasses: [],
     compounds: [],
@@ -61,18 +82,17 @@ const SearchBase = (
       }
     ]
   }
-  const chemicalClassOrCompound: Field<string> = {
-    label: "Select 'chemical class' / 'compound' (resistant to)",
+  const chemicalClass: MultiValueField<string> = {
+    label: "Select chemical class(resistant to)",
     name: "chemical_class",
-    value: selectedChemicalClass || "",
-    values: [
-      {
-        value: "",
-        label: "Any",
-      },
-      ...params.chemicalClasses,
-      ...params.compounds
-    ]
+    value: selectedChemicalClasses || [],
+    values: params.chemicalClasses,
+  }
+  const compound: MultiValueField<string> = {
+    label: "Select compound (resistant to)",
+    name: "compound",
+    value: selectedCompounds || [],
+    values: params.compounds
   }
   const proteinDescription: Field = {
     label: "Protein description contains text",
@@ -127,7 +147,8 @@ const SearchBase = (
     const params = new URLSearchParams();
     if (selectedPage) params.append("page", selectedPage || "0");
     if (selectedLocation) params.append("location", selectedLocation);
-    if (selectedChemicalClass) params.append("chemical_class", selectedChemicalClass);
+    if (selectedChemicalClasses) selectedChemicalClasses.forEach(cc => params.append("chemical_class", cc));
+    if (selectedCompounds) selectedCompounds.forEach(c => params.append("compound", c));
     if (selectedProteinDescription) params.append("protein_description", selectedProteinDescription);
     if (selectedPeptideSequenceLengthMin) params.append("peptide_sequence_length_min", selectedPeptideSequenceLengthMin);
     if (selectedPeptideSequenceLengthMax) params.append("peptide_sequence_length_max", selectedPeptideSequenceLengthMax);
@@ -149,7 +170,8 @@ const SearchBase = (
   }, [
     selectedPage,
     selectedLocation,
-    selectedChemicalClass,
+    selectedChemicalClasses,
+    selectedCompounds,
     selectedProteinDescription,
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
@@ -167,22 +189,20 @@ const SearchBase = (
   const handleSubmit: FormEventHandler = useCallback((event) => {
     event.preventDefault();
     event.stopPropagation();
-    const target = (event.target as unknown as {[id: string]: {type: string, checked: boolean, value: string | number}});
-    const values = [
-      "page",
-      "location",
-      "chemical_class",
-      "protein_description",
-      "peptide_sequence_length_min",
-      "peptide_sequence_length_max",
-      "free_text"
-    ].reduce<{[x: string]: string}>((acc, fieldName) => {
+    const target = (event.target as unknown as Record<keyof SingleValueFields, {type: string, checked: boolean, value: string | number}>);
+    const singleValues = singleValueFieldIds.reduce<Partial<SearchFields>>((acc, fieldName) => {
         const selectedTarget = target[fieldName];
         const value = selectedTarget.type === "checkbox" ? !!selectedTarget.checked : selectedTarget.value;
         acc[fieldName] = `${value}`;
         return acc;
     }, {});
-    navigateInPage(values);
+    const multiTarget = (event.target as unknown as Record<keyof MultiValueFields, Record<number, {checked: boolean, value: string}>>);
+    const multiValues = multiValueFieldIds.reduce<Partial<SearchFields>>((acc, fieldName) => {
+        const selectedTarget = multiTarget[fieldName];
+        acc[fieldName] = Object.values(selectedTarget).filter(t => t.checked).map(t => t.value)
+        return acc;
+    }, {})
+    navigateInPage({...singleValues, ...multiValues});
   }, []);
   const allPages = (result && "_links" in result ? result._links : []);
   const pageCount = (result && "_meta" in result ? result._meta.totalPages : undefined);
@@ -198,7 +218,10 @@ const SearchBase = (
         <form onSubmit={handleSubmit}>
           <input type="hidden" name="page" value="0" />
           <FieldSet><TextField field={freeText}/></FieldSet>
-          <FieldSet><SelectField field={chemicalClassOrCompound}/></FieldSet>
+          <FieldSet>
+            <MultiSelectField field={chemicalClass}/>
+            <MultiSelectField field={compound}/>
+          </FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>
             <RadioSelectField field={location}/>
@@ -260,19 +283,21 @@ const SearchBase = (
 
 const SearchWithSearchParams = () => {
   const searchParams = useSearchParams();
-  const values = [
-    "page",
-    "location",
-    "chemical_class",
-    "protein_description",
-    "peptide_sequence_length_min",
-    "peptide_sequence_length_max",
-    "free_text"
-  ].reduce<{[x: string]: string | null}>((acc, key) => {
-    acc[key] = searchParams.get(key)
+  const singleValues = singleValueFieldIds.reduce<Partial<SearchFields>>((acc, key) => {
+    const value = searchParams.get(key);
+    if (value) {
+      acc[key] = value;
+    }
     return acc;
   }, {});
-  return <SearchBase values={values} />
+  const multiValues = multiValueFieldIds.reduce<Partial<SearchFields>>((acc, key) => {
+    const value = searchParams.getAll(key);
+    if (value.length > 0) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+  return <SearchBase values={{...singleValues, ...multiValues}} />
 }
 
 
