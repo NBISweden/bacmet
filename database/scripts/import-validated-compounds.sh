@@ -25,11 +25,15 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
+
 # This data needs to be preprocessed to remove empty records and
 # internal headers.  There are characters that are not UTF-8 (these are
 # dropped).
+
+echo 'Preprocessing data...' >&2
 iconv -c -t UTF-8 "$1" |
-awk 'NR == 1 || !(/,,,/ || /CAS Number,Chemical Class/)' >"$tmpdir/data.csv"
+awk 'NR == 1 || !(/,,,/ || /CAS Number,Chemical Class/)' |
+mlr --csv clean-whitespace >"$tmpdir/data.csv"
 
 echo 'Loading data into database...' >&2
 

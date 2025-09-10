@@ -29,10 +29,19 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 echo 'Extracting Zip archive...' >&2
 unzip -q -d "$tmpdir" "$data_zip_archive"
 
+echo 'Preprocessing files...' >&2
+
+printf '%s\0' "$tmpdir"/*.tab |
+xargs -0 -P "$(nproc)" -n 50 sh -c '
+	mlr -I --t2c clean-whitespace "$@"
+	for name do
+		mv -- "$name" "${name%.tab}.csv"
+	done' sh
+
 echo 'Loading files into database...' >&2
 
 cat <<-'SQL' >"$tmpdir/import.sql"
-	.mode tabs
+	.mode csv
 	PRAGMA temp_store = MEMORY;
 	CREATE TEMPORARY TABLE import_tmp (
 		query TEXT NOT NULL,
@@ -61,7 +70,7 @@ cat <<-'SQL' >"$tmpdir/import.sql"
 	);
 SQL
 
-printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.tab >>"$tmpdir/import.sql"
+printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
 	INSERT INTO predicted_unique_homologues (

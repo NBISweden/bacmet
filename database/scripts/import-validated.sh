@@ -25,11 +25,15 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
+
 # This data needs to be preprocessed to remove characters that are not
 # UTF-8 and to correct some misspelled terms.
 # shellcheck disable=SC2016
+
+echo 'Preprocessing data...' >&2
+
 iconv -c -t UTF-8 "$1" |
-mlr --csv put '
+mlr --csv clean-whitespace then put '
 	$Compound = gssub($Compound,
 		"Benzylkonium Chloride (BAC)", 
 		"Benzalkonium Chloride (BAC)");
