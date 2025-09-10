@@ -100,7 +100,8 @@ def health_check():
 @app.route('/api/search/predicted')
 @cross_origin()
 def predicted_search():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
+    chemical_class = request.args.getlist("chemical_class")
+    compound = request.args.getlist("compound")
     location = parsers.location(request.args.get("location"), "predicted")
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
@@ -112,6 +113,7 @@ def predicted_search():
 
     items, total_count = find_in_predicted(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         gene_name=gene_name,
@@ -120,7 +122,10 @@ def predicted_search():
     )
 
     last_page = math.ceil(total_count / page_size) - 1
-    args = request.args.to_dict()
+    args = {
+        key: values
+        for key, values in request.args.lists()
+    }
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,
@@ -162,7 +167,8 @@ def predicted_search():
 @app.route('/api/search/validated')
 @cross_origin()
 def validated_search():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
+    chemical_class = request.args.getlist("chemical_class")
+    compound = request.args.getlist("compound")
     location = parsers.location(request.args.get("location"), "validated")
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
@@ -179,6 +185,7 @@ def validated_search():
 
     items, total_count = find_in_validated(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         peptide_sequence_length_range=peptide_sequence_length_range,
@@ -188,7 +195,10 @@ def validated_search():
     )
 
     last_page = math.ceil(total_count / page_size) - 1
-    args = request.args.to_dict()
+    args = {
+        key: values
+        for key, values in request.args.lists()
+    }
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,

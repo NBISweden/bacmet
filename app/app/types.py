@@ -2,12 +2,6 @@ import dataclasses
 from typing import Literal, Optional, Tuple, Any
 
 
-ChemicalClassType = Literal["class", "compound"]
-
-
-ChemicalClass = Tuple[ChemicalClassType, str]
-
-
 DatabaseOption = Literal["validated", "predicted"]
 
 
