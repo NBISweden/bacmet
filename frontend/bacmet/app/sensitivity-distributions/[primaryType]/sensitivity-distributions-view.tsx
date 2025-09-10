@@ -47,16 +47,23 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
 
   const histogramFetcher = useCallback(
     () => {
-      return Promise.all(secondaryIdentifiers.map((secondaryIdentifier) => (
-        fetchData<HistogramData>(`${apiRoot}/sensitivity_distributions/histogram?${primaryType}=${primaryIdentifier}&${secondaryType}=${secondaryIdentifier}`)
-      )))
+      return Promise.all(secondaryIdentifiers.map((secondaryIdentifier) => {
+        const params = new URLSearchParams({
+          [primaryType]: primaryIdentifier || "",
+          [secondaryType + ""]: secondaryIdentifier || ""
+        })
+        return fetchData<HistogramData>(`${apiRoot}/sensitivity_distributions/histogram?${params}`)
+      }))
     },
     [apiRoot, primaryType, primaryIdentifier, secondaryType, secondaryIdentifiers]
   )
   const valueListsFetcher = useCallback(
-    () => Promise.all([primaryType, secondaryType].map((t) => (
-      fetchValue(fetchData<ValueContainer>(`${apiRoot}/sensitivity_distributions/aggregated/${t}?${primaryType}=${primaryIdentifier}`), "items")
-    ))),
+    () => Promise.all([primaryType, secondaryType].map((t) => {
+      const params = new URLSearchParams({
+        [primaryType]: primaryIdentifier || "",
+      })
+      return fetchValue(fetchData<ValueContainer>(`${apiRoot}/sensitivity_distributions/aggregated/${t}?${params}`), "items")
+    })),
     [apiRoot, primaryType, primaryIdentifier, secondaryType]
   );
   const valueLists = usePromiseData(valueListsFetcher, null);
