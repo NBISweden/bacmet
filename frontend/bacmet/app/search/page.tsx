@@ -83,13 +83,13 @@ const SearchBase = (
     ]
   }
   const chemicalClass: MultiValueField<string> = {
-    label: "Select chemical class(resistant to)",
+    label: "Select chemical class (resistant to) (max. 10 selections)",
     name: "chemical_class",
     value: selectedChemicalClasses || [],
     values: params.chemicalClasses,
   }
   const compound: MultiValueField<string> = {
-    label: "Select compound (resistant to)",
+    label: "Select compound (resistant to) (max. 10 selections)",
     name: "compound",
     value: selectedCompounds || [],
     values: params.compounds
@@ -219,8 +219,8 @@ const SearchBase = (
           <input type="hidden" name="page" value="0" />
           <FieldSet><TextField field={freeText}/></FieldSet>
           <FieldSet>
-            <MultiSelectField field={chemicalClass} filterText="Filter chemical class options"/>
-            <MultiSelectField field={compound} filterText="Filter compound options"/>
+            <MultiSelectField field={chemicalClass} maxSelections={10} filterText="Filter chemical class options"/>
+            <MultiSelectField field={compound} maxSelections={10} filterText="Filter compound options"/>
           </FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>
