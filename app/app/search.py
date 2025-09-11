@@ -23,7 +23,7 @@ def apply_search_filters(
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
-    gene_name: Optional[str] = None,
+    gene_name: Optional[list[str]] = None,
     free_text: Optional[str] = None
 ):
     if chemical_class and len(chemical_class) > 0:
@@ -58,7 +58,7 @@ def apply_search_filters(
             )
     if gene_name:
         stmt = stmt.filter(
-            Validated.gene_name == gene_name
+            Validated.gene_name.in_(gene_name)
         )
     if free_text:
         search_pattern = f"%{free_text}%"
@@ -100,7 +100,7 @@ def find_in_validated(
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
-    gene_name: Optional[str],
+    gene_name: Optional[list[str]],
     pagination: Tuple[int, int],
     free_text: Optional[str] = None
 ) -> Tuple[list[Validated], int]:
@@ -129,7 +129,7 @@ def find_in_predicted(
     compound: Optional[list[str]],
     location: Optional[LocationOption],
     protein_description: Optional[str],
-    gene_name: Optional[str],
+    gene_name: Optional[list[str]],
     bacmet_id: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:

@@ -102,11 +102,11 @@ def health_check():
 def predicted_search():
     chemical_class = request.args.getlist("chemical_class")
     compound = request.args.getlist("compound")
-    location = parsers.location(request.args.get("location"), "predicted")
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
-    gene_name = request.args.get("gene_name")
+    gene_name = request.args.getlist("gene_name")
     bacmet_id = request.args.get("bacmet_id")
     page = max(0, int(request.args.get("page", "0")))
     page_size = 100
@@ -169,7 +169,7 @@ def predicted_search():
 def validated_search():
     chemical_class = request.args.getlist("chemical_class")
     compound = request.args.getlist("compound")
-    location = parsers.location(request.args.get("location"), "validated")
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
@@ -177,7 +177,7 @@ def validated_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
-    gene_name = request.args.get("gene_name")
+    gene_name = request.args.getlist("gene_name")
     free_text = request.args.get("free_text")
 
     page = max(0, int(request.args.get("page", "0")))
@@ -215,7 +215,11 @@ def validated_search():
                 organism=item.organism,
                 location=item.location,
                 compounds=[
-                    Compound(compound_name=compound.compound_name)
+                    Compound(
+                        compound_name=compound.compound_name,
+                        chemical_class=compound.chemical_class,
+                        cas_number=compound.cas_number
+                    )
                     for compound in item.compounds
                 ],
                 description=item.description,
@@ -244,7 +248,11 @@ def validated_entry(entry_id: str):
         organism=item.organism,
         location=item.location,
         compounds=[
-            Compound(compound_name=compound.compound_name)
+            Compound(
+                compound_name=compound.compound_name,
+                chemical_class=compound.chemical_class,
+                cas_number=compound.cas_number
+            )
             for compound in item.compounds
         ],
         description=item.description,
@@ -291,14 +299,16 @@ def aggregated_compound():
 @app.route('/api/aggregated/gene_name')
 @cross_origin()
 def aggregated_gene_name():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
-    location = parsers.location(request.args.get("location"), "validated")
+    chemical_class = tuple(*request.args.getlist("chemical_class"))
+    compound = tuple(*request.args.getlist("compound"))
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
     gene_name = request.args.get("gene_name")
     gene_names = get_gene_names(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         gene_name=gene_name,

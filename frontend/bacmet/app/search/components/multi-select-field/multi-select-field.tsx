@@ -24,7 +24,7 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
         setCurrent(limitedNextValue);
       }
     }
-  }, [usedValue, setCurrent, onChange]);
+  }, [maxSelections, usedValue, setCurrent, onChange]);
 
   const handleFilter = useCallback<ChangeEventHandler<HTMLInputElement>>((event) => {
     const v = event.target.value;
@@ -41,7 +41,6 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
     const checkedFiltered = filterChecked ? textFiltered.filter(v => usedValue.includes(v.value)) : textFiltered;
     return checkedFiltered;
   }, [field.values, usedValue, filterValue, filterChecked]);
-  const allFilteredSelected = usedValue.length === new Set([...usedValue, ...filteredValues.map(v => v.value)]).size
 
   const handleToggleAll = useCallback<MouseEventHandler<HTMLButtonElement>>(() => {
     const usedValueSet = new Set(usedValue);
@@ -59,7 +58,7 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
       } else {
         setCurrent(nextValue);
       }
-  }, [filteredValues, usedValue, setCurrent, onChange, allFilteredSelected]);
+  }, [maxSelections, filteredValues, usedValue, setCurrent, onChange]);
 
   return (
     <>

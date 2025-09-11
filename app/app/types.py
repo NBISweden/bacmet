@@ -41,6 +41,9 @@ class SearchResult:
 @dataclasses.dataclass
 class Compound:
     compound_name: str
+    chemical_class: str
+    cas_number: str
+
 
 
 @dataclasses.dataclass

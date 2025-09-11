@@ -12,14 +12,9 @@ def database(data: str) -> Optional[DatabaseOption]:
 
 def location(
     data: str,
-    database: DatabaseOption
 ) -> Optional[LocationOption]:
     value = None if data is None else data.lower()
-    allowed_values = (
-        {"any", "chromosome", "plasmid"}
-        if database == "validated"
-        else {"any", "chromosome"}
-    )
+    allowed_values = {"any", "chromosome", "plasmid"}
     if value is None or value in allowed_values:
         return None if value == "any" else cast(
            LocationOption, value
