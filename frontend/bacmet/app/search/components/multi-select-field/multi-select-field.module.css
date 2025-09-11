@@ -1,0 +1,4 @@
+.multiSelectBody {
+    max-height: 20rem;
+    overflow: auto;
+}

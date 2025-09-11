@@ -7,7 +7,7 @@ import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
 import {TextField} from "./components/text-field";
-import {MultiSelectField} from "./components/multi-select-field";
+import {MultiSelectField} from "./components/multi-select-field/multi-select-field";
 import {default as NextLink} from 'next/link'
 import ValidatedEntry from "./components/validated-entry";
 import {navigateInPage} from "../utils";
@@ -219,8 +219,8 @@ const SearchBase = (
           <input type="hidden" name="page" value="0" />
           <FieldSet><TextField field={freeText}/></FieldSet>
           <FieldSet>
-            <MultiSelectField field={chemicalClass}/>
-            <MultiSelectField field={compound}/>
+            <MultiSelectField field={chemicalClass} filterText="Filter chemical class options"/>
+            <MultiSelectField field={compound} filterText="Filter compound options"/>
           </FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>

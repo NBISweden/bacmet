@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
 import {navigateInPage} from "../../utils";
-import { MultiSelectField } from "../components/multi-select-field"
+import { MultiSelectField } from "../components/multi-select-field/multi-select-field"
 
 const PredictedTableItems: (keyof Predicted)[] = [
   "blast_hit_genome",
