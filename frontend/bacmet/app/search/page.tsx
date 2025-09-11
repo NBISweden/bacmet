@@ -24,6 +24,7 @@ type SingleValueFields = {
 type MultiValueFields = {
   chemical_class: string[],
   compound: string[],
+  gene_name: string[],
 }
 
 type SearchFields = SingleValueFields & MultiValueFields;
@@ -40,6 +41,7 @@ const singleValueFieldIds: (keyof SingleValueFields)[] = [
 const multiValueFieldIds: (keyof MultiValueFields)[] = [
   "chemical_class",
   "compound",
+  "gene_name",
 ]
 
 const SearchBase = (
@@ -57,10 +59,12 @@ const SearchBase = (
     free_text: selectedFreeText,
     chemical_class: selectedChemicalClasses,
     compound: selectedCompounds,
+    gene_name: selectedGeneName
  } = values;
   const [params, setParams] = useState<SearchParams>({
     chemicalClasses: [],
     compounds: [],
+    geneNames: [],
   });
   const [result, setResult] = useState<ValidatedResult | ErrorResult | undefined>(undefined);
   const location: Field<string> = {
@@ -93,6 +97,12 @@ const SearchBase = (
     name: "compound",
     value: selectedCompounds || [],
     values: params.compounds
+  }
+  const geneName: MultiValueField<string> = {
+    label: "Select gene name (max. 10 selections)",
+    name: "gene_name",
+    value: selectedGeneName || [],
+    values: params.geneNames
   }
   const proteinDescription: Field = {
     label: "Protein description contains text",
@@ -128,15 +138,18 @@ const SearchBase = (
       const [
         chemicalClassData,
         compoundData,
+        geneNameData,
       ] = await Promise.all([
         (await fetch(`${apiRoot}/aggregated/chemical_class`)).json(),
-        (await fetch(`${apiRoot}/aggregated/compound`)).json()
+        (await fetch(`${apiRoot}/aggregated/compound`)).json(),
+        (await fetch(`${apiRoot}/aggregated/gene_name`)).json()
       ]);
       setParams((p) => {
         return {
           ...p,
           chemicalClasses: chemicalClassData.items,
           compounds: compoundData.items,
+          geneNames: geneNameData.items,
         }
       })
     }
@@ -149,6 +162,7 @@ const SearchBase = (
     if (selectedLocation) params.append("location", selectedLocation);
     if (selectedChemicalClasses) selectedChemicalClasses.forEach(cc => params.append("chemical_class", cc));
     if (selectedCompounds) selectedCompounds.forEach(c => params.append("compound", c));
+    if (selectedGeneName) selectedGeneName.forEach(c => params.append("gene_name", c));
     if (selectedProteinDescription) params.append("protein_description", selectedProteinDescription);
     if (selectedPeptideSequenceLengthMin) params.append("peptide_sequence_length_min", selectedPeptideSequenceLengthMin);
     if (selectedPeptideSequenceLengthMax) params.append("peptide_sequence_length_max", selectedPeptideSequenceLengthMax);
@@ -176,6 +190,7 @@ const SearchBase = (
     selectedPeptideSequenceLengthMin,
     selectedPeptideSequenceLengthMax,
     selectedFreeText,
+    selectedGeneName,
     setResult,
     apiRoot,
   ]);
@@ -221,6 +236,9 @@ const SearchBase = (
           <FieldSet>
             <MultiSelectField field={chemicalClass} maxSelections={10} filterText="Filter chemical class options"/>
             <MultiSelectField field={compound} maxSelections={10} filterText="Filter compound options"/>
+          </FieldSet>
+          <FieldSet>
+            <MultiSelectField field={geneName} maxSelections={10} filterText="Filter gene name options"/>
           </FieldSet>
           <FieldSet><TextField field={proteinDescription}/></FieldSet>
           <FieldSet>

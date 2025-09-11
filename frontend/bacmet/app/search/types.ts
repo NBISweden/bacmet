@@ -18,6 +18,7 @@ export type MultiValueField<T=unknown> = Omit<Field<T>, "value"> & {
 export type SearchParams = {
   chemicalClasses: FieldValue<string>[];
   compounds: FieldValue<string>[];
+  geneNames: FieldValue<string>[];
 }
 
 export type Compound = {
