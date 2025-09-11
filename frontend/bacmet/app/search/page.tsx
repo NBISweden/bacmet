@@ -1,5 +1,5 @@
 'use client'
-import {useCallback, useEffect, useState, FormEventHandler, Suspense} from "react";
+import {useCallback, useEffect, useMemo, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams} from "next/navigation";
 import {SearchParams, ValidatedResult, ErrorResult, Field, MultiValueField, Link} from "./types";
@@ -70,10 +70,10 @@ const SearchBase = (
   const location: Field<string> = {
     label: "Select location",
     name: "location",
-    value: selectedLocation || "any",
+    value: selectedLocation || "",
     values: [
       {
-        value: "any",
+        value: "",
         label: "Any"
       },
       {
@@ -133,6 +133,30 @@ const SearchBase = (
     values: []
   }
 
+  const searchParams = useMemo(() => {
+    const params = new URLSearchParams();
+    if (selectedPage) params.append("page", selectedPage || "0");
+    if (selectedLocation) params.append("location", selectedLocation);
+    if (selectedChemicalClasses) selectedChemicalClasses.forEach(cc => params.append("chemical_class", cc));
+    if (selectedCompounds) selectedCompounds.forEach(c => params.append("compound", c));
+    if (selectedGeneName) selectedGeneName.forEach(c => params.append("gene_name", c));
+    if (selectedProteinDescription) params.append("protein_description", selectedProteinDescription);
+    if (selectedPeptideSequenceLengthMin) params.append("peptide_sequence_length_min", selectedPeptideSequenceLengthMin);
+    if (selectedPeptideSequenceLengthMax) params.append("peptide_sequence_length_max", selectedPeptideSequenceLengthMax);
+    if (selectedFreeText) params.append("free_text", selectedFreeText);
+    return params;
+  }, [
+    selectedPage,
+    selectedLocation,
+    selectedChemicalClasses,
+    selectedCompounds,
+    selectedProteinDescription,
+    selectedPeptideSequenceLengthMin,
+    selectedPeptideSequenceLengthMax,
+    selectedFreeText,
+    selectedGeneName,
+  ])
+
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -157,21 +181,10 @@ const SearchBase = (
   }, [apiRoot, setParams]);
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (selectedPage) params.append("page", selectedPage || "0");
-    if (selectedLocation) params.append("location", selectedLocation);
-    if (selectedChemicalClasses) selectedChemicalClasses.forEach(cc => params.append("chemical_class", cc));
-    if (selectedCompounds) selectedCompounds.forEach(c => params.append("compound", c));
-    if (selectedGeneName) selectedGeneName.forEach(c => params.append("gene_name", c));
-    if (selectedProteinDescription) params.append("protein_description", selectedProteinDescription);
-    if (selectedPeptideSequenceLengthMin) params.append("peptide_sequence_length_min", selectedPeptideSequenceLengthMin);
-    if (selectedPeptideSequenceLengthMax) params.append("peptide_sequence_length_max", selectedPeptideSequenceLengthMax);
-    if (selectedFreeText) params.append("free_text", selectedFreeText);
-
-    if (params.size > 0) {
+    if (searchParams.size > 0) {
       const fetchResult = async () => {
         try {
-          const response = await fetch(`${apiRoot}/search/validated?${params.toString()}`);
+          const response = await fetch(`${apiRoot}/search/validated?${searchParams.toString()}`);
           const resultData = await response.json();
           setResult({ type: "validated", ...resultData });
         } catch (e) {
@@ -182,15 +195,7 @@ const SearchBase = (
       fetchResult();
     }
   }, [
-    selectedPage,
-    selectedLocation,
-    selectedChemicalClasses,
-    selectedCompounds,
-    selectedProteinDescription,
-    selectedPeptideSequenceLengthMin,
-    selectedPeptideSequenceLengthMax,
-    selectedFreeText,
-    selectedGeneName,
+    searchParams,
     setResult,
     apiRoot,
   ]);
@@ -223,6 +228,7 @@ const SearchBase = (
   const pageCount = (result && "_meta" in result ? result._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
   const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
+  const simpleSearchActive = new Set([...searchParams.keys(), "page", "free_text"]).size == 2
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
@@ -231,23 +237,28 @@ const SearchBase = (
           aliqua. Utenim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
+          <details open={!simpleSearchActive}>
+            <summary>
+              <span>Search parameters</span>
+              <FieldSet><TextField field={freeText}/></FieldSet>
+            </summary>
+            <FieldSet>
+              <MultiSelectField field={chemicalClass} maxSelections={10} filterText="Filter chemical class options"/>
+              <MultiSelectField field={compound} maxSelections={10} filterText="Filter compound options"/>
+            </FieldSet>
+            <FieldSet>
+              <MultiSelectField field={geneName} maxSelections={10} filterText="Filter gene name options"/>
+            </FieldSet>
+            <FieldSet><TextField field={proteinDescription}/></FieldSet>
+            <FieldSet>
+              <RadioSelectField field={location}/>
+            </FieldSet>
+            <FieldSet>
+              <TextField field={peptideSequenceLengthMin}/>
+              <TextField field={peptideSequenceLengthMax}/>
+            </FieldSet>
+          </details>
           <input type="hidden" name="page" value="0" />
-          <FieldSet><TextField field={freeText}/></FieldSet>
-          <FieldSet>
-            <MultiSelectField field={chemicalClass} maxSelections={10} filterText="Filter chemical class options"/>
-            <MultiSelectField field={compound} maxSelections={10} filterText="Filter compound options"/>
-          </FieldSet>
-          <FieldSet>
-            <MultiSelectField field={geneName} maxSelections={10} filterText="Filter gene name options"/>
-          </FieldSet>
-          <FieldSet><TextField field={proteinDescription}/></FieldSet>
-          <FieldSet>
-            <RadioSelectField field={location}/>
-          </FieldSet>
-          <FieldSet>
-            <TextField field={peptideSequenceLengthMin}/>
-            <TextField field={peptideSequenceLengthMax}/>
-          </FieldSet>
           <div className="pt-3 pb-2">
             <input className="btn btn-primary" type="submit" value="Search" />
           </div>
