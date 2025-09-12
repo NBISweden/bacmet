@@ -286,14 +286,12 @@ def aggregated_compound():
 
     result = SearchResult(
         items=[
-            Item(
-                label=label,
-                value=value,
-                _meta={
-                    "chemical_class": chemical_class
-                }
+            Compound(
+                compound_name=compound_name,
+                chemical_class=chemical_class,
+                cas_number=cas_number
             )
-            for (label, value, chemical_class) in compounds
+            for (compound_name, chemical_class, cas_number) in compounds
         ]
     )
     return jsonify(dataclasses.asdict(result))
@@ -336,7 +334,7 @@ def sensitivity_distributions_histogram():
     biocide = request.args.get("biocide")
 
     if species is None or biocide is None:
-        return make_error(f"Missing parameter biocide or species.", 400)
+        return make_error("Missing parameter biocide or species.", 400)
 
     buckets = get_sensitivity_histogram(
         species=species,

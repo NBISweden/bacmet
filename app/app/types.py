@@ -46,7 +46,6 @@ class Compound:
     cas_number: str
 
 
-
 @dataclasses.dataclass
 class ValidatedResult:
     gene_name: str
