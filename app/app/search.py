@@ -174,12 +174,12 @@ def get_chemical_classes() -> list[Tuple[str, str]]:
 @cache
 def get_compounds() -> list[Tuple[str, str]]:
     all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
-    stmt = select(Compounds.compound_name).filter(Compounds.compound_id.in_(all_compounds)).distinct()
+    stmt = select(Compounds.compound_name, Compounds.chemical_class).filter(Compounds.compound_id.in_(all_compounds)).distinct()
     with db_session() as session:
-        compound_names = session.execute(stmt)
+        compound_info = session.execute(stmt)
         return [
-            (cn, cn)
-            for cn, in compound_names
+            (cn, cn, cc)
+            for cn, cc in compound_info
         ]
 
 

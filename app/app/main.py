@@ -288,9 +288,12 @@ def aggregated_compound():
         items=[
             Item(
                 label=label,
-                value=value
+                value=value,
+                _meta={
+                    "chemical_class": chemical_class
+                }
             )
-            for (label, value) in compounds
+            for (label, value, chemical_class) in compounds
         ]
     )
     return jsonify(dataclasses.asdict(result))

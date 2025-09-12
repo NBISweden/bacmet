@@ -15,6 +15,7 @@ OpenRange = Tuple[int | None, int | None]
 class Item:
     label: str
     value: str
+    _meta: Optional[dict[str, str]] = None
 
 
 @dataclasses.dataclass
