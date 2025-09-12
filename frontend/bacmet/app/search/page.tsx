@@ -2,7 +2,7 @@
 import {useCallback, useEffect, useMemo, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams} from "next/navigation";
-import {SearchParams, ValidatedResult, ErrorResult, Field, MultiValueField, Link} from "./types";
+import {Result, Compound, SearchParams, FieldValue, ValidatedResult, ErrorResult, Field, MultiValueField, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
@@ -10,7 +10,7 @@ import {TextField} from "./components/text-field";
 import {MultiSelectField} from "./components/multi-select-field/multi-select-field";
 import {default as NextLink} from 'next/link'
 import ValidatedEntry from "./components/validated-entry";
-import {navigateInPage} from "../utils";
+import {navigateInPage, usePromiseData, fetchData} from "../utils";
 
 type SingleValueFields = {
   page: string,
@@ -61,11 +61,34 @@ const SearchBase = (
     compound: selectedCompounds,
     gene_name: selectedGeneName
  } = values;
-  const [params, setParams] = useState<SearchParams>({
-    chemicalClasses: [],
-    compounds: [],
-    geneNames: [],
-  });
+  const paramsFetcher = useCallback(
+    async () => {
+      const [ccs, cs, gns] = await Promise.all([
+        fetchData<Result<FieldValue<string>>>(`${apiRoot}/aggregated/chemical_class`),
+        fetchData<Result<Compound>>(`${apiRoot}/aggregated/compound`),
+        fetchData<Result<FieldValue<string>>>(`${apiRoot}/aggregated/gene_name`)
+      ]);
+      const sps: SearchParams = {
+        chemicalClasses: ccs.items,
+        compounds: cs.items.map(c => ({
+          value: c.compound_name,
+          label: c.compound_name,
+          _meta: {chemical_class: c.chemical_class}
+        })),
+        geneNames: gns.items
+      }
+      return sps;
+    },
+    [apiRoot]
+  );
+  const params = usePromiseData(
+    paramsFetcher,
+    {
+      chemicalClasses: [],
+      compounds: [],
+      geneNames: [],
+    }
+  );
   const [result, setResult] = useState<ValidatedResult | ErrorResult | undefined>(undefined);
   const location: Field<string> = {
     label: "Select location",
@@ -86,19 +109,20 @@ const SearchBase = (
       }
     ]
   }
-  const chemicalClass: MultiValueField<string> = {
+  const [chemicalClassState, setChemicalClassState] = useState<unknown[]>(selectedChemicalClasses || []);
+  const chemicalClass: MultiValueField = {
     label: "Select chemical class (resistant to) (max. 10 selections)",
     name: "chemical_class",
-    value: selectedChemicalClasses || [],
+    value: chemicalClassState,
     values: params.chemicalClasses,
   }
-  const compound: MultiValueField<string> = {
+  const compound: MultiValueField = {
     label: "Select compound (resistant to) (max. 10 selections)",
     name: "compound",
     value: selectedCompounds || [],
-    values: params.compounds
+    values: params.compounds.filter(c => c._meta && chemicalClassState.length > 0 ? chemicalClassState.includes(c._meta["chemical_class"]) : true)
   }
-  const geneName: MultiValueField<string> = {
+  const geneName: MultiValueField = {
     label: "Select gene name (max. 10 selections)",
     name: "gene_name",
     value: selectedGeneName || [],
@@ -156,29 +180,6 @@ const SearchBase = (
     selectedFreeText,
     selectedGeneName,
   ])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const [
-        chemicalClassData,
-        compoundData,
-        geneNameData,
-      ] = await Promise.all([
-        (await fetch(`${apiRoot}/aggregated/chemical_class`)).json(),
-        (await fetch(`${apiRoot}/aggregated/compound`)).json(),
-        (await fetch(`${apiRoot}/aggregated/gene_name`)).json()
-      ]);
-      setParams((p) => {
-        return {
-          ...p,
-          chemicalClasses: chemicalClassData.items,
-          compounds: compoundData.items,
-          geneNames: geneNameData.items,
-        }
-      })
-    }
-    fetchData();
-  }, [apiRoot, setParams]);
 
   useEffect(() => {
     if (searchParams.size > 0) {
@@ -243,7 +244,7 @@ const SearchBase = (
               <FieldSet><TextField field={freeText}/></FieldSet>
             </summary>
             <FieldSet>
-              <MultiSelectField field={chemicalClass} maxSelections={10} filterText="Filter chemical class options"/>
+              <MultiSelectField field={chemicalClass} maxSelections={10} onChange={setChemicalClassState} filterText="Filter chemical class options"/>
               <MultiSelectField field={compound} maxSelections={10} filterText="Filter compound options"/>
             </FieldSet>
             <FieldSet>
