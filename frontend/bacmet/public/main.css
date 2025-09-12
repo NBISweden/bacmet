@@ -109,10 +109,8 @@ legend {
   margin: 0;
 }
 
-ul.dropdown-menu > .dropdown-item.text-white:hover,
-ul.dropdown-menu > .dropdown-item.text-white:focus,
-ul.dropdown-menu > li > .dropdown-item.text-white:hover,
-ul.dropdown-menu > li > .dropdown-item.text-white:focus {
+.dropdown-item.text-white:hover,
+.dropdown-item.text-white:focus {
   background-color: var(--bs-primary-hover);
 }
 
