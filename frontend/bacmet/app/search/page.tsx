@@ -116,46 +116,54 @@ const SearchBase = (
     value: chemicalClassState,
     values: params.chemicalClasses,
   }
-  const compound: MultiValueField = {
-    label: "Select compound (resistant to) (max. 10 selections)",
-    name: "compound",
-    value: selectedCompounds || [],
-    values: params.compounds.filter(c => c._meta && chemicalClassState.length > 0 ? chemicalClassState.includes(c._meta["chemical_class"]) : true)
-  }
-  const geneName: MultiValueField = {
+  const compound: MultiValueField = useMemo(() => {
+    const values = params.compounds.filter(c => (
+      c._meta && chemicalClassState.length > 0 ? chemicalClassState.includes(c._meta["chemical_class"]) : true
+    ));
+    const valuesSet = new Set(values.map(v => v.value))
+    const value = (selectedCompounds || []).filter(v => valuesSet.has(v));
+    const c: MultiValueField = {
+      label: "Select compound (resistant to) (max. 10 selections)",
+      name: "compound",
+      value: value,
+      values: values
+    }
+    return c;
+  }, [selectedCompounds, params.compounds, chemicalClassState]);
+  const geneName: MultiValueField = useMemo(() => ({
     label: "Select gene name (max. 10 selections)",
     name: "gene_name",
     value: selectedGeneName || [],
     values: params.geneNames
-  }
-  const proteinDescription: Field = {
+  }), [selectedGeneName, params.geneNames])
+  const proteinDescription: Field = useMemo(() => ({
     label: "Protein description contains text",
     name: "protein_description",
     value: selectedProteinDescription || undefined,
     placeholder: "example: resistance",
     values: []
-  }
-  const peptideSequenceLengthMin: Field = {
+  }), [selectedProteinDescription])
+  const peptideSequenceLengthMin: Field = useMemo(() => ({
     label: "Peptide sequence length greater than",
     name: "peptide_sequence_length_min",
     value: selectedPeptideSequenceLengthMin || undefined,
     placeholder: "50",
     values: [],
-  }
-  const peptideSequenceLengthMax: Field = {
+  }), [selectedPeptideSequenceLengthMin])
+  const peptideSequenceLengthMax: Field = useMemo(() => ({
     label: "Peptide sequence length less than",
     name: "peptide_sequence_length_max",
     value: selectedPeptideSequenceLengthMax || undefined,
     placeholder: "2000",
     values: [],
-  }
-  const freeText: Field = {
+  }), [selectedPeptideSequenceLengthMax])
+  const freeText: Field = useMemo(() => ({
     label: "Free text search",
     name: "free_text",
     value: selectedFreeText || undefined,
     placeholder: "gene name, compound name, chemical class",
     values: []
-  }
+  }), [selectedFreeText])
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams();
