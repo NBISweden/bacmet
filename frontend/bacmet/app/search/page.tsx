@@ -120,8 +120,7 @@ const SearchBase = (
     const values = params.compounds.filter(c => (
       c._meta && chemicalClassState.length > 0 ? chemicalClassState.includes(c._meta["chemical_class"]) : true
     ));
-    const valuesSet = new Set(values.map(v => v.value))
-    const value = (selectedCompounds || []).filter(v => valuesSet.has(v));
+    const value = selectedCompounds || [];
     const c: MultiValueField = {
       label: "Select compound (resistant to) (max. 10 selections)",
       name: "compound",
