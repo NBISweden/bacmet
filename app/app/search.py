@@ -161,7 +161,7 @@ def find_in_predicted(
 
 @cache
 def get_chemical_classes() -> list[Tuple[str, str]]:
-    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
+    all_compounds = select(ValidatedCompounds.compound_id).distinct()
     stmt = select(Compounds.chemical_class).filter(Compounds.compound_id.in_(all_compounds)).distinct()
     with db_session() as session:
         chemical_classes = session.execute(stmt)
@@ -173,7 +173,7 @@ def get_chemical_classes() -> list[Tuple[str, str]]:
 
 @cache
 def get_compounds() -> list[Tuple[str, str, str]]:
-    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
+    all_compounds = select(ValidatedCompounds.compound_id).distinct()
     stmt = select(Compounds.compound_name, Compounds.chemical_class, Compounds.cas_number).filter(Compounds.compound_id.in_(all_compounds)).distinct()
     with db_session() as session:
         compound_info = session.execute(stmt)
