@@ -61,9 +61,6 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
       }
   }, [usedMaxSelections, filteredValuesSet, usedValueSet, setCurrent, onChange]);
   const availableItems = Math.min(usedMaxSelections - usedValueSet.difference(filteredValuesSet).size, usedMaxSelections, filteredValuesSet.size);
-  const toggleText = usedMaxSelections === field.values.length
-    ? "all"
-    : availableItems === usedMaxSelections ? `${usedMaxSelections}` : `${availableItems} of ${usedMaxSelections}`
 
   return (
     <>
@@ -81,10 +78,15 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
                 value="filter-checked"
                 id={filterCheckedId}
                 />
-              <label className="form-check-label" htmlFor={filterCheckedId}>Checked only</label>
+              <label className="form-check-label" htmlFor={filterCheckedId}>Show selection only</label>
             </div>
           </div>
-          <button className="btn btn-outline-secondary" type="button" onClick={handleToggleAll}>Toggle {toggleText}</button>
+          <button
+            className="btn btn-outline-secondary"
+            type="button"
+            onClick={handleToggleAll}
+            disabled={availableItems === 0 || availableItems !== filteredValuesSet.size}
+            >Toggle all</button>
         </div>
       ) : <></>}
       {filteredValuesSet.size === field.values.length ? <></> : <div className={`row mb-3 px-3 alert alert-info ${styles.multiSelectBody}`}>
