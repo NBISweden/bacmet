@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import NavBarCore from "./components/nav-bar-core";
+import NavBar from "./components/navbar";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   description: "BacMet is an easy-to-use bioinformatics resource of antibacterial biocide- and metal-resistance genes.",
@@ -16,14 +18,21 @@ export default function RootLayout({
   const copyright = "Copyright © 2013-2018 All rights reserved";
   const contact = "info@example.com";
   const attribution = "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team";
-  const navigation: { label: string, href: string }[] = [
-    ["Search", "/search"],
-    ["BLAST", "#"],
-    ["Download", "#"],
-    ["FAQ", "/faq"],
-    ["About", "/about"],
-    ["Contact", "/contact"],
-  ].map(([label, href]) => ({ label, href }));
+  const navigation: ({ label: string, href?: string, dropdown?: { label: string, href: string }[] })[] = [
+    { label: "Search", href: "/search/" },
+    { label: "Sensitivity Distributions",
+      dropdown: [
+        { label: "For species", href: "/sensitivity-distributions/species/" },
+        { label: "For biocides", href: "/sensitivity-distributions/biocide/" },
+      ]
+    },
+    { label: "BLAST", href: "#" },
+    { label: "Download", href: "#" },
+    { label: "FAQ", href: "/faq/" },
+    { label: "About", href: "/about/" },
+    { label: "Contact", href: "/contact/" },
+  ];
+
   return (
     <html lang="en">
       <head>
@@ -38,24 +47,9 @@ export default function RootLayout({
       <body>
         <header>
           {navigation.length > 0 ? (
-            <nav className="navbar navbar-expand-lg navbar-light bg-primary">
-              <div className="container-fluid justify-content-between">
-                <div>
-                  <Link className="navbar-brand text-white me-1" href="/">{brandName}</Link> <i className="bi bi-virus text-white"></i>
-                </div>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                  aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                  <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                  <ul className="navbar-nav ms-auto">
-                    {navigation.map((item, index) => (
-                      <li key={index} className="nav-item me-2"><Link className="nav-link text-white" href={item.href}>{item.label}</Link></li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </nav>
+            <Suspense fallback={<NavBarCore navigation={navigation} brandName={brandName} /> }>
+              <NavBar navigation={navigation} brandName={brandName} />
+            </Suspense>
           ) : <></>}
         </header>
         <main className="container">
