@@ -8,7 +8,11 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
   const [filterValue, setFilterValue] = useState<string | undefined>();
   const [filterChecked, setFilterChecked] = useState<boolean>(false);
   const [current, setCurrent] = useState<unknown[]>(field.value);
-  const usedValue = useMemo(() => onChange ? field.value : current, [onChange, field.value, current])
+  const usedValue = useMemo(() => {
+    const allValuesSet = new Set(field.values.map(v => v.value));
+    const nextValue = onChange ? field.value : current;
+    return nextValue.filter(v => allValuesSet.has(v));
+  }, [onChange, field.value, field.values, current])
   const usedMaxSelections = maxSelections === undefined ? field.values.length : Math.min(maxSelections, field.values.length);
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>((event) => {
     const singleValue: unknown  = event.target.value;
