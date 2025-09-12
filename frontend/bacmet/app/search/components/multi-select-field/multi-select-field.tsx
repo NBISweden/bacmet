@@ -60,7 +60,8 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
         setCurrent(nextValue);
       }
   }, [usedMaxSelections, filteredValuesSet, usedValueSet, setCurrent, onChange]);
-  const availableItems = Math.min(usedMaxSelections - usedValueSet.difference(filteredValuesSet).size, usedMaxSelections, filteredValuesSet.size);
+  const hiddenSelections = usedValueSet.difference(filteredValuesSet)
+  const availableItems = Math.min(usedMaxSelections - hiddenSelections.size, usedMaxSelections, filteredValuesSet.size);
 
   return (
     <>
@@ -91,11 +92,12 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
       ) : <></>}
       {filteredValuesSet.size === field.values.length ? <></> : <div className={`row mb-3 px-3 alert alert-info ${styles.multiSelectBody}`}>
         Showing {filteredValuesSet.size} of {field.values.length} options.
-        {maxSelections !== undefined && availableItems !== undefined && availableItems !== maxSelections ? <> Where {maxSelections - availableItems} selected options are hidden.</> : <></>}
+        {hiddenSelections.size > 0 ? <> Where {hiddenSelections.size} selected options are hidden.</> : <></>}
       </div>}
       <div className={`row mb-3 px-3 ${styles.multiSelectBody}`}>
       {field.values.map(value => {
         const valueId = `${fieldId}-${value.value}`;
+        const isChecked = usedValue.includes(value.value);
         return (
           <div key={value.value + ""} className={`form-check col-md-4 ${filteredValuesSet.has(value.value) ? "" : "d-none"}`}>
             <input
@@ -103,9 +105,9 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
               type="checkbox"
               name={field.name}
               onChange={handleChange}
-              checked={usedValue.includes(value.value)} 
+              checked={isChecked} 
               value={value.value + ""}
-              disabled={usedValue.length === maxSelections && !usedValue.includes(value.value) ? true : undefined}
+              disabled={usedValue.length === maxSelections && !isChecked ? true : undefined}
               id={valueId}
               />
             <label
