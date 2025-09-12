@@ -22,16 +22,15 @@ export default function NavBarCore({ navigation, brandName, pathname }: NavBarPr
             {navigation.map((item, index) =>
               item.dropdown ? (
                 <li key={index} className="nav-item dropdown me-2">
-                  <a
+                  <button
                     className={`nav-link dropdown-toggle text-white${pathname && pathname.startsWith("/sensitivity-distributions/") ? " active" : ""}`}
-                    href="#"
                     id={`navbarDropdown-${index}`}
-                    role="button"
+                    type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
                     {item.label}
-                  </a>
+                  </button>
                   <ul className="dropdown-menu bg-primary" aria-labelledby={`navbarDropdown-${index}`}>
                     {item.dropdown.map((dropItem, dropIndex) => (
                       <li key={dropIndex}>
