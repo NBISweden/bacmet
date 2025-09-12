@@ -56,7 +56,7 @@ export const MultiSelectField = ({field, onChange, filterText, maxSelections}: {
         setCurrent(nextValue);
       }
   }, [usedMaxSelections, filteredValuesSet, usedValueSet, setCurrent, onChange]);
-  const availableItems = Math.min(usedMaxSelections - usedValueSet.difference(filteredValuesSet).size, usedMaxSelections);
+  const availableItems = Math.min(usedMaxSelections - usedValueSet.difference(filteredValuesSet).size, usedMaxSelections, filteredValuesSet.size);
   const toggleText = usedMaxSelections === field.values.length
     ? "all"
     : availableItems === usedMaxSelections ? `${usedMaxSelections}` : `${availableItems} of ${usedMaxSelections}`
