@@ -1,6 +1,7 @@
 import React from "react";
 import { Validated } from "../types";
 
+
 export default function ValidatedEntry({entry}: {entry: Validated | Record<keyof Validated, React.ReactNode>}) {
   return (
     <table className="table">
@@ -14,7 +15,11 @@ export default function ValidatedEntry({entry}: {entry: Validated | Record<keyof
         <tr><th scope="row">Compound:</th><td>{Array.isArray(entry.compounds) ? entry.compounds.map(c => c.compound_name).join(", ") : entry.compounds}</td></tr>
         <tr><th scope="row">Description:</th><td>{ entry.description }</td></tr>
         <tr><th scope="row">Length (amino acid):</th><td>{ entry.length_aa }</td></tr>
-        <tr><th scope="row">Reference:</th><td>{ entry.reference }</td></tr>
+        <tr><th scope="row">Reference:</th><td>{ Array.isArray(entry.reference) ? (
+          entry.reference.map((ref, index, refs) => (
+            <span key={index}>{ref.description}; <a href={`https://pubmed.ncbi.nlm.nih.gov/${ref.pubMedId}/`}>Pubmed-{ref.pubMedId}</a>{index < refs.length - 1 ? ", " : ""}</span>
+          ))
+        ) : entry.reference }</td></tr>
         <tr><th scope="row">Protein accession (NCBI)</th><td>{
           typeof entry.protein_accession_ncbi === "string" ? (
             <a href={`https://www.ncbi.nlm.nih.gov/protein/${entry.protein_accession_ncbi}`} >{ entry.protein_accession_ncbi }</a>

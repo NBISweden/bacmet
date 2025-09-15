@@ -40,7 +40,7 @@ const EmptyValidatedEntry: Validated = {
   compounds: [],
   description: "...",
   length_aa: "...",
-  reference: "...",
+  reference: [],
   protein_accession_ncbi: "...",
   protein_accession_uniprot: "...",
   nucleotide_accession_ena_embl: "...",

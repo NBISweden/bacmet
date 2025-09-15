@@ -42,7 +42,7 @@ export type Validated = {
   compounds: Compound[];
   description: string;
   length_aa: string;
-  reference: string;
+  reference: PubMedReference[];
 }
 
 export type Predicted = {
@@ -66,6 +66,11 @@ export type Predicted = {
   lddt: number;
   alntmscore: number;
   rmsd: number;
+}
+
+export type PubMedReference = {
+  description: string;
+  pubMedId: string;
 }
 
 export type Meta = {

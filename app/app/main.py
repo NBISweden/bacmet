@@ -228,7 +228,7 @@ def validated_search():
                 ],
                 description=item.description,
                 length_aa=item.length_aa,
-                reference=item.reference,
+                reference=parsers.pubmed_list(item.reference),
             )
             for (item,) in items
         ],
@@ -264,7 +264,7 @@ def validated_entry(entry_id: str):
         ],
         description=item.description,
         length_aa=item.length_aa,
-        reference=item.reference,
+        reference=parsers.pubmed_list(item.reference),
     )
     return jsonify(dataclasses.asdict(result))
 
