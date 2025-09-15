@@ -209,10 +209,13 @@ def validated_search():
         ),
         items=[
             ValidatedResult(
-                gene_name=item.gene_name,
                 bacmet_id=item.bacmet_id,
+                gene_name=item.gene_name,
                 code_for=item.code_for,
                 family=item.family,
+                protein_accession_ncbi=item.protein_accession_ncbi,
+                nucleotide_accession_ena_embl=item.nucleotide_accession_ena_embl,
+                protein_accession_uniprot=item.protein_accession_uniprot,
                 organism=item.organism,
                 location=item.location,
                 compounds=[
@@ -242,10 +245,13 @@ def validated_entry(entry_id: str):
     if item is None:
         return make_error(f"No entry found for: {entry_id}")
     result = ValidatedResult(
-        gene_name=item.gene_name,
         bacmet_id=item.bacmet_id,
+        gene_name=item.gene_name,
         code_for=item.code_for,
         family=item.family,
+        protein_accession_ncbi=item.protein_accession_ncbi,
+        nucleotide_accession_ena_embl=item.nucleotide_accession_ena_embl,
+        protein_accession_uniprot=item.protein_accession_uniprot,
         organism=item.organism,
         location=item.location,
         compounds=[

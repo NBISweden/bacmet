@@ -49,10 +49,13 @@ class Compound:
 
 @dataclasses.dataclass
 class ValidatedResult:
-    gene_name: str
     bacmet_id: str
+    gene_name: str
     code_for: str
     family: str
+    protein_accession_ncbi: str
+    nucleotide_accession_ena_embl: str
+    protein_accession_uniprot: str
     organism: str
     location: str
     compounds: list[Compound]

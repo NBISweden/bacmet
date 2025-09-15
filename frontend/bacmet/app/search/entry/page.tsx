@@ -41,6 +41,9 @@ const EmptyValidatedEntry: Validated = {
   description: "...",
   length_aa: "...",
   reference: "...",
+  protein_accession_ncbi: "...",
+  protein_accession_uniprot: "...",
+  nucleotide_accession_ena_embl: "...",
 }
 
 function EntryViewWithParams() {
@@ -67,6 +70,9 @@ function EntryViewWithParams() {
         description: loadingText,
         length_aa: loadingText,
         reference: loadingText,
+        protein_accession_ncbi: loadingText,
+        protein_accession_uniprot: loadingText,
+        nucleotide_accession_ena_embl: loadingText,
       }
       return validated ? validated : placeholder
     },

@@ -30,10 +30,13 @@ export type Compound = {
 }
 
 export type Validated = {
-  gene_name: string;
   bacmet_id: string;
+  gene_name: string;
   code_for: string;
   family: string;
+  protein_accession_ncbi: string;
+  nucleotide_accession_ena_embl: string;
+  protein_accession_uniprot: string;
   organism: string;
   location: string;
   compounds: Compound[];
