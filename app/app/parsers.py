@@ -1,5 +1,5 @@
 from typing import cast,  Optional, Tuple
-from .types import DatabaseOption, ChemicalClassType, LocationOption, OpenRange
+from .types import DatabaseOption, LocationOption, OpenRange
 
 
 def database(data: str) -> Optional[DatabaseOption]:
@@ -10,31 +10,11 @@ def database(data: str) -> Optional[DatabaseOption]:
     raise ValueError(f"Could not parse database: {value}")
 
 
-def chemical_class(data: str) -> (
-    Optional[Tuple[ChemicalClassType, str]]
-):
-    if data:
-        [value_type_str, *value] = data.split(":")
-        value_type_str = value_type_str.lower()
-        if value_type_str in {"class", "compound"}:
-            value_type = cast(ChemicalClassType, value_type_str)
-            return value_type, ":".join(value)
-    else:
-        return None
-
-    raise ValueError(f"Could not parse chemical_class: {data}")
-
-
 def location(
     data: str,
-    database: DatabaseOption
 ) -> Optional[LocationOption]:
     value = None if data is None else data.lower()
-    allowed_values = (
-        {"any", "chromosome", "plasmid"}
-        if database == "validated"
-        else {"any", "chromosome"}
-    )
+    allowed_values = {"any", "chromosome", "plasmid"}
     if value is None or value in allowed_values:
         return None if value == "any" else cast(
            LocationOption, value

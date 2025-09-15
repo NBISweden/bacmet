@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
 import {navigateInPage} from "../../utils";
-import { MultiSelectField } from "../components/multi-select-field"
+import { MultiSelectField } from "../components/multi-select-field/multi-select-field"
 
 const PredictedTableItems: (keyof Predicted)[] = [
   "blast_hit_genome",
@@ -125,11 +125,13 @@ function EntryViewWithParams() {
   return (
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
+        <h1 className="text-center">{validatedEntry.gene_name}: {validatedEntry.organism} ({validatedEntry.bacmet_id})</h1>
         <ValidatedEntry entry={validatedEntry} />
       </div>
       {predictedResult ? (
           <>
             <div className="col-sm-12 col-md-9 col-lg-7">
+              <h2>Related predictions</h2>
               <hr/>
               <MultiSelectField field={tableItemsField} onChange={handleSelectedTableItemsChange}/>
               <hr/>

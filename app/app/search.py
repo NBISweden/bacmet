@@ -12,27 +12,30 @@ from .database import (
 from .types import (
     LocationOption,
     OpenRange,
-    ChemicalClass,
 )
 from functools import cache
 
 
 def apply_search_filters(
     stmt,
-    chemical_class: Optional[ChemicalClass],
+    chemical_class: Optional[list[str]],
+    compound: Optional[list[str]],
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
-    gene_name: Optional[str] = None,
+    gene_name: Optional[list[str]] = None,
     free_text: Optional[str] = None
 ):
-    if chemical_class:
-        chemical_class_type, chemical_class_name = chemical_class
+    if chemical_class and len(chemical_class) > 0:
         stmt = stmt.filter(
             Validated.compounds.any(
-                Compounds.compound_name == chemical_class_name
-                if chemical_class_type == "compound"
-                else Compounds.chemical_class == chemical_class_name
+                Compounds.chemical_class.in_(chemical_class)
+            )
+        )
+    if compound and len(compound) > 0:
+        stmt = stmt.filter(
+            Validated.compounds.any(
+                Compounds.compound_name.in_(compound)
             )
         )
     if protein_description:
@@ -55,7 +58,7 @@ def apply_search_filters(
             )
     if gene_name:
         stmt = stmt.filter(
-            Validated.gene_name == gene_name
+            Validated.gene_name.in_(gene_name)
         )
     if free_text:
         search_pattern = f"%{free_text}%"
@@ -92,11 +95,12 @@ def get_from_validated(
 
 
 def find_in_validated(
-    chemical_class: Optional[ChemicalClass],
+    chemical_class: Optional[list[str]],
+    compound: Optional[list[str]],
     location: Optional[LocationOption],
     protein_description: Optional[str],
     peptide_sequence_length_range: Optional[OpenRange],
-    gene_name: Optional[str],
+    gene_name: Optional[list[str]],
     pagination: Tuple[int, int],
     free_text: Optional[str] = None
 ) -> Tuple[list[Validated], int]:
@@ -105,6 +109,7 @@ def find_in_validated(
             joinedload(Validated.compounds)
         ).order_by(Validated.validated_id),
         chemical_class,
+        compound,
         location,
         protein_description,
         peptide_sequence_length_range,
@@ -120,10 +125,11 @@ def find_in_validated(
 
 
 def find_in_predicted(
-    chemical_class: Optional[ChemicalClass],
+    chemical_class: Optional[list[str]],
+    compound: Optional[list[str]],
     location: Optional[LocationOption],
     protein_description: Optional[str],
-    gene_name: Optional[str],
+    gene_name: Optional[list[str]],
     bacmet_id: Optional[str],
     pagination: Tuple[int, int]
 ) -> Tuple[list[Tuple[Validated, PredictedUniqueHomologues]], int]:
@@ -141,6 +147,7 @@ def find_in_predicted(
     stmt = apply_search_filters(
         base_stmt,
         chemical_class,
+        compound,
         location,
         protein_description,
         (None, None),
@@ -154,31 +161,32 @@ def find_in_predicted(
 
 @cache
 def get_chemical_classes() -> list[Tuple[str, str]]:
-    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
-    stmt = select(Compounds.chemical_class).filter(Compounds.compound_id.in_(all_compounds)).distinct()
+    all_compounds = select(ValidatedCompounds.compound_id).distinct()
+    stmt = select(Compounds.chemical_class).filter(Compounds.compound_id.in_(all_compounds)).distinct().order_by(collate(Compounds.chemical_class, 'NOCASE'))
     with db_session() as session:
         chemical_classes = session.execute(stmt)
         return [
-            (f"class: {cc}", f"class:{cc}")
+            (f"class: {cc}", cc)
             for cc, in chemical_classes
         ]
 
 
 @cache
-def get_compounds() -> list[Tuple[str, str]]:
-    all_compounds = select(ValidatedCompounds.compound_id).distinct().subquery()
-    stmt = select(Compounds.compound_name).filter(Compounds.compound_id.in_(all_compounds)).distinct()
+def get_compounds() -> list[Tuple[str, str, str]]:
+    all_compounds = select(ValidatedCompounds.compound_id).distinct()
+    stmt = select(Compounds.compound_name, Compounds.chemical_class, Compounds.cas_number).filter(Compounds.compound_id.in_(all_compounds)).distinct().order_by(collate(Compounds.compound_name, 'NOCASE'))
     with db_session() as session:
-        compound_names = session.execute(stmt)
+        compound_info = session.execute(stmt)
         return [
-            (cn, f"compound:{cn}")
-            for cn, in compound_names
+            (cname, cclass, cnum)
+            for cname, cclass, cnum in compound_info
         ]
 
 
 @cache
 def get_gene_names(
-    chemical_class: Optional[ChemicalClass],
+    chemical_class: Optional[list[str]],
+    compound: Optional[list[str]],
     location: Optional[LocationOption],
     protein_description: Optional[str],
     gene_name: Optional[str]
@@ -186,6 +194,7 @@ def get_gene_names(
     summary_stmt = apply_search_filters(
         select(Validated.gene_name).order_by(collate(Validated.gene_name, 'NOCASE')),
         chemical_class,
+        compound,
         location,
         protein_description,
         (None, None)

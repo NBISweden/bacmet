@@ -100,18 +100,20 @@ def health_check():
 @app.route('/api/search/predicted')
 @cross_origin()
 def predicted_search():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
-    location = parsers.location(request.args.get("location"), "predicted")
+    chemical_class = request.args.getlist("chemical_class")
+    compound = request.args.getlist("compound")
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
-    gene_name = request.args.get("gene_name")
+    gene_name = request.args.getlist("gene_name")
     bacmet_id = request.args.get("bacmet_id")
     page = max(0, int(request.args.get("page", "0")))
     page_size = 100
 
     items, total_count = find_in_predicted(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         gene_name=gene_name,
@@ -120,7 +122,10 @@ def predicted_search():
     )
 
     last_page = math.ceil(total_count / page_size) - 1
-    args = request.args.to_dict()
+    args = {
+        key: values
+        for key, values in request.args.lists()
+    }
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,
@@ -162,8 +167,9 @@ def predicted_search():
 @app.route('/api/search/validated')
 @cross_origin()
 def validated_search():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
-    location = parsers.location(request.args.get("location"), "validated")
+    chemical_class = request.args.getlist("chemical_class")
+    compound = request.args.getlist("compound")
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
@@ -171,7 +177,7 @@ def validated_search():
         request.args.get("peptide_sequence_length_min"),
         request.args.get("peptide_sequence_length_max")
     ))
-    gene_name = request.args.get("gene_name")
+    gene_name = request.args.getlist("gene_name")
     free_text = request.args.get("free_text")
 
     page = max(0, int(request.args.get("page", "0")))
@@ -179,6 +185,7 @@ def validated_search():
 
     items, total_count = find_in_validated(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         peptide_sequence_length_range=peptide_sequence_length_range,
@@ -188,7 +195,10 @@ def validated_search():
     )
 
     last_page = math.ceil(total_count / page_size) - 1
-    args = request.args.to_dict()
+    args = {
+        key: values
+        for key, values in request.args.lists()
+    }
     search_result = SearchResult(
         _meta=Meta(
             totalRecords=total_count,
@@ -205,7 +215,11 @@ def validated_search():
                 organism=item.organism,
                 location=item.location,
                 compounds=[
-                    Compound(compound_name=compound.compound_name)
+                    Compound(
+                        compound_name=compound.compound_name,
+                        chemical_class=compound.chemical_class,
+                        cas_number=compound.cas_number
+                    )
                     for compound in item.compounds
                 ],
                 description=item.description,
@@ -234,7 +248,11 @@ def validated_entry(entry_id: str):
         organism=item.organism,
         location=item.location,
         compounds=[
-            Compound(compound_name=compound.compound_name)
+            Compound(
+                compound_name=compound.compound_name,
+                chemical_class=compound.chemical_class,
+                cas_number=compound.cas_number
+            )
             for compound in item.compounds
         ],
         description=item.description,
@@ -268,11 +286,12 @@ def aggregated_compound():
 
     result = SearchResult(
         items=[
-            Item(
-                label=label,
-                value=value
+            Compound(
+                compound_name=compound_name,
+                chemical_class=chemical_class,
+                cas_number=cas_number
             )
-            for (label, value) in compounds
+            for (compound_name, chemical_class, cas_number) in compounds
         ]
     )
     return jsonify(dataclasses.asdict(result))
@@ -281,14 +300,16 @@ def aggregated_compound():
 @app.route('/api/aggregated/gene_name')
 @cross_origin()
 def aggregated_gene_name():
-    chemical_class = parsers.chemical_class(request.args.get("chemical_class"))
-    location = parsers.location(request.args.get("location"), "validated")
+    chemical_class = tuple(*request.args.getlist("chemical_class"))
+    compound = tuple(*request.args.getlist("compound"))
+    location = parsers.location(request.args.get("location"))
     protein_description = parsers.protein_description(
         request.args.get("protein_description")
     )
     gene_name = request.args.get("gene_name")
     gene_names = get_gene_names(
         chemical_class=chemical_class,
+        compound=compound,
         location=location,
         protein_description=protein_description,
         gene_name=gene_name,
@@ -313,7 +334,7 @@ def sensitivity_distributions_histogram():
     biocide = request.args.get("biocide")
 
     if species is None or biocide is None:
-        return make_error(f"Missing parameter biocide or species.", 400)
+        return make_error("Missing parameter biocide or species.", 400)
 
     buckets = get_sensitivity_histogram(
         species=species,

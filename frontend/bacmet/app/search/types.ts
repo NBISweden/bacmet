@@ -1,6 +1,7 @@
 export type FieldValue<T=unknown> = {
   value: T;
   label: string;
+  _meta?: Record<string, unknown>;
 }
 
 export type Field<T=unknown> = {
@@ -18,10 +19,13 @@ export type MultiValueField<T=unknown> = Omit<Field<T>, "value"> & {
 export type SearchParams = {
   chemicalClasses: FieldValue<string>[];
   compounds: FieldValue<string>[];
+  geneNames: FieldValue<string>[];
 }
 
 export type Compound = {
   compound_name: string;
+  chemical_class: string;
+  cas_number: string;
 }
 
 export type Validated = {

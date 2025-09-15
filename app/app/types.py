@@ -2,12 +2,6 @@ import dataclasses
 from typing import Literal, Optional, Tuple, Any
 
 
-ChemicalClassType = Literal["class", "compound"]
-
-
-ChemicalClass = Tuple[ChemicalClassType, str]
-
-
 DatabaseOption = Literal["validated", "predicted"]
 
 
@@ -21,6 +15,7 @@ OpenRange = Tuple[int | None, int | None]
 class Item:
     label: str
     value: str
+    _meta: Optional[dict[str, str]] = None
 
 
 @dataclasses.dataclass
@@ -47,6 +42,8 @@ class SearchResult:
 @dataclasses.dataclass
 class Compound:
     compound_name: str
+    chemical_class: str
+    cas_number: str
 
 
 @dataclasses.dataclass

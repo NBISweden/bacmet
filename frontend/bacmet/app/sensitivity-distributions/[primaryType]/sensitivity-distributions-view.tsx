@@ -4,7 +4,7 @@ import { useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { FieldValue, MultiValueField, Field } from "../../search/types";
 import { SelectField } from "../../search/components/select-field";
-import { MultiSelectField } from "../../search/components/multi-select-field";
+import { MultiSelectField } from "../../search/components/multi-select-field/multi-select-field";
 import { FieldSet } from "../../search/components/fieldset";
 import { navigateInPage, usePromiseData, fetchData } from "../../utils";
 import BubblePlot from "./dynamic-bubble-plot";
@@ -156,7 +156,7 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
       <div className="col-sm-12 col-md-9 col-lg-7">
         <h1>Sensitivity distributions for {primaryLabel}</h1>
         <FieldSet><SelectField field={primaryField} onChange={handlePrimarySelect}/></FieldSet>
-        <FieldSet><MultiSelectField field={secondaryField} onChange={handleSecondarySelect} /></FieldSet>
+        <FieldSet><MultiSelectField field={secondaryField} onChange={handleSecondarySelect} filterText={`Filter ${secondaryType} options`}/></FieldSet>
         <hr />
       </div>
       {primaryIdentifier && secondaryIdentifiers.length > 0 ? (
