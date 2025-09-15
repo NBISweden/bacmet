@@ -2,6 +2,7 @@ from .database import (
     db_session,
     SensitivityDistributions
 )
+from sqlalchemy.sql import collate
 from sqlalchemy import case, func, select
 from functools import cache
 
@@ -42,7 +43,7 @@ def get_unique_values(value_column, row_filter=None):
     stmt = stmt if row_filter is None else stmt.filter(row_filter)
 
     with db_session() as session:
-        items = session.execute(stmt.distinct())
+        items = session.execute(stmt.distinct().order_by(collate(value_column, 'NOCASE')))
         return [
             item[0]
             for item in items
