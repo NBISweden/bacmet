@@ -62,7 +62,7 @@ def apply_search_filters(
             Validated.gene_name.in_(gene_name)
         )
     if free_text:
-        search_pattern = f"%{free_text}%"
+        search_pattern = f"%{free_text.replace('*', '%')}%"
         stmt = stmt.filter(
             (Validated.gene_name.ilike(search_pattern)) |
             (Validated.compounds.any(Compounds.compound_name.ilike(search_pattern))) |
