@@ -10,7 +10,7 @@ export default function About() {
   const { content } = matter(fileContent);
 
   return (
-    <div className="text-center pt-3">
+    <div className="pt-3">
       <Markdown>{content}</Markdown>
     </div>
   );

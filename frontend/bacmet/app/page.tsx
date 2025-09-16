@@ -39,7 +39,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="text-center bg-image position-relative" style={{ backgroundImage: `url('${indexProps.heroImage}')` }}>
+      <div className="bg-image position-relative" style={{ backgroundImage: `url('${indexProps.heroImage}')` }}>
         <div className="d-flex justify-content-center align-items-center h-100">
           <div className="bg-dark bg-opacity-75 px-4 py-3">
             <p className="hero-image-text">{indexProps.heroText}</p>

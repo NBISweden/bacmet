@@ -125,7 +125,7 @@ function EntryViewWithParams() {
   return (
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
-        <h1 className="text-center">{validatedEntry.gene_name}: {validatedEntry.organism} ({validatedEntry.bacmet_id})</h1>
+        <h1>{validatedEntry.gene_name}: {validatedEntry.organism} ({validatedEntry.bacmet_id})</h1>
         <ValidatedEntry entry={validatedEntry} />
       </div>
       {predictedResult ? (

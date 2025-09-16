@@ -28,7 +28,7 @@ export default function Contact() {
 
   return (
     <>
-      <div className="text-center pt-3">
+      <div className="pt-3">
         <Markdown>{content}</Markdown>
       </div>
       <div className="row justify-content-center">
