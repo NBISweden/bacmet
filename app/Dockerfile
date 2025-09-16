@@ -25,8 +25,8 @@ COPY --chmod=444 app/app/requirements.txt app/
 RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.txt
 
-# The start script will be copied here in later build stages.
-CMD ./start-script.sh
+# The start script.
+COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
 
 EXPOSE 8080/tcp
 
@@ -45,9 +45,10 @@ RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.dev.txt
 
 COPY --chown=$UID --chmod=444 app/caddy/Caddyfile.dev ./Caddyfile
-COPY --chown=$UID --chmod=555 app/scripts/start-script.dev.sh ./start-script.sh
 
 USER "$UID"
+
+CMD [ "./start-script.sh", "dev" ]
 
 
 ## Production build setup
@@ -104,3 +105,5 @@ COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
 COPY --chown=$UID app/app ./app/
 
 USER "$UID"
+
+CMD [ "./start-script.sh" ]
