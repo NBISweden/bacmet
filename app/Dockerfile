@@ -22,7 +22,7 @@ RUN install -d -o "$UID" app/
 
 # Install Python dependencies.
 COPY --chmod=444 app/app/requirements.txt app/
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.txt
 
 # The start script will be copied here in later build stages.
@@ -41,7 +41,7 @@ ARG UID=1000
 
 # Install developent Python dependencies.
 COPY --chmod=444 app/app/requirements.dev.txt app/
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.dev.txt
 
 COPY --chown=$UID --chmod=444 app/caddy/Caddyfile.dev ./Caddyfile
@@ -60,14 +60,13 @@ ARG UID=1000
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN install -d -o "$UID" /tmp/build /tmp/build/.npm
-
 WORKDIR /tmp/build
 
 # Set up the Node build directories so that we can build everything as
 # our service user later.
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	chown -R "$UID" /tmp/build/
 
 # Switch to the service user as the rest of the RUN actions shouldn't
@@ -75,13 +74,15 @@ RUN --mount=type=cache,target=/tmp/build/.npm \
 USER "$UID"
 
 COPY --chown=$UID --chmod=444 frontend/bacmet/package*.json ./
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm ci
 
 COPY --chown=$UID frontend/bacmet/ ./
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm run build
 
 
