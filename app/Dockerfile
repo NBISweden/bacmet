@@ -9,8 +9,11 @@ ARG UID=1000
 
 RUN adduser -D -u "$UID" bacmet
 
-RUN --mount=type=cache,target=/etc/apk/cache \
-	apk add caddy
+RUN --mount=type=cache,id=apk-cache,target=/etc/apk/cache \
+	apk add \
+		caddy~2 \
+		miller~6 \
+		sqlite~3
 
 WORKDIR /home/bacmet
 
@@ -20,6 +23,9 @@ RUN install -d -o "$UID" caddy/ data/
 # The "app" directory.
 RUN install -d -o "$UID" app/
 
+# The "db-scripts" directory.
+RUN install -d -o "$UID" db-scripts/
+
 # Install Python dependencies.
 COPY --chmod=444 app/app/requirements.txt app/
 RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
@@ -27,6 +33,9 @@ RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 
 # The start script.
 COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
+
+# Copy the database loading scripts and schema into "db-scripts".
+COPY --chown=$UID --chmod=555 ../database/ db-scripts/
 
 EXPOSE 8080/tcp
 
