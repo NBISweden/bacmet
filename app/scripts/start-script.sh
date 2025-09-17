@@ -20,9 +20,9 @@ while true; do
 		echo 'Database file does not exist, importing data.' >&2
 		do_import=true
 	elif [ -d "$IMPORT_DIR" ]; then
-                # If the import directory exists, import data.  This
-                # allows users to drop new data into the import
-                # directory to replace the existing database.
+		# If the import directory exists, import data.  This
+		# allows users to drop new data into the import
+		# directory to replace the existing database.
 		echo 'Import directory exists, (re-)importing data.' >&2
 		do_import=true
 	fi
@@ -35,14 +35,14 @@ while true; do
 			sleep 5
 		done
 
-                # Sleep for 30 seconds to give data a chance to be
-                # copied in.
+		# Sleep for 30 seconds to give data a chance to be
+		# copied in.
 		echo 'Sleeping for 30s...' >&2
 		sleep 30
 
-                # Import data into a temporary database, then switch it
-                # to be the active one.  Also, remove the uploaded raw
-                # data.
+		# Import data into a temporary database, then switch it
+		# to be the active one.  Also, remove the uploaded raw
+		# data.
 		DATABASE=$DATABASE.new db-scripts/scripts/import-all.sh
 		mv "$DATABASE.new" "$DATABASE"
 		rm -rf "$IMPORT_DIR"
