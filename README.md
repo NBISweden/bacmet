@@ -19,7 +19,7 @@ structure on the Chalmers server (see below).
 
 The data is imported into the persistent SQLite database
 `/data/database.db` by copying the `data-import` directory into the
-running `app` containers persistant volume.  This can be done at any
+running `app` containers persistent volume.  This can be done at any
 time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
 
