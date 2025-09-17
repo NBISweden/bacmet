@@ -27,7 +27,7 @@ export default function RootLayout({
       ]
     },
     { label: "BLAST", href: "#" },
-    { label: "Download", href: "#" },
+    { label: "Download", href: "/download/" },
     { label: "FAQ", href: "/faq/" },
     { label: "About", href: "/about/" },
     { label: "Contact", href: "/contact/" },

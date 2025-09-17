@@ -5,7 +5,7 @@ export default function Markdown({ children }: { children: string }) {
     <ReactMarkdown
       components={{
         img: ({ node, ...props }) => (
-          <img {...props} className="img-fluid" />
+          <img {...props} className="img-fluid" style={{ display: "block", marginLeft: "auto", marginRight: "auto" }} />
         ),
       }}
     >
