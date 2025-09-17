@@ -16,7 +16,8 @@ from .search import (
     get_compounds,
     get_gene_names,
     get_from_validated,
-    get_from_compounds
+    get_from_compounds,
+    get_from_predicted,
 )
 from .sensitivity_distributions import (
     get_sensitivity_histogram,
@@ -32,7 +33,8 @@ from .types import (
     Compound,
     Item,
     Histogram,
-    HistogramBucket
+    HistogramBucket,
+    PredictedGroup
 )
 from .core import create_app
 from flask_cors import cross_origin
@@ -265,6 +267,44 @@ def validated_entry(entry_id: str):
         description=item.description,
         length_aa=item.length_aa,
         reference=parsers.pubmed_list(item.reference),
+    )
+    return jsonify(dataclasses.asdict(result))
+
+
+@app.route('/api/predicted/<entry_id>')
+@cross_origin()
+def predicted_entry(entry_id: str):
+    item = get_from_predicted(entry_id)
+    if item is None:
+        return make_error(f"No entry found for: {entry_id}")
+    result = PredictedResult(
+        bacmet_id=item.validated.bacmet_id,
+        blast_hit_genome=item.blast_hit_genome,
+        start_alignment_query=item.start_alignment_query,
+        end_alignment_query=item.end_alignment_query,
+        fident=item.fident,
+        alnlen=item.alnlen,
+        mismatch=item.mismatch,
+        gapopen=item.gapopen,
+        qstart=item.qstart,
+        qend=item.qend,
+        qlen=item.qlen,
+        tstart=item.tstart,
+        tend=item.tend,
+        tlen=item.tlen,
+        evalue=item.evalue,
+        bits=item.bits,
+        prob=item.prob,
+        lddt=item.lddt,
+        alntmscore=item.alntmscore,
+        rmsd=item.rmsd,
+        group=PredictedGroup(
+            matching_ids=[
+                item.strip()
+                for item in item.group.matching_ids.split(",")
+            ],
+            sequence=item.group.sequence.sequence,
+        )
     )
     return jsonify(dataclasses.asdict(result))
 

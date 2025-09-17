@@ -68,6 +68,12 @@ class ValidatedResult:
 
 
 @dataclasses.dataclass
+class PredictedGroup:
+    sequence: str
+    matching_ids: list[str]
+
+
+@dataclasses.dataclass
 class PredictedResult:
     bacmet_id: str
     blast_hit_genome: str
@@ -89,6 +95,7 @@ class PredictedResult:
     lddt: float
     alntmscore: float
     rmsd: float
+    group: Optional[PredictedGroup] = None
 
 
 @dataclasses.dataclass

@@ -33,3 +33,21 @@ Validated.compounds = relationship(
     backref='validated',
     viewonly=True
 )
+
+PredictedUniqueHomologues.group = relationship(
+    'predicted_groups',
+    viewonly=True,
+    uselist=False
+)
+
+PredictedUniqueHomologues.validated = relationship(
+    'validated',
+    viewonly=True,
+    uselist=False
+)
+
+PredictedGroups.sequence = relationship(
+    'sequences',
+    viewonly=True,
+    uselist=False
+)
