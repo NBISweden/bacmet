@@ -26,7 +26,7 @@ export default function RootLayout({
         { label: "For biocides", href: "/sensitivity-distributions/biocide/" },
       ]
     },
-    { label: "BLAST", href: "#" },
+    { label: "Compounds", href: "/compounds/" },
     { label: "Download", href: "/download/" },
     { label: "FAQ", href: "/faq/" },
     { label: "About", href: "/about/" },
