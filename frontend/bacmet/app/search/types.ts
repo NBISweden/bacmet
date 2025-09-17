@@ -43,6 +43,7 @@ export type Validated = {
   description: string;
   length_aa: string;
   reference: PubMedReference[];
+  sequence?: string;
 }
 
 export type Predicted = {
@@ -107,3 +108,7 @@ export type ErrorResult = {
   type: "error";
   error: string;
 }
+
+export type ReplicateKeys<T, V> = {
+  [K in keyof T]: V;
+};

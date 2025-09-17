@@ -1,11 +1,11 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
 import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
-import {PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField} from "../types";
+import { PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField } from "../types";
 import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
-import {navigateInPage} from "../../utils";
+import { navigateInPage } from "../../utils";
 import { MultiSelectField } from "../components/multi-select-field/multi-select-field";
 import { default as NextLink } from 'next/link';
 
@@ -61,7 +61,7 @@ function EntryViewWithParams() {
   const validatedEntry = useMemo(
     () => {
       const loadingText = <span>{`Loading data... ${entryId}`}</span>;
-      const placeholder: Record<keyof Validated, ReactNode>= {
+      const placeholder: Record<keyof Omit<Validated, "sequence">, ReactNode>= {
         gene_name: loadingText,
         bacmet_id: loadingText,
         code_for: loadingText,
