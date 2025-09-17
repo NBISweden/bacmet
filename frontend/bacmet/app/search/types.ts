@@ -66,6 +66,10 @@ export type Predicted = {
   lddt: number;
   alntmscore: number;
   rmsd: number;
+  group?: {
+    matching_ids: string[],
+    sequence: string;
+  }
 }
 
 export type PubMedReference = {
