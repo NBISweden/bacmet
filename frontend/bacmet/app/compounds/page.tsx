@@ -31,7 +31,9 @@ function CompoundListWithData() {
 function CompoundList({entries}: {entries: Compound[]}) {
   const [usedChemcialClasses, setUsedChemicalClasses] = useState<Set<unknown>>(new Set());
   const chemicalClasses = useMemo(() => (
-    Array.from(new Set<string>(entries.map(c => c.chemical_class))).map<FieldValue>(cc => ({value: cc, label: cc}))
+    Array.from(new Set<string>(entries.map(c => c.chemical_class)))
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .map<FieldValue>(cc => ({value: cc, label: cc}))
   ), [entries]);
   const chemicalClassField: MultiValueField = useMemo(() => ({
     label: "Filter by chemical classes",
