@@ -27,8 +27,14 @@ CREATE TABLE validated (
 	description TEXT NOT NULL,
 	length_aa INTEGER NOT NULL,
 	reference TEXT NOT NULL,
+	nucleotide_sequence_id INTEGER NOT NULL,
+	protein_sequence_id INTEGER NOT NULL,
 
 	PRIMARY KEY(validated_id)
+	FOREIGN KEY(nucleotide_sequence_id) REFERENCES
+		sequences(sequence_id),
+	FOREIGN KEY(protein_sequence_id) REFERENCES
+		sequences(sequence_id)
 );
 
 DROP TABLE IF EXISTS validated_compounds;
