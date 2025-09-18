@@ -38,7 +38,7 @@ CREATE TABLE validated (
 	nucleotide_sequence_id INTEGER,
 	protein_sequence_id INTEGER,
 
-	PRIMARY KEY(validated_id)
+	PRIMARY KEY(validated_id),
 	FOREIGN KEY(nucleotide_sequence_id) REFERENCES
 		sequences(sequence_id),
 	FOREIGN KEY(protein_sequence_id) REFERENCES
