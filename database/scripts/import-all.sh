@@ -27,6 +27,10 @@ import-validated-compounds.sh \
 import-validated.sh \
 	"$IMPORT_DIR"/1-Experimentally_validated/1-BacMet_experimentally_validated_database_3.0.csv
 
+import-validated-sequence-files.sh \
+	"$IMPORT_DIR"/1-Experimentally_validated/BacMet_nt_sequences.fasta \
+	"$IMPORT_DIR"/1-Experimentally_validated/BacMet_v3_proteins.fasta
+
 import-validated-pdb-files.sh \
 	"$IMPORT_DIR"/1-Experimentally_validated/Experimentally_validated_PDB_files.zip
 
