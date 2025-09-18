@@ -20,11 +20,24 @@ while true; do
 		echo 'Database file does not exist, importing data.' >&2
 		do_import=true
 	elif [ -d "$IMPORT_DIR" ]; then
-		# If the import directory exists, import data.  This
-		# allows users to drop new data into the import
-		# directory to replace the existing database.
-		echo 'Import directory exists, (re-)importing data.' >&2
-		do_import=true
+                # If the import directory exists, we need to check if
+                # any of the data is newer than the MD5 checksum file.
+                # If it is newer, we need test the data against the
+                # checksum file, and if it *fails* the test, we need to
+                # import the data.
+		if [ ! -f "$IMPORT_DIR.md5" ]; then
+			echo 'No checksum file found, importing data.' >&2
+			do_import=true
+		elif [ "$( find "$IMPORT_DIR" -newer "$IMPORT_DIR.md5" | wc -l )" -gt 0 ]; then
+			echo 'Possibly fresh data found, verifying...' >&2
+			if ! md5sum -c "$IMPORT_DIR.md5"; then
+				echo 'Data verification failed, importing data.' >&2
+				do_import=true
+			else
+				echo 'Data unchanged, skipping import.' >&2
+				touch "$IMPORT_DIR.md5"
+			fi
+		fi
 	fi
 
 	if "${do_import:-false}"; then
@@ -41,11 +54,10 @@ while true; do
 		sleep 30
 
 		# Import data into a temporary database, then switch it
-		# to be the active one.  Also, remove the uploaded raw
-		# data.
+		# to be the active one.
 		DATABASE=$DATABASE.new db-scripts/scripts/import-all.sh
 		mv "$DATABASE.new" "$DATABASE"
-		rm -rf "$IMPORT_DIR"
+		find "$IMPORT_DIR" -type f -exec md5sum {} + >"$IMPORT_DIR.md5"
 
 		unset -v do_import
 
