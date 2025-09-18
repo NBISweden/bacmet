@@ -55,10 +55,22 @@ while true; do
 		sleep 30
 
 		# Import data into a temporary database, then switch it
-		# to be the active one.
+		# to be the active one if the data did not change during
+		# the import.
+		find "$IMPORT_DIR" -type f -exec md5sum {} + | sort -o "$IMPORT_DIR.md5-before"
 		DATABASE=$DATABASE.new db-scripts/scripts/import-all.sh
+		find "$IMPORT_DIR" -type f -exec md5sum {} + | sort -o "$IMPORT_DIR.md5-after"
+
+		if ! cmp -s "$IMPORT_DIR.md5-before" "$IMPORT_DIR.md5-after"
+		then
+			echo 'Data changed during import, retrying...' >&2
+			rm -f "$DATABASE.new"
+			rm -f "$IMPORT_DIR.md5-before" "$IMPORT_DIR.md5-after"
+			continue
+		fi
 		mv "$DATABASE.new" "$DATABASE"
-		find "$IMPORT_DIR" -type f -exec md5sum {} + >"$IMPORT_DIR.md5"
+		rm -f "$IMPORT_DIR.md5-before"
+		mv "$IMPORT_DIR.md5-after" "$IMPORT_DIR.md5"
 
 		unset -v do_import
 
