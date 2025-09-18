@@ -16,6 +16,7 @@ from .search import (
     get_compounds,
     get_gene_names,
     get_from_validated,
+    get_from_compounds
 )
 from .sensitivity_distributions import (
     get_sensitivity_histogram,
@@ -392,6 +393,21 @@ def sensitivity_distributions_aggregated(param: str):
     )
     return jsonify(dataclasses.asdict(result))
 
+
+@app.route('/api/compound/<compound_name>')
+@cross_origin()
+def compound_entry(compound_name: str):
+    compound = get_from_compounds(compound_name)
+    if compound is None:
+        return make_error(f"No entry found for: {compound_name}")
+    from .types import Compound 
+    compound_data = Compound(
+        compound_name=compound.compound_name,
+        chemical_class=compound.chemical_class,
+        cas_number=compound.cas_number,
+        description=compound.description
+    )
+    return jsonify(dataclasses.asdict(compound_data))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

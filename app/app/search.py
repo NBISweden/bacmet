@@ -93,6 +93,16 @@ def get_from_validated(
         (value,) = session.execute(stmt).first()
         return value
 
+def get_from_compounds(
+    compound_name
+) -> Compounds:
+    stmt = select(Compounds).where(Compounds.compound_name == compound_name)
+    with db_session() as session:
+        result = session.execute(stmt).first()
+        if result:
+            (compound,) = result
+            return compound
+        return None
 
 def find_in_validated(
     chemical_class: Optional[list[str]],
