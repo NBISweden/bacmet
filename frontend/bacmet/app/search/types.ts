@@ -26,6 +26,7 @@ export type Compound = {
   compound_name: string;
   chemical_class: string;
   cas_number: string;
+  description?: string;
 }
 
 export type Validated = {

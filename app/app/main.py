@@ -394,7 +394,7 @@ def sensitivity_distributions_aggregated(param: str):
     return jsonify(dataclasses.asdict(result))
 
 
-@app.route('/api/compound/<compound_name>')
+@app.route('/api/compound/<path:compound_name>')
 @cross_origin()
 def compound_entry(compound_name: str):
     compound = get_from_compounds(compound_name)
