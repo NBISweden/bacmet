@@ -35,8 +35,8 @@ CREATE TABLE validated (
 	description TEXT NOT NULL,
 	length_aa INTEGER NOT NULL,
 	reference TEXT NOT NULL,
-	nucleotide_sequence_id INTEGER NOT NULL,
-	protein_sequence_id INTEGER NOT NULL,
+	nucleotide_sequence_id INTEGER,
+	protein_sequence_id INTEGER,
 
 	PRIMARY KEY(validated_id)
 	FOREIGN KEY(nucleotide_sequence_id) REFERENCES
