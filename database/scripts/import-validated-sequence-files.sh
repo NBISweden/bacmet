@@ -2,12 +2,12 @@
 
 set -u
 
-# shellshellcheck disable=SC2153
+# shellcheck disable=SC2153
 database=$DATABASE
 nucleotide_data=$1
 protein_data=$2
 
-echo 'Umporting sequence files...' >&2
+echo 'Importing sequence files...' >&2
 
 if [ ! -f "$database" ]; then
     printf 'Database "%s" not found.\n' "$database" >&2
