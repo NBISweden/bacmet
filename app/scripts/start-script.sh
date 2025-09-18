@@ -22,7 +22,7 @@ while true; do
 	elif [ -d "$IMPORT_DIR" ]; then
                 # If the import directory exists, we need to check if
                 # any of the data is newer than the MD5 checksum file.
-                # If it is newer, we need test the data against the
+                # If it is newer, we need to test the data against the
                 # checksum file, and if it *fails* the test, we need to
                 # import the data.
 		if [ ! -f "$IMPORT_DIR.md5" ]; then
