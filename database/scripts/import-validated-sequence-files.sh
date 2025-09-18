@@ -59,44 +59,44 @@ cat <<-SQL >"$tmpdir/import.sql"
 	PRAGMA temp_store = MEMORY;
 
 	CREATE TEMPORARY TABLE import_n (
-		sequence_id INTEGER PRIMARY KEY,
+		name TEXT NOT NULL,
 		sequence TEXT NOT NULL
 	);
 	CREATE TEMPORARY TABLE import_p (
-		sequence_id INTEGER PRIMARY KEY,
+		name TEXT NOT NULL,
 		sequence TEXT NOT NULL
 	);
 	CREATE TEMPORARY TABLE import_tmp (
 		name TEXT NOT NULL,
 		sequence TEXT NOT NULL,
-		type TEXT,
-		id INTEGER,
+		sequence_id INTEGER NOT NULL,
+		type TEXT NOT NULL,
 
-		PRIMARY KEY (id)
+		PRIMARY KEY (sequence_id)
 	);
 
 	.import "$tmpdir/data-n.csv" import_n
 	INSERT INTO import_tmp (name, sequence, type)
-	SELECT sequence_id, sequence, 'n'
+	SELECT name, sequence, 'n'
 	FROM import_n;
 
 	.import "$tmpdir/data-p.csv" import_p
 	INSERT INTO import_tmp (name, sequence, type)
-	SELECT sequence_id, sequence, 'p'
+	SELECT name, sequence, 'p'
 	FROM import_p;
 
 	INSERT INTO sequences (sequence_id, sequence)
-	SELECT id, sequence
+	SELECT sequence_id, sequence
 	FROM import_tmp;
 
 	UPDATE validated
 	SET nucleotide_sequence_id = (
-		SELECT id FROM import_tmp
+		SELECT sequence_id FROM import_tmp
 		WHERE type = 'n' AND name = validated.protein_accession_ncbi
 	);
 	UPDATE validated
 	SET protein_sequence_id = (
-		SELECT id FROM import_tmp
+		SELECT sequence_id FROM import_tmp
 		WHERE type = 'p' AND name = validated.protein_accession_ncbi
 	);
 SQL
