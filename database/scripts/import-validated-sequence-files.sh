@@ -32,7 +32,7 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 fasta_to_csv () {
 	awk '
 		function output() {
-			if (id != "") printf("%s,\"%s\",,\n", id, data)
+			if (id != "") printf("%s,\"%s\"\n", id, data)
 		}
 
 		/^>/ {
@@ -57,19 +57,33 @@ echo 'Loading data into database...' >&2
 cat <<-SQL >"$tmpdir/import.sql"
 	.mode csv
 	PRAGMA temp_store = MEMORY;
+
+	CREATE TEMPORARY TABLE import_n (
+		sequence_id INTEGER PRIMARY KEY,
+		sequence TEXT NOT NULL
+	);
+	CREATE TEMPORARY TABLE import_p (
+		sequence_id INTEGER PRIMARY KEY,
+		sequence TEXT NOT NULL
+	);
 	CREATE TEMPORARY TABLE import_tmp (
 		name TEXT NOT NULL,
 		sequence TEXT NOT NULL,
-		id INTEGER,
 		type TEXT,
+		id INTEGER,
 
 		PRIMARY KEY (id)
 	);
 
-	.import "$tmpdir/data-n.csv" import_tmp
-	UPDATE import_tmp SET type = 'n';
-	.import "$tmpdir/data-p.csv" import_tmp
-	UPDATE import_tmp SET type = 'p' WHERE type IS NULL;
+	.import "$tmpdir/data-n.csv" import_n
+	INSERT INTO import_tmp (name, sequence, type)
+	SELECT sequence_id, sequence, 'n'
+	FROM import_n;
+
+	.import "$tmpdir/data-p.csv" import_p
+	INSERT INTO import_tmp (name, sequence, type)
+	SELECT sequence_id, sequence, 'p'
+	FROM import_p;
 
 	INSERT INTO sequences (sequence_id, sequence)
 	SELECT id, sequence
