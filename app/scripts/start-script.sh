@@ -28,7 +28,8 @@ while true; do
 		if [ ! -f "$IMPORT_DIR.md5" ]; then
 			echo 'No checksum file found, importing data.' >&2
 			do_import=true
-		elif [ "$( find "$IMPORT_DIR" -newer "$IMPORT_DIR.md5" | wc -l )" -gt 0 ]; then
+		elif find "$IMPORT_DIR" -newer "$IMPORT_DIR.md5" | grep -q .
+		then
 			echo 'Possibly fresh data found, verifying...' >&2
 			if ! md5sum -c "$IMPORT_DIR.md5"; then
 				echo 'Data verification failed, importing data.' >&2
