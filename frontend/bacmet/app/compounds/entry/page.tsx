@@ -1,29 +1,10 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useConfig } from "../../../contexts/config";
 import { Compound } from "../../search/types";
 
-export default function CompoundEntryPage() {
-  const { apiRoot } = useConfig();
-  const searchParams = useSearchParams();
-  const compoundName = searchParams.get("compound_name");
-  const [compound, setCompound] = useState<Compound | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!compoundName) return;
-    setError(null);
-
-    fetch(`${apiRoot}/compound/${encodeURIComponent(compoundName)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("not found");
-        return res.json();
-      })
-      .then((data) => setCompound(data))
-      .catch((e) => setError(e.message))
-  }, [apiRoot, compoundName]);
-
+function CompoundEntry({ compound, error, compoundName }: { compound: Compound | null, error: string | null, compoundName?: string | null }) {
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
@@ -57,5 +38,37 @@ export default function CompoundEntryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function CompoundEntryWithData() {
+  const { apiRoot } = useConfig();
+  const searchParams = useSearchParams();
+  const compoundName = searchParams.get("compound_name");
+  const [compound, setCompound] = useState<Compound | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!compoundName) return;
+    setError(null);
+    setCompound(null);
+
+    fetch(`${apiRoot}/compound/${encodeURIComponent(compoundName)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("not found");
+        return res.json();
+      })
+      .then((data) => setCompound(data))
+      .catch((e) => setError(e.message));
+  }, [apiRoot, compoundName]);
+
+  return <CompoundEntry compound={compound} error={error} compoundName={compoundName} />;
+}
+
+export default function CompoundEntryPage() {
+  return (
+    <Suspense fallback={<CompoundEntry compound={null} error={null} />}>
+      <CompoundEntryWithData />
+    </Suspense>
   );
 }
