@@ -400,7 +400,7 @@ def compound_entry(compound_name: str):
     compound = get_from_compounds(compound_name)
     if compound is None:
         return make_error(f"No entry found for: {compound_name}")
-    from .types import Compound 
+    
     compound_data = Compound(
         compound_name=compound.compound_name,
         chemical_class=compound.chemical_class,
