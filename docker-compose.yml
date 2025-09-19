@@ -1,15 +1,6 @@
 name: bacmet
 
 services:
-  database:
-    build:
-      context: database
-    environment:
-      - DATABASE_REINIT
-    volumes:
-      - data:/home/bacmet/data
-      - ./data-import:/data-import:ro
-    profiles: ["load-data"]
 
   app:
     build:

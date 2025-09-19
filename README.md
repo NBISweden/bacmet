@@ -18,25 +18,24 @@ put in a directory called `data-import`, replicating the directory
 structure on the Chalmers server (see below).
 
 The data is imported into the persistent SQLite database
-`/data/database.db` in the `database` container when the service is
-brought up and the database is missing or empty.
+`/data/database.db` by copying the `data-import` directory into the
+running `app` containers persistent volume.  This can be done at any
+time, and copying updated data (or the same old data a further time)
+will cause the already imported data to be discarded.
 
-The data can be reimported by removing the database’s Docker volume and
-restarting the service. This will cause the database to be recreated and
-the data to be imported:
-
+This shows how to explicitly throw the old data away and reload it from
+scratch.  In reality, the `down -v` step is not actually needed:
 ``` shell
-docker compose --profile load-data down -v
-docker compose --profile load-data up database
+docker compose down -v
+docker compose up -d
+
+docker compose cp data-import app:/home/bacmet/data/
 ```
 
-The database will also be recreated and the data reimported if the
-environment variable `DATABASE_REINIT` has a non-empty value when the
-service is started.
-
-``` shell
-DATABASE_REINIT=1 docker compose --profile load-data up database
-```
+By observing the container log (`docker compose logs -f`), you should
+be able to follow the service noticing that new data is available,
+importing it (in several steps), and then finally restarting the
+service.
 
 #### Fetching updated data
 

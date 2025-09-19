@@ -9,8 +9,11 @@ ARG UID=1000
 
 RUN adduser -D -u "$UID" bacmet
 
-RUN --mount=type=cache,target=/etc/apk/cache \
-	apk add caddy
+RUN --mount=type=cache,id=apk-cache,target=/etc/apk/cache \
+	apk add \
+		caddy~2 \
+		miller~6 \
+		sqlite~3
 
 WORKDIR /home/bacmet
 
@@ -20,13 +23,19 @@ RUN install -d -o "$UID" caddy/ data/
 # The "app" directory.
 RUN install -d -o "$UID" app/
 
+# The "db-scripts" directory.
+RUN install -d -o "$UID" db-scripts/
+
 # Install Python dependencies.
 COPY --chmod=444 app/app/requirements.txt app/
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.txt
 
-# The start script will be copied here in later build stages.
-CMD ./start-script.sh
+# The start script.
+COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
+
+# Copy the database loading scripts and schema into "db-scripts".
+COPY --chown=$UID --chmod=555 ../database/ db-scripts/
 
 EXPOSE 8080/tcp
 
@@ -41,13 +50,14 @@ ARG UID=1000
 
 # Install developent Python dependencies.
 COPY --chmod=444 app/app/requirements.dev.txt app/
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.dev.txt
 
 COPY --chown=$UID --chmod=444 app/caddy/Caddyfile.dev ./Caddyfile
-COPY --chown=$UID --chmod=555 app/scripts/start-script.dev.sh ./start-script.sh
 
 USER "$UID"
+
+CMD [ "./start-script.sh", "dev" ]
 
 
 ## Production build setup
@@ -60,14 +70,13 @@ ARG UID=1000
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN install -d -o "$UID" /tmp/build /tmp/build/.npm
-
 WORKDIR /tmp/build
 
 # Set up the Node build directories so that we can build everything as
 # our service user later.
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	chown -R "$UID" /tmp/build/
 
 # Switch to the service user as the rest of the RUN actions shouldn't
@@ -75,13 +84,15 @@ RUN --mount=type=cache,target=/tmp/build/.npm \
 USER "$UID"
 
 COPY --chown=$UID --chmod=444 frontend/bacmet/package*.json ./
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm ci
 
 COPY --chown=$UID frontend/bacmet/ ./
-RUN --mount=type=cache,target=/tmp/build/.npm \
-    --mount=type=cache,target=/tmp/build/node_modules \
+RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+    --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
+    --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm run build
 
 
@@ -103,3 +114,5 @@ COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
 COPY --chown=$UID app/app ./app/
 
 USER "$UID"
+
+CMD [ "./start-script.sh" ]

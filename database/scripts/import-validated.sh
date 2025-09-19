@@ -115,6 +115,15 @@ cat <<-'SQL' >>"$tmpdir/import.sql"
 	JOIN compounds c ON tmp.compound_name = c.compound_name;
 SQL
 
+# Clean up the compound names by removing "[class: ...]"
+cat <<-'SQL' >>"$tmpdir/import.sql"
+	UPDATE compounds
+	SET compound_name =
+		SUBSTR(compound_name, 1,
+			INSTR(compound_name, ' [class: ') - 1)
+	WHERE compound_name LIKE '% [class: %';
+SQL
+
 sqlite3 "$database" <"$tmpdir/import.sql"
 
 echo 'Done.' >&2
