@@ -1,5 +1,6 @@
 import React from "react";
 import { Validated, ReplicateKeys } from "../types";
+import Link from "next/link";
 
 
 export default function ValidatedEntry({entry}: {entry: Validated | ReplicateKeys<Validated, React.ReactNode>}) {
@@ -13,7 +14,12 @@ export default function ValidatedEntry({entry}: {entry: Validated | ReplicateKey
         {entry.protein_sequence ? <tr><th scope="row">Protein Sequence:</th><td className="text-break">{entry.protein_sequence}</td></tr> : <></>}
         <tr><th scope="row">Organism:</th><td><em>{ entry.organism }</em></td></tr>
         <tr><th scope="row">Location:</th><td>{ entry.location }</td></tr>
-        <tr><th scope="row">Compound:</th><td>{Array.isArray(entry.compounds) ? entry.compounds.map(c => c.compound_name).join(", ") : entry.compounds}</td></tr>
+        <tr><th scope="row">Compound:</th><td>{Array.isArray(entry.compounds) ? <>
+          {entry.compounds.map((c, index, array) => <React.Fragment key={c.compound_name}>
+            <Link href={`/compounds/entry?${new URLSearchParams({ compound_name: c.compound_name })}`}>{c.compound_name}</Link>
+            {index < array.length -1 ? ", " : <></>}
+          </React.Fragment>)}
+        </> : entry.compounds}</td></tr>
         <tr><th scope="row">Description:</th><td>{ entry.description }</td></tr>
         <tr><th scope="row">Length (amino acid):</th><td>{ entry.length_aa }</td></tr>
         <tr><th scope="row">Reference:</th><td>{ Array.isArray(entry.reference) ? (
