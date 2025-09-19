@@ -53,7 +53,6 @@ SQL
 printf '.import --skip 1 %s import_tmp\n' "$tmpdir"/*.csv >>"$tmpdir/import.sql"
 
 cat <<-'SQL' >>"$tmpdir/import.sql"
-	DELETE FROM sequences;
 	INSERT INTO sequences (sequence)
 	SELECT DISTINCT sequence
 	FROM import_tmp;

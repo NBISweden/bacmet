@@ -11,6 +11,14 @@ CREATE TABLE compounds (
 );
 CREATE INDEX chemical_class_idx ON compounds(chemical_class);
 
+DROP TABLE IF EXISTS sequences;
+CREATE TABLE sequences (
+	sequence_id INTEGER NOT NULL,
+	sequence TEXT NOT NULL,
+
+	PRIMARY KEY(sequence_id)
+);
+
 DROP TABLE IF EXISTS validated;
 CREATE TABLE validated (
 	validated_id INTEGER NOT NULL,
@@ -27,8 +35,14 @@ CREATE TABLE validated (
 	description TEXT NOT NULL,
 	length_aa INTEGER NOT NULL,
 	reference TEXT NOT NULL,
+	nucleotide_sequence_id INTEGER,
+	protein_sequence_id INTEGER,
 
-	PRIMARY KEY(validated_id)
+	PRIMARY KEY(validated_id),
+	FOREIGN KEY(nucleotide_sequence_id) REFERENCES
+		sequences(sequence_id),
+	FOREIGN KEY(protein_sequence_id) REFERENCES
+		sequences(sequence_id)
 );
 
 DROP TABLE IF EXISTS validated_compounds;
@@ -84,14 +98,6 @@ CREATE TABLE predicted_unique_homologues (
 		validated(validated_id)
 );
 CREATE INDEX validated_idx ON predicted_unique_homologues(validated_id);
-
-DROP TABLE IF EXISTS sequences;
-CREATE TABLE sequences (
-	sequence_id INTEGER NOT NULL,
-	sequence TEXT NOT NULL,
-
-	PRIMARY KEY(sequence_id)
-);
 
 DROP TABLE IF EXISTS predicted_groups;
 CREATE TABLE predicted_groups (
