@@ -43,7 +43,8 @@ export type Validated = {
   description: string;
   length_aa: string;
   reference: PubMedReference[];
-  sequence?: string;
+  protein_sequence?: string;
+  nucleotide_sequence?: string;
 }
 
 export type Predicted = {

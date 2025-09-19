@@ -9,7 +9,8 @@ export default function ValidatedEntry({entry}: {entry: Validated | ReplicateKey
         <tr><th scope="row">BacMet ID:</th><td>{ entry.bacmet_id }</td></tr>
         <tr><th scope="row">Code for:</th><td>{ entry.code_for }</td></tr>
         <tr><th scope="row">Family:</th><td>{ entry.family }</td></tr>
-        {entry.sequence ? <tr><th scope="row">Sequence:</th><td className="text-break">{entry.sequence}</td></tr> : <></>}
+        {entry.nucleotide_sequence ? <tr><th scope="row">Nucleotide Sequence:</th><td className="text-break">{entry.nucleotide_sequence}</td></tr> : <></>}
+        {entry.protein_sequence ? <tr><th scope="row">Protein Sequence:</th><td className="text-break">{entry.protein_sequence}</td></tr> : <></>}
         <tr><th scope="row">Organism:</th><td><em>{ entry.organism }</em></td></tr>
         <tr><th scope="row">Location:</th><td>{ entry.location }</td></tr>
         <tr><th scope="row">Compound:</th><td>{Array.isArray(entry.compounds) ? entry.compounds.map(c => c.compound_name).join(", ") : entry.compounds}</td></tr>

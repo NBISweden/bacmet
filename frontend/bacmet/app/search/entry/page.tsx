@@ -1,7 +1,7 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
 import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
-import { PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField } from "../types";
+import { PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField, ReplicateKeys } from "../types";
 import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
@@ -61,7 +61,7 @@ function EntryViewWithParams() {
   const validatedEntry = useMemo(
     () => {
       const loadingText = <span>{`Loading data... ${entryId}`}</span>;
-      const placeholder: Record<keyof Omit<Validated, "sequence">, ReactNode>= {
+      const placeholder: ReplicateKeys<Validated, ReactNode>= {
         gene_name: loadingText,
         bacmet_id: loadingText,
         code_for: loadingText,
