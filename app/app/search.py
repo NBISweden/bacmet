@@ -27,6 +27,7 @@ PEPTIDE_SEQUENCE_LENGTH_WEIGHT = 1000
 GENE_NAME_WEIGHT = 1000
 ORGANISM_WEIGHT = 500
 CAS_NUMBER_WEIGHT = 1000
+ACCESSION_ID_WEIGHT = 500
 
 
 def ilike_rank(label, query_str, target_field, weight):
@@ -134,17 +135,21 @@ def apply_search_filters(
         stmt = stmt.filter(gene_name_query)
     if free_text:
         search_pattern = build_wildcard_pattern(free_text)
-        free_gene_name_rank = ilike_rank(
-            "free_gene_name",
-            search_pattern,
-            Validated.gene_name,
-            GENE_NAME_WEIGHT
-        )
-        free_organism_rank = ilike_rank(
-            "free_organism_rank",
-            search_pattern,
-            Validated.organism,
-            ORGANISM_WEIGHT
+
+        free_ilike_ranks = (
+            ilike_rank(
+                f"free_{label}_rank",
+                search_pattern,
+                field,
+                weight
+            )
+            for label, field, weight in (
+                ("protein_accession_ncbi", Validated.protein_accession_ncbi, ACCESSION_ID_WEIGHT),
+                ("nucleotide_accession_ena_embl", Validated.nucleotide_accession_ena_embl, ACCESSION_ID_WEIGHT),
+                ("protein_accession_uniprot", Validated.protein_accession_uniprot, ACCESSION_ID_WEIGHT),
+                ("gene_name", Validated.gene_name, GENE_NAME_WEIGHT),
+                ("organism", Validated.organism, ORGANISM_WEIGHT),
+            )
         )
         chemical_class_query = func.trim(Compounds.chemical_class).ilike(search_pattern, escape='\\')
         chemical_class_ratio = (func.length(literal(search_pattern)) / func.length(Compounds.chemical_class))
@@ -167,14 +172,16 @@ def apply_search_filters(
             cas_number_query,
             cas_number_ratio * COMPOUND_WEIGHT
         )
-        ranks.append(free_gene_name_rank)
-        ranks.append(free_organism_rank)
+        ranks.extend(free_ilike_ranks)
         ranks.append(free_chemical_class_rank)
         ranks.append(free_compound_name_rank)
         ranks.append(free_cas_number_rank)
         stmt = stmt.filter(
-            func.trim(Validated.gene_name).ilike(search_pattern, escape='\\') |
-            func.trim(Validated.organism).ilike(search_pattern, escape='\\') |
+            Validated.gene_name.ilike(search_pattern, escape='\\') |
+            Validated.organism.ilike(search_pattern, escape='\\') |
+            Validated.protein_accession_uniprot.ilike(search_pattern, escape='\\') |
+            Validated.nucleotide_accession_ena_embl.ilike(search_pattern, escape='\\') |
+            Validated.protein_accession_ncbi.ilike(search_pattern, escape='\\') |
             Validated.compounds.any(compound_name_query) |
             Validated.compounds.any(chemical_class_query) |
             Validated.compounds.any(cas_number_query)
