@@ -65,6 +65,8 @@ class ValidatedResult:
     description: str
     length_aa: str
     reference: PubMedReference
+    nucleotide_sequence: Optional[str] = None
+    protein_sequence: Optional[str] = None
 
 
 @dataclasses.dataclass

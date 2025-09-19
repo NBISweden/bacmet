@@ -51,3 +51,17 @@ PredictedGroups.sequence = relationship(
     viewonly=True,
     uselist=False
 )
+
+Validated.nucleotide_sequence = relationship(
+    'sequences',
+    foreign_keys=[Validated.nucleotide_sequence_id],
+    viewonly=True,
+    uselist=False
+)
+
+Validated.protein_sequence = relationship(
+    'sequences',
+    foreign_keys=[Validated.protein_sequence_id],
+    viewonly=True,
+    uselist=False
+)

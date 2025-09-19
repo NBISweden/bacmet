@@ -88,7 +88,9 @@ def get_from_validated(
     bacmet_id: str
 ) -> Validated:
     stmt = select(Validated).options(
-        joinedload(Validated.compounds)
+        joinedload(Validated.compounds),
+        joinedload(Validated.nucleotide_sequence),
+        joinedload(Validated.protein_sequence),
     ).order_by(Validated.validated_id).filter(Validated.bacmet_id == bacmet_id)
     with db_session() as session:
         return session.execute(stmt).unique().scalar_one_or_none()

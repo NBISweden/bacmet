@@ -267,6 +267,8 @@ def validated_entry(entry_id: str):
         description=item.description,
         length_aa=item.length_aa,
         reference=parsers.pubmed_list(item.reference),
+        nucleotide_sequence=item.nucleotide_sequence.sequence,
+        protein_sequence=item.protein_sequence.sequence,
     )
     return jsonify(dataclasses.asdict(result))
 
