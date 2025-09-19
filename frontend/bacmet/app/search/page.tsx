@@ -1,8 +1,8 @@
 'use client'
-import {useCallback, useEffect, useMemo, useState, FormEventHandler, Suspense} from "react";
+import {useCallback, useMemo, useState, FormEventHandler, Suspense} from "react";
 import {useConfig} from "../../contexts/config";
 import {useSearchParams} from "next/navigation";
-import {Result, Compound, SearchParams, FieldValue, ValidatedResult, ErrorResult, Field, MultiValueField, Link} from "./types";
+import {Result, Compound, SearchParams, FieldValue, Validated, Field, MultiValueField, Link} from "./types";
 import {FieldSet} from "./components/fieldset";
 import {Pagination} from "./components/pagination";
 import {RadioSelectField} from "./components/radio-select-field";
@@ -11,6 +11,8 @@ import {MultiSelectField} from "./components/multi-select-field/multi-select-fie
 import {default as NextLink} from 'next/link'
 import ValidatedEntry from "./components/validated-entry";
 import {navigateInPage, usePromiseData, fetchData} from "../utils";
+import ErrorView from "../components/error-view";
+import { LineLoading } from "../components/loading/loading";
 
 type SingleValueFields = {
   page: string,
@@ -81,7 +83,7 @@ const SearchBase = (
     },
     [apiRoot]
   );
-  const params = usePromiseData(
+  const [params, paramsError] = usePromiseData(
     paramsFetcher,
     {
       chemicalClasses: [],
@@ -89,7 +91,6 @@ const SearchBase = (
       geneNames: [],
     }
   );
-  const [result, setResult] = useState<ValidatedResult | ErrorResult | undefined>(undefined);
   const location: Field<string> = {
     label: "Select location",
     name: "location",
@@ -188,25 +189,12 @@ const SearchBase = (
     selectedGeneName,
   ])
 
-  useEffect(() => {
-    if (searchParams.size > 0) {
-      const fetchResult = async () => {
-        try {
-          const response = await fetch(`${apiRoot}/search/validated?${searchParams.toString()}`);
-          const resultData = await response.json();
-          setResult({ type: "validated", ...resultData });
-        } catch (e) {
-          console.warn(e);
-          setResult({ type: "error", error: `Failed to get data from the backend: ${e}` });
-        }
-      };
-      fetchResult();
-    }
-  }, [
-    searchParams,
-    setResult,
-    apiRoot,
-  ]);
+  const resultFetcher = useCallback(
+    () => searchParams.size > 0 ? fetchData<Result<Validated>>(`${apiRoot}/search/validated?${searchParams.toString()}`) : Promise.resolve(null),
+    [apiRoot, searchParams]
+  )
+  const defaultResult = useMemo(() => (searchParams.size > 0 ? {loading: true} : null), [searchParams.size]);
+  const [result, resultError] = usePromiseData(resultFetcher, defaultResult);
 
   const handlePageNavigation = useCallback((page: Link) => {
       const url = new URL(page.href);
@@ -232,8 +220,8 @@ const SearchBase = (
     }, {})
     navigateInPage({...singleValues, ...multiValues});
   }, []);
-  const allPages = (result && "_links" in result ? result._links : []);
-  const pageCount = (result && "_meta" in result ? result._meta.totalPages : undefined);
+  const allPages = (result && !("loading" in result) && "_links" in result ? result._links : []);
+  const pageCount = (result && !("loading" in result) && "_meta" in result ? result._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
   const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel))
   const simpleSearchActive = new Set([...searchParams.keys(), "page", "free_text"]).size == 2
@@ -245,6 +233,7 @@ const SearchBase = (
           aliqua. Utenim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
           irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
         <form onSubmit={handleSubmit}>
+          {paramsError ? <ErrorView>Failed to load search params: {paramsError.error}</ErrorView> : <></>}
           <details open={!simpleSearchActive}>
             <summary>
               <span>Search parameters</span>
@@ -268,49 +257,37 @@ const SearchBase = (
           </details>
           <input type="hidden" name="page" value="0" />
           <div className="pt-3 pb-2">
-            <input className="btn btn-primary" type="submit" value="Search" />
+            <input className="btn btn-primary" type="submit" value="Search" disabled={!!paramsError}/>
           </div>
         </form>
-
+        {resultError ? <ErrorView>Failed to get search results: {resultError.error}</ErrorView> : <></>}
         {result ? (
           <>
             <hr/>
             <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
-            <hr/>
-            {result.type === "validated" ? `Viewing ${result._meta.count} of ${result._meta.totalRecords}` : <></>}
-            {(() => {
-              switch(result.type) {
-                case "validated": {
-                  return (
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Gene Name</th>
-                          <th scope="col">Experimentally Verified Resistance Gene Information</th>
-                          <th scope="col">Predicted Resistance Gene Information</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.items.map((item, index) => (
-                          <tr key={index}>
-                            <td>{ item.gene_name }</td>
-                            <td>
-                              <ValidatedEntry entry={item}/>
-                            </td>
-                            <td><NextLink href={`/search/entry/?entry_id=${item.bacmet_id}`}>View entries</NextLink></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  );
-                }
-                case "error": {
-                  return (
-                    <div>{result.error}</div>
-                  )
-                }
-              }
-            })()}
+            {"loading" in result ? <LineLoading>Loading search results</LineLoading> : <></>}
+            {result && !("loading" in result) ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Gene Name</th>
+                    <th scope="col">Experimentally Verified Resistance Gene Information</th>
+                    <th scope="col">Predicted Resistance Gene Information</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.items.map((item, index) => (
+                    <tr key={index}>
+                      <td>{ item.gene_name }</td>
+                      <td>
+                        <ValidatedEntry entry={item}/>
+                      </td>
+                      <td><NextLink href={`/search/entry/?entry_id=${item.bacmet_id}`}>View entries</NextLink></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ): <></>}
             <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
           </>
         ) : <></>}

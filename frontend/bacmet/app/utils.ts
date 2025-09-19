@@ -1,6 +1,10 @@
 
 import { useState, useEffect, useRef } from "react";
 
+export type ErrorResult = {
+  error: string;
+}
+
 export function navigateInPage(params: Record<string, string | string[]> | URLSearchParams) {
     if (params instanceof URLSearchParams) {
         window.history.pushState(null, "", `?${params.toString()}`);
@@ -11,17 +15,27 @@ export function navigateInPage(params: Record<string, string | string[]> | URLSe
     }
 }
 
-export function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, defaultValue: D): T | D {
-  const [data, setData] = useState<T | null>(null);
+export function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, defaultValue: D): [T | D, ErrorResult | null] {
+  const [data, setData] = useState<T | undefined>(undefined);
+  const [error, setError] = useState<ErrorResult | null>(null)
   const ref = useRef<() => Promise<T> | null>(null);
 
   useEffect(() => {
     ref.current = promiseGenerator;
     const fetchData = async () => {
-      const result = await promiseGenerator();
-      if (ref.current === promiseGenerator) {
-        setData(result);
+      try {
+        const result = await promiseGenerator();
+        if (ref.current === promiseGenerator) {
+          setData(result);
+        }
+      } catch (e) {
+        if (ref.current === promiseGenerator) {
+          setError({
+            error: `${e}`,
+          });
+        }
       }
+      
     }
     fetchData();
     return () => {
@@ -29,10 +43,25 @@ export function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, default
     };
   }, [setData, promiseGenerator]);
 
-  return data || defaultValue;
+  return [
+    data === undefined ? defaultValue : data,
+    error
+  ];
 }
 
 export async function fetchData<T>(url: string): Promise<T> {
   const response = await fetch(url);
-  return await response.json() as T
+  let errorText: string | null = null;
+  if (response.ok) {
+    return await response.json() as T
+  } else {
+    try {
+      const errorData = await response.json() as ErrorResult;
+      errorText = errorData.error;
+      throw new Error(`${errorData.error}: (${response.status}, ${response.statusText}): ${url}`);
+    } catch {}
+  }
+  const baseError = `(${response.status}, ${response.statusText}): ${url}`
+  const error = errorText ? `${errorText}: ${baseError}` : baseError;
+  throw new Error(error);
 }

@@ -8,6 +8,8 @@ import { MultiSelectField } from "../../search/components/multi-select-field/mul
 import { FieldSet } from "../../search/components/fieldset";
 import { navigateInPage, usePromiseData, fetchData } from "../../utils";
 import BubblePlot from "./dynamic-bubble-plot";
+import { LineLoading } from "@/app/components/loading/loading";
+import ErrorView from "@/app/components/error-view";
 
 
 type HistogramData = {
@@ -66,8 +68,8 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
     })),
     [apiRoot, primaryType, primaryIdentifier, secondaryType]
   );
-  const valueLists = usePromiseData(valueListsFetcher, null);
-  const histogramData = usePromiseData(histogramFetcher, null);
+  const [valueLists, valueListsError] = usePromiseData(valueListsFetcher, null);
+  const [histogramData, histogramDataError] = usePromiseData(histogramFetcher, null);
   const [primaryValues, secondaryValues] = valueLists ? valueLists : [[], []];
 
   const primaryLabel = primaryType && typeLabels[primaryType];
@@ -155,12 +157,17 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
         <h1>Sensitivity distributions for {primaryLabel}</h1>
-        <FieldSet><SelectField field={primaryField} onChange={handlePrimarySelect}/></FieldSet>
-        <FieldSet><MultiSelectField field={secondaryField} onChange={handleSecondarySelect} filterText={`Filter ${secondaryType} options`}/></FieldSet>
+        {valueListsError ? <ErrorView>Failed to load selection values: {valueListsError.error}</ErrorView> : <></>}
+        {valueLists ? <>
+          <FieldSet><SelectField field={primaryField} onChange={handlePrimarySelect}/></FieldSet>
+          <FieldSet><MultiSelectField field={secondaryField} onChange={handleSecondarySelect} filterText={`Filter ${secondaryType} options`}/></FieldSet>
+        </> : <LineLoading>Loading selection values</LineLoading>}
         <hr />
+        {histogramDataError ? <ErrorView>Failed to load histogram data: {histogramDataError.error}</ErrorView> : <></>}
+        {primaryIdentifier && secondaryIdentifiers.length > 0 && !histogramData ? <LineLoading>Loading histogram data</LineLoading> : <></>}
       </div>
       {primaryIdentifier && secondaryIdentifiers.length > 0 ? (
-        <div className="col-sm-12 text-center">
+        !histogramDataError ? <div className="col-sm-12 text-center">
           <BubblePlot
             values={values}
             title={title}
@@ -170,7 +177,7 @@ export function SensitivitDistributionsView({primaryType}: {primaryType: string}
             verticalLabels={verticalLabels}
             formatValue={v => `Count: ${v}`}
           />
-        </div>
+        </div> : <></>
       ) : <div className="col-sm-12 col-md-9 col-lg-7">Make a selection to view bubble plot</div>}
     </>
   )

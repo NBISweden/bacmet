@@ -1,13 +1,16 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
-import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
-import { PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField, ReplicateKeys } from "../types";
+import { Suspense, useState, ReactNode, useMemo, useCallback } from "react";
+import { Result, Link, Validated, Predicted, MultiValueField, ReplicateKeys } from "../types";
 import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
+import ErrorView from "../../components/error-view";
 import { navigateInPage } from "../../utils";
 import { MultiSelectField } from "../components/multi-select-field/multi-select-field";
 import { default as NextLink } from 'next/link';
+import { LineLoading } from "../../components/loading/loading";
+import { usePromiseData, fetchData } from "../../utils";
 
 type ListedItems = keyof Omit<Predicted, "group">
 
@@ -32,71 +35,43 @@ const PredictedTableItems: ListedItems[] = [
   "rmsd",
 ];
 
-const EmptyValidatedEntry: Validated = {
-  gene_name: "...",
-  bacmet_id: "...",
-  code_for: "...",
-  family: "...",
-  organism: "...",
-  location: "...",
+const LoadingPlaceholder = <LineLoading>Loading</LineLoading>;
+
+const EmptyValidatedEntry: ReplicateKeys<Validated, ReactNode> = {
+  gene_name: LoadingPlaceholder,
+  bacmet_id: LoadingPlaceholder,
+  code_for: LoadingPlaceholder,
+  family: LoadingPlaceholder,
+  organism: LoadingPlaceholder,
+  location: LoadingPlaceholder,
   compounds: [],
-  description: "...",
-  length_aa: "...",
+  description: LoadingPlaceholder,
+  length_aa: LoadingPlaceholder,
   reference: [],
-  protein_accession_ncbi: "...",
-  protein_accession_uniprot: "...",
-  nucleotide_accession_ena_embl: "...",
+  protein_accession_ncbi: LoadingPlaceholder,
+  protein_accession_uniprot: LoadingPlaceholder,
+  nucleotide_accession_ena_embl: LoadingPlaceholder,
 }
 
 function EntryViewWithParams() {
   const {apiRoot} = useConfig();
   const searchParams = useSearchParams();
-  const [validated, setValidated] = useState<Validated | null>(null);
 
   const entryId = searchParams.get("entry_id");
-
-  const [predictedResult, setPredictedResult] = useState<PredictedResult | ErrorResult | undefined>(undefined);
   const predictedPage = searchParams.get("page") || "0";
 
-  const validatedEntry = useMemo(
-    () => {
-      const loadingText = <span>{`Loading data... ${entryId}`}</span>;
-      const placeholder: ReplicateKeys<Validated, ReactNode>= {
-        gene_name: loadingText,
-        bacmet_id: loadingText,
-        code_for: loadingText,
-        family: loadingText,
-        organism: loadingText,
-        location: loadingText,
-        compounds: loadingText,
-        description: loadingText,
-        length_aa: loadingText,
-        reference: loadingText,
-        protein_accession_ncbi: loadingText,
-        protein_accession_uniprot: loadingText,
-        nucleotide_accession_ena_embl: loadingText,
-      }
-      return validated ? validated : placeholder
-    },
-    [validated, entryId]
+  const validatedFetcher = useCallback(
+    () => fetchData<Validated>(`${apiRoot}/validated/${entryId}`),
+    [apiRoot, entryId]
   );
-  useEffect(() => {
-    const fetchEntry = async () => {
-      const response = await fetch(`${apiRoot}/validated/${entryId}`)
-      const data = await response.json()
-      setValidated(data)
-    }
-    fetchEntry()
-  }, [entryId, setValidated, apiRoot])
+  const defaultEntry = useMemo(() => ({...EmptyValidatedEntry, bacmet_id: entryId}), [entryId])
+  const [validatedEntry, validatedEntryError] = usePromiseData(validatedFetcher, defaultEntry);
 
-  useEffect(() => {
-    const fetchEntry = async () => {
-      const predictedResponse = await fetch(`${apiRoot}/search/predicted?bacmet_id=${entryId}&page=${predictedPage}`)
-      const predictedData = await predictedResponse.json()
-      setPredictedResult({type: "predicted", ...predictedData})
-    }
-    fetchEntry()
-  }, [entryId, predictedPage, setPredictedResult, apiRoot])
+  const predictedFetcher = useCallback(
+    () => fetchData<Result<Predicted>>(`${apiRoot}/search/predicted?bacmet_id=${entryId}&page=${predictedPage}`),
+    [apiRoot, entryId, predictedPage]
+  )
+  const [predictedResult, predictedResultError] = usePromiseData(predictedFetcher, null);
 
   const handlePageNavigation = useCallback((page: Link) => {
       const url = new URL(page.href);
@@ -105,7 +80,6 @@ function EntryViewWithParams() {
         navigateInPage({entry_id: entryId, page: pageNumber});
       }
   }, [entryId])
-
 
   const allPages = (predictedResult && "_links" in predictedResult ? predictedResult._links : []);
   const pageCount = (predictedResult && "_meta" in predictedResult ? predictedResult._meta.totalPages : undefined);
@@ -132,10 +106,12 @@ function EntryViewWithParams() {
   return (
     <>
       <div className="col-sm-12 col-md-9 col-lg-7">
-        <h1>{validatedEntry.gene_name}: {validatedEntry.organism} ({validatedEntry.bacmet_id})</h1>
+        <h1>{validatedEntry.bacmet_id}: {validatedEntry.organism} ({validatedEntry.gene_name})</h1>
+        {validatedEntryError ? <ErrorView>Failed to load data: {validatedEntryError.error}</ErrorView>: <></>}
         <ValidatedEntry entry={validatedEntry} />
+        {predictedResultError ? <ErrorView>Failed to load predicted result: {predictedResultError.error}</ErrorView>: <></>}
       </div>
-      {predictedResult ? (
+      {predictedResult && !predictedResultError ? (
           <>
             <div className="col-sm-12 col-md-9 col-lg-7">
               <h2>Related predictions</h2>
@@ -143,51 +119,38 @@ function EntryViewWithParams() {
               <MultiSelectField field={tableItemsField} onChange={handleSelectedTableItemsChange}/>
               <hr/>
             </div>
-            {(() => {
-              switch(predictedResult.type) {
-                case "predicted": {
-                  return (
-                    <>
-                      <div className="col-sm-12 col-md-9 col-lg-7">
-                        <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
-                      </div>
-                      <div className="col-sm-12" style={{overflow: "auto"}}>
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th>BLAST Hit Genome</th>
-                              {usedTableItems.map(ti => (
-                                <th key={ti} scope="col">{ti}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {predictedResult ? predictedResult.items.map((item, index) => (
-                              <tr key={index}>
-                                <td><NextLink href={`/search/predicted-entry/?entry_id=${item.blast_hit_genome}`}>{item.blast_hit_genome}</NextLink></td>
-                                {usedTableItems.map(ti => (
-                                  <td key={ti}>{item[ti]}</td>
-                                ))}
-                              </tr>
-                            )) : <></>}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="col-sm-12 col-md-9 col-lg-7">
-                        <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
-                      </div>
-                    </>
-                  );
-                }
-                case "error": {
-                  return (
-                    <div>{predictedResult.error}</div>
-                  )
-                }
-              }
-            })()}
+            {predictedResult ? <>
+                <div className="col-sm-12 col-md-9 col-lg-7">
+                  <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
+                </div>
+                <div className="col-sm-12" style={{overflow: "auto"}}>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>BLAST Hit Genome</th>
+                        {usedTableItems.map(ti => (
+                          <th key={ti} scope="col">{ti}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {predictedResult ? predictedResult.items.map((item, index) => (
+                        <tr key={index}>
+                          <td><NextLink href={`/search/predicted-entry/?entry_id=${item.blast_hit_genome}`}>{item.blast_hit_genome}</NextLink></td>
+                          {usedTableItems.map(ti => (
+                            <td key={ti}>{item[ti]}</td>
+                          ))}
+                        </tr>
+                      )) : <></>}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="col-sm-12 col-md-9 col-lg-7">
+                  <Pagination pages={pages} currentPage={currentPageHref} pageCount={pageCount} onNavigate={handlePageNavigation}/>
+                </div>
+              </> : <></>}
           </>
-        ) : <></>}
+        ) : <div className="col-sm-12 col-md-9 col-lg-7"><LineLoading>Loading predicted data</LineLoading></div>}
     </>
   )
 }
