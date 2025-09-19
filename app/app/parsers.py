@@ -1,13 +1,21 @@
 from typing import cast,  Optional, Tuple
-from .types import DatabaseOption, LocationOption, OpenRange
+from .types import LocationOption, OpenRange, PubMedReference
+import re
 
 
-def database(data: str) -> Optional[DatabaseOption]:
-    value = None if data is None else data.lower()
-    if value in {None, "validated", "predicted"}:
-        return cast(DatabaseOption, value)
-
-    raise ValueError(f"Could not parse database: {value}")
+def pubmed_list(data: str) -> list[PubMedReference]:
+    items = re.findall(
+        r"\s*(.*?)(?:,|;)\s*pubmed-\s*(\S+?)\s*(?:,|;|$)",
+        data,
+        re.IGNORECASE
+    )
+    return [
+        PubMedReference(
+            pubMedId=pubMedId,
+            description=description
+        )
+        for (description, pubMedId) in items
+    ]
 
 
 def location(
@@ -21,7 +29,7 @@ def location(
         )
 
     raise ValueError(
-        f"Could not parse location: {value} for database: {database}"
+        f"Could not parse location: {value}"
     )
 
 

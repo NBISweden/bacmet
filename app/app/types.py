@@ -2,9 +2,6 @@ import dataclasses
 from typing import Literal, Optional, Tuple, Any
 
 
-DatabaseOption = Literal["validated", "predicted"]
-
-
 LocationOption = Literal["chromosome", "plasmid"]
 
 
@@ -48,17 +45,34 @@ class Compound:
 
 
 @dataclasses.dataclass
+class PubMedReference:
+    pubMedId: Optional[str] = None
+    description: Optional[str] = None
+
+
+@dataclasses.dataclass
 class ValidatedResult:
-    gene_name: str
     bacmet_id: str
+    gene_name: str
     code_for: str
     family: str
+    protein_accession_ncbi: str
+    nucleotide_accession_ena_embl: str
+    protein_accession_uniprot: str
     organism: str
     location: str
     compounds: list[Compound]
     description: str
     length_aa: str
-    reference: str
+    reference: PubMedReference
+    nucleotide_sequence: Optional[str] = None
+    protein_sequence: Optional[str] = None
+
+
+@dataclasses.dataclass
+class PredictedGroup:
+    sequence: str
+    matching_ids: list[str]
 
 
 @dataclasses.dataclass
@@ -83,6 +97,7 @@ class PredictedResult:
     lddt: float
     alntmscore: float
     rmsd: float
+    group: Optional[PredictedGroup] = None
 
 
 @dataclasses.dataclass

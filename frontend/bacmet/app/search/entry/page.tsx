@@ -1,15 +1,17 @@
 "use client"
 import { useConfig } from "../../../contexts/config";
 import { Suspense, useState, useMemo, ReactNode, useEffect, useCallback } from "react";
-import {PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField} from "../types";
+import { PredictedResult, ErrorResult, Link, Validated, Predicted, MultiValueField, ReplicateKeys } from "../types";
 import { useSearchParams } from "next/navigation";
 import ValidatedEntry from "../components/validated-entry";
 import { Pagination } from "../components/pagination";
-import {navigateInPage} from "../../utils";
-import { MultiSelectField } from "../components/multi-select-field/multi-select-field"
+import { navigateInPage } from "../../utils";
+import { MultiSelectField } from "../components/multi-select-field/multi-select-field";
+import { default as NextLink } from 'next/link';
 
-const PredictedTableItems: (keyof Predicted)[] = [
-  "blast_hit_genome",
+type ListedItems = keyof Omit<Predicted, "group">
+
+const PredictedTableItems: ListedItems[] = [
   "start_alignment_query",
   "end_alignment_query",
   "fident",
@@ -40,7 +42,10 @@ const EmptyValidatedEntry: Validated = {
   compounds: [],
   description: "...",
   length_aa: "...",
-  reference: "...",
+  reference: [],
+  protein_accession_ncbi: "...",
+  protein_accession_uniprot: "...",
+  nucleotide_accession_ena_embl: "...",
 }
 
 function EntryViewWithParams() {
@@ -56,7 +61,7 @@ function EntryViewWithParams() {
   const validatedEntry = useMemo(
     () => {
       const loadingText = <span>{`Loading data... ${entryId}`}</span>;
-      const placeholder: Record<keyof Validated, ReactNode>= {
+      const placeholder: ReplicateKeys<Validated, ReactNode>= {
         gene_name: loadingText,
         bacmet_id: loadingText,
         code_for: loadingText,
@@ -67,6 +72,9 @@ function EntryViewWithParams() {
         description: loadingText,
         length_aa: loadingText,
         reference: loadingText,
+        protein_accession_ncbi: loadingText,
+        protein_accession_uniprot: loadingText,
+        nucleotide_accession_ena_embl: loadingText,
       }
       return validated ? validated : placeholder
     },
@@ -103,8 +111,7 @@ function EntryViewWithParams() {
   const pageCount = (predictedResult && "_meta" in predictedResult ? predictedResult._meta.totalPages : undefined);
   const currentPageHref = allPages.filter(l => l.rel === "self")[0]?.href;
   const pages = allPages.filter(link => !["self", "next", "prev"].includes(link.rel));
-  const [selectedTableItems, setSelectedTableItems] = useState<(keyof Predicted)[]>([
-    "blast_hit_genome",
+  const [selectedTableItems, setSelectedTableItems] = useState<ListedItems[]>([
     "start_alignment_query",
     "end_alignment_query",
   ]);
@@ -148,6 +155,7 @@ function EntryViewWithParams() {
                         <table className="table">
                           <thead>
                             <tr>
+                              <th>BLAST Hit Genome</th>
                               {usedTableItems.map(ti => (
                                 <th key={ti} scope="col">{ti}</th>
                               ))}
@@ -156,6 +164,7 @@ function EntryViewWithParams() {
                           <tbody>
                             {predictedResult ? predictedResult.items.map((item, index) => (
                               <tr key={index}>
+                                <td><NextLink href={`/search/predicted-entry/?entry_id=${item.blast_hit_genome}`}>{item.blast_hit_genome}</NextLink></td>
                                 {usedTableItems.map(ti => (
                                   <td key={ti}>{item[ti]}</td>
                                 ))}

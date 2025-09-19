@@ -33,3 +33,35 @@ Validated.compounds = relationship(
     backref='validated',
     viewonly=True
 )
+
+PredictedUniqueHomologues.group = relationship(
+    'predicted_groups',
+    viewonly=True,
+    uselist=False
+)
+
+PredictedUniqueHomologues.validated = relationship(
+    'validated',
+    viewonly=True,
+    uselist=False
+)
+
+PredictedGroups.sequence = relationship(
+    'sequences',
+    viewonly=True,
+    uselist=False
+)
+
+Validated.nucleotide_sequence = relationship(
+    'sequences',
+    foreign_keys=[Validated.nucleotide_sequence_id],
+    viewonly=True,
+    uselist=False
+)
+
+Validated.protein_sequence = relationship(
+    'sequences',
+    foreign_keys=[Validated.protein_sequence_id],
+    viewonly=True,
+    uselist=False
+)

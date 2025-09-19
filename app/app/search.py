@@ -6,6 +6,7 @@ from .database import (
     db_session,
     Validated,
     PredictedUniqueHomologues,
+    PredictedGroups,
     Compounds,
     ValidatedCompounds
 )
@@ -84,14 +85,27 @@ def apply_total_count(stmt):
 
 
 def get_from_validated(
-    bacmet_id
+    bacmet_id: str
 ) -> Validated:
     stmt = select(Validated).options(
-        joinedload(Validated.compounds)
+        joinedload(Validated.compounds),
+        joinedload(Validated.nucleotide_sequence),
+        joinedload(Validated.protein_sequence),
     ).order_by(Validated.validated_id).filter(Validated.bacmet_id == bacmet_id)
     with db_session() as session:
-        (value,) = session.execute(stmt).first()
-        return value
+        return session.execute(stmt).unique().scalar_one_or_none()
+
+
+def get_from_predicted(
+    blast_hit_genome: str
+) -> PredictedUniqueHomologues:
+    stmt = select(PredictedUniqueHomologues).options(
+        joinedload(PredictedUniqueHomologues.group),
+        joinedload(PredictedUniqueHomologues.validated),
+        joinedload(PredictedUniqueHomologues.group, PredictedGroups.sequence),
+    ).order_by(PredictedUniqueHomologues.predicted_unique_homologue_id).filter(PredictedUniqueHomologues.blast_hit_genome == blast_hit_genome)
+    with db_session() as session:
+        return session.execute(stmt).scalar_one_or_none()
 
 def get_from_compounds(
     compound_name

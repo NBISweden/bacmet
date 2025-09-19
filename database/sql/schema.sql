@@ -42,7 +42,8 @@ CREATE TABLE validated (
 	FOREIGN KEY(nucleotide_sequence_id) REFERENCES
 		sequences(sequence_id),
 	FOREIGN KEY(protein_sequence_id) REFERENCES
-		sequences(sequence_id)
+		sequences(sequence_id),
+	UNIQUE(bacmet_id)
 );
 
 DROP TABLE IF EXISTS validated_compounds;
@@ -93,6 +94,7 @@ CREATE TABLE predicted_unique_homologues (
 	alntmscore REAL NOT NULL,
 	rmsd REAL NOT NULL,
 
+	UNIQUE(blast_hit_genome),
 	PRIMARY KEY(predicted_unique_homologue_id),
 	FOREIGN KEY(validated_id) REFERENCES
 		validated(validated_id)
@@ -112,6 +114,7 @@ CREATE TABLE predicted_groups (
 	FOREIGN KEY(sequence_id) REFERENCES
 		sequences(sequence_id)
 );
+CREATE INDEX predicted_unique_homologue_id_idx ON predicted_groups(predicted_unique_homologue_id);
 
 -- Note: Not directly related to the other tables.
 DROP TABLE IF EXISTS sensitivity_distributions;

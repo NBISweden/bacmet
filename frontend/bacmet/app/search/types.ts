@@ -30,16 +30,21 @@ export type Compound = {
 }
 
 export type Validated = {
-  gene_name: string;
   bacmet_id: string;
+  gene_name: string;
   code_for: string;
   family: string;
+  protein_accession_ncbi: string;
+  nucleotide_accession_ena_embl: string;
+  protein_accession_uniprot: string;
   organism: string;
   location: string;
   compounds: Compound[];
   description: string;
   length_aa: string;
-  reference: string;
+  reference: PubMedReference[];
+  protein_sequence?: string;
+  nucleotide_sequence?: string;
 }
 
 export type Predicted = {
@@ -63,6 +68,15 @@ export type Predicted = {
   lddt: number;
   alntmscore: number;
   rmsd: number;
+  group?: {
+    matching_ids: string[],
+    sequence: string;
+  }
+}
+
+export type PubMedReference = {
+  description: string;
+  pubMedId: string;
 }
 
 export type Meta = {
@@ -95,3 +109,7 @@ export type ErrorResult = {
   type: "error";
   error: string;
 }
+
+export type ReplicateKeys<T, V> = {
+  [K in keyof T]: V;
+};
