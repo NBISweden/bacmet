@@ -44,6 +44,7 @@ class Compound:
     compound_name: str
     chemical_class: str
     cas_number: str
+    description: Optional[str] = None
 
 
 @dataclasses.dataclass

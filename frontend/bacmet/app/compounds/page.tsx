@@ -63,7 +63,11 @@ function CompoundList({entries}: {entries: Compound[]}) {
             const searchByCompoundUrl = `/search/?${new URLSearchParams({compound: entry.compound_name})}`;
             return (
               <tr key={entry.compound_name}>
-                <td scope="col">{entry.compound_name}</td>
+                <td scope="col">
+                  <Link href={`/compounds/entry?${new URLSearchParams({ compound_name: entry.compound_name })}`}>
+                    {entry.compound_name}
+                  </Link>
+                </td>
                 <td scope="col">{entry.chemical_class}</td>
                 <td scope="col">{entry.cas_number}</td>
                 <td scope="col">
