@@ -62,7 +62,7 @@ def apply_search_filters(
             Validated.gene_name.in_(gene_name)
         )
     if free_text:
-        search_pattern = f"%{free_text.replace('*', '%')}%"
+        search_pattern = build_wildcard_pattern(free_text)
         stmt = stmt.filter(
             (Validated.gene_name.ilike(search_pattern)) |
             (Validated.compounds.any(Compounds.compound_name.ilike(search_pattern))) |
@@ -228,3 +228,16 @@ def get_gene_names(
             item[0]
             for item in list(session.execute(summary_stmt))
         ]
+
+def build_wildcard_pattern(free_text: str) -> str:
+    pattern = free_text.replace('*', '%')
+    while '%%' in pattern:
+        pattern = pattern.replace('%%', '%')
+    if '*' not in free_text:
+        pattern = f"%{pattern}%"
+    else:
+        if free_text.startswith('*') and not pattern.startswith('%'):
+            pattern = '%' + pattern
+        if free_text.endswith('*') and not pattern.endswith('%'):
+            pattern = pattern + '%'
+    return pattern
