@@ -3,7 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo } from "react";
 import { useConfig } from "../../../contexts/config";
 import { Compound, ReplicateKeys } from "../../search/types";
-import { usePromiseData, fetchData } from "../../utils";
+import { usePromiseData, fetchData, requiredOrNotFound } from "../../utils";
 import { LineLoading } from "@/app/components/loading/loading";
 import ErrorView from "@/app/components/error-view";
 
@@ -61,6 +61,7 @@ function CompoundEntryWithData() {
     [apiRoot, compoundName]
   )
   const [compound, compoundError] = usePromiseData(compoundFetcher, defaultCompound);
+  requiredOrNotFound(compoundError)
 
   return <CompoundEntry compound={compound}>
     {compoundError ? <ErrorView>Faild to load compound data: {compoundError.error}</ErrorView> : <></>}

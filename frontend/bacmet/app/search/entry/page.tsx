@@ -10,7 +10,7 @@ import { navigateInPage } from "../../utils";
 import { MultiSelectField } from "../components/multi-select-field/multi-select-field";
 import { default as NextLink } from 'next/link';
 import { LineLoading } from "../../components/loading/loading";
-import { usePromiseData, fetchData } from "../../utils";
+import { usePromiseData, fetchData, requiredOrNotFound } from "../../utils";
 
 type ListedItems = keyof Omit<Predicted, "group">
 
@@ -66,6 +66,7 @@ function EntryViewWithParams() {
   );
   const defaultEntry = useMemo(() => ({...EmptyValidatedEntry, bacmet_id: entryId}), [entryId])
   const [validatedEntry, validatedEntryError] = usePromiseData(validatedFetcher, defaultEntry);
+  requiredOrNotFound(validatedEntryError);
 
   const predictedFetcher = useCallback(
     () => fetchData<Result<Predicted>>(`${apiRoot}/search/predicted?bacmet_id=${entryId}&page=${predictedPage}`),

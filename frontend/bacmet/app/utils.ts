@@ -1,8 +1,10 @@
 
 import { useState, useEffect, useRef } from "react";
+import { notFound } from "next/navigation";
 
 export type ErrorResult = {
   error: string;
+  httpStatus?: number;
 }
 
 export function navigateInPage(params: Record<string, string | string[]> | URLSearchParams) {
@@ -32,6 +34,7 @@ export function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, default
         if (ref.current === promiseGenerator) {
           setError({
             error: `${e}`,
+            httpStatus: e instanceof FetchError ? e.httpStatus : undefined
           });
         }
       }
@@ -49,6 +52,19 @@ export function usePromiseData<T, D>(promiseGenerator: () => Promise<T>, default
   ];
 }
 
+class FetchError extends Error {
+  private _httpStatus?: number;
+
+  constructor(msg: string, httpStatus?: number) {
+    super(msg)
+    this._httpStatus = httpStatus;
+  }
+
+  get httpStatus() {
+    return this._httpStatus;
+  }
+}
+
 export async function fetchData<T>(url: string): Promise<T> {
   const response = await fetch(url);
   let errorText: string | null = null;
@@ -58,10 +74,20 @@ export async function fetchData<T>(url: string): Promise<T> {
     try {
       const errorData = await response.json() as ErrorResult;
       errorText = errorData.error;
-      throw new Error(`${errorData.error}: (${response.status}, ${response.statusText}): ${url}`);
+      throw new FetchError(
+        `${errorData.error}: (${response.status}, ${response.statusText}): ${url}`,
+        response.status
+      );
     } catch {}
   }
   const baseError = `(${response.status}, ${response.statusText}): ${url}`
   const error = errorText ? `${errorText}: ${baseError}` : baseError;
-  throw new Error(error);
+  throw new FetchError(error, response.status);
+}
+
+
+export function requiredOrNotFound(error: ErrorResult | null) {
+  if (error && error.httpStatus === 404) {
+    notFound()
+  }
 }

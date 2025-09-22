@@ -3,7 +3,7 @@ import { useConfig } from "../../../contexts/config";
 import { Suspense, useCallback, useMemo } from "react";
 import { Predicted, } from "../types";
 import { useSearchParams } from "next/navigation";
-import { usePromiseData, fetchData } from "../../utils";
+import { usePromiseData, fetchData, requiredOrNotFound } from "../../utils";
 import { LineLoading } from "../../components/loading/loading";
 import { default as NextLink } from 'next/link';
 import ErrorView from "../../components/error-view"
@@ -63,6 +63,7 @@ function PredictedEntryViewWithParams() {
   const entryFetcher = useCallback(() => fetchData<Predicted>(`${apiRoot}/predicted/${entryId}`), [apiRoot, entryId]);
   const defaultEntry = useMemo(() => ({...EmptyPredictedEntry, blast_hit_genome: entryId}), [entryId]);
   const [predictedEntry, predictedEntryError] = usePromiseData(entryFetcher, defaultEntry);
+  requiredOrNotFound(predictedEntryError);
 
   return (
     <PredictedEntryView entry={predictedEntry}>
