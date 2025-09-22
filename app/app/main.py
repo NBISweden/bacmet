@@ -448,7 +448,7 @@ def compound_entry(compound_name: str):
     compound = get_from_compounds(compound_name)
     if compound is None:
         return make_error(f"No entry found for: {compound_name}")
-    
+
     compound_data = Compound(
         compound_name=compound.compound_name,
         chemical_class=compound.chemical_class,
@@ -456,6 +456,7 @@ def compound_entry(compound_name: str):
         description=compound.description
     )
     return jsonify(dataclasses.asdict(compound_data))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
