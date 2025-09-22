@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, sql
 from sqlalchemy.sql import func, collate, case, literal
 from sqlalchemy.orm import joinedload
 import re
@@ -48,6 +48,186 @@ def sum_rank(label, query, weight):
     return func.coalesce(rank, 0)
 
 
+def chemical_class_filter_rank(chemical_class: list[str]):
+    chemical_class_query = Compounds.chemical_class.in_(chemical_class)
+    chemical_class_rank = func.sum(
+        case(
+            (chemical_class_query, CHEMICAL_CLASS_WEIGHT),
+            else_=0
+        )
+    ).label("chemical_class_rank")
+    query_filter = Validated.compounds.any(chemical_class_query)
+    query_rank = func.coalesce(chemical_class_rank, 0)
+    return (
+        query_filter,
+        query_rank
+    )
+
+
+def compound_filter_rank(compound: list[str]):
+    compound_query = Compounds.compound_name.in_(compound)
+    compound_rank = func.sum(
+        case(
+            (compound_query, COMPOUND_WEIGHT),
+            else_=0
+        )
+    ).label("compound_rank")
+    query_rank = func.coalesce(compound_rank, 0)
+    query_filter = Validated.compounds.any(compound_query)
+    return (
+        query_filter,
+        query_rank
+    )
+
+
+def protein_description_filter_rank(protein_description: str):
+    protein_query = f"%{protein_description}%"
+    protein_description_rank = ilike_rank(
+        "protein_description_rank",
+        protein_query,
+        Validated.description,
+        PROTEIN_DESCRIPTION_WEIGHT
+    )
+    query_filter = Validated.description.ilike(protein_query)
+    return (
+        query_filter,
+        protein_description_rank
+    )
+
+
+def location_filter_rank(location: LocationOption):
+    location_query = f"%{location}%"
+    location_rank = ilike_rank(
+        "location_rank",
+        location_query,
+        Validated.location,
+        LOCATION_WEIGHT
+    )
+    query_filter = Validated.location.ilike(location_query)
+    return (
+        query_filter,
+        location_rank
+    )
+
+
+def peptide_sequence_length_range_filter_rank(
+    peptide_sequence_length_range: OpenRange
+):
+    min_length, max_length = peptide_sequence_length_range
+    query_filter = sql.true()
+    query_rank = literal(0)
+
+    if min_length is not None:
+        query_filter = query_filter & Validated.length_aa > min_length
+    if max_length is not None:
+        query_filter = query_filter & Validated.length_aa < max_length
+
+    query_rank = case(
+        (query_filter, PEPTIDE_SEQUENCE_LENGTH_WEIGHT),
+        else_=0
+    ).label("ps_length_rank")
+
+    return (
+        query_filter,
+        query_rank
+    )
+
+
+def gene_name_filter_rank(gene_name: str):
+    gene_name_query = Validated.gene_name.in_(gene_name)
+    query_rank = case(
+        (gene_name_query, GENE_NAME_WEIGHT),
+        else_=0
+    ).label("gene_name_rank")
+    return (
+        gene_name_query,
+        query_rank
+    )
+
+
+def free_text_filter_rank(free_text: str):
+    search_pattern = build_wildcard_pattern(free_text)
+
+    free_ilike_ranks = (
+        ilike_rank(
+            f"free_{label}_rank",
+            search_pattern,
+            field,
+            weight
+        )
+        for label, field, weight in (
+            (
+                "protein_accession_ncbi",
+                Validated.protein_accession_ncbi,
+                ACCESSION_ID_WEIGHT
+            ),
+            (
+                "nucleotide_accession_ena_embl",
+                Validated.nucleotide_accession_ena_embl,
+                ACCESSION_ID_WEIGHT
+            ),
+            (
+                "protein_accession_uniprot",
+                Validated.protein_accession_uniprot,
+                ACCESSION_ID_WEIGHT
+            ),
+            ("gene_name", Validated.gene_name, GENE_NAME_WEIGHT),
+            ("organism", Validated.organism, ORGANISM_WEIGHT),
+        )
+    )
+    chemical_class_query = func.trim(Compounds.chemical_class).ilike(search_pattern, escape='\\')
+    chemical_class_ratio = (
+        func.length(literal(search_pattern)) /
+        func.length(Compounds.chemical_class)
+    )
+    free_chemical_class_rank = sum_rank(
+        "free_chemcial_class_rank",
+        chemical_class_query,
+        chemical_class_ratio * CHEMICAL_CLASS_WEIGHT
+    )
+    compound_name_query = func.trim(Compounds.compound_name).ilike(search_pattern, escape='\\')
+    compound_name_ratio = (
+        func.length(literal(search_pattern)) /
+        func.length(Compounds.compound_name)
+    )
+    free_compound_name_rank = sum_rank(
+        "free_compound_name_rank",
+        compound_name_query,
+        compound_name_ratio * COMPOUND_WEIGHT
+    )
+    cas_number_query = func.trim(Compounds.cas_number).ilike(search_pattern, escape='\\')
+    cas_number_ratio = (
+        func.length(literal(search_pattern)) /
+        func.length(Compounds.cas_number)
+    )
+    free_cas_number_rank = sum_rank(
+        "free_cas_number_rank",
+        cas_number_query,
+        cas_number_ratio * COMPOUND_WEIGHT
+    )
+    all_ranks = (
+        *free_ilike_ranks,
+        free_chemical_class_rank,
+        free_compound_name_rank,
+        free_cas_number_rank,
+    )
+    query_rank = reduce(operator.add, all_ranks)
+    query_filter = (
+        Validated.gene_name.ilike(search_pattern, escape='\\') |
+        Validated.organism.ilike(search_pattern, escape='\\') |
+        Validated.protein_accession_uniprot.ilike(search_pattern, escape='\\') |
+        Validated.nucleotide_accession_ena_embl.ilike(search_pattern, escape='\\') |
+        Validated.protein_accession_ncbi.ilike(search_pattern, escape='\\') |
+        Validated.compounds.any(compound_name_query) |
+        Validated.compounds.any(chemical_class_query) |
+        Validated.compounds.any(cas_number_query)
+    )
+    return (
+        query_filter,
+        query_rank
+    )
+
+
 def apply_search_filters(
     stmt,
     chemical_class: Optional[list[str]],
@@ -59,139 +239,55 @@ def apply_search_filters(
     free_text: Optional[str] = None
 ):
     ranks = []
+    filters = []
     if chemical_class and len(chemical_class) > 0:
-        chemical_class_query = Compounds.chemical_class.in_(chemical_class)
-        chemical_class_rank = func.sum(
-            case(
-                (chemical_class_query, CHEMICAL_CLASS_WEIGHT),
-                else_=0
-            )
-        ).label("chemical_class_rank")
-        ranks.append(func.coalesce(chemical_class_rank, 0))
-        stmt = stmt.filter(
-            Validated.compounds.any(chemical_class_query)
-        )
-    if compound and len(compound) > 0:
-        compound_query = Compounds.compound_name.in_(compound)
-        compound_rank = func.sum(
-            case(
-                (compound_query, COMPOUND_WEIGHT),
-                else_=0
-            )
-        ).label("compound_rank")
-        ranks.append(func.coalesce(compound_rank, 0))
-        stmt = stmt.filter(
-            Validated.compounds.any(compound_query)
-        )
-    if protein_description:
-        protein_query = f"%{protein_description}%"
-        protein_description_rank = ilike_rank(
-            "protein_description_rank",
-            protein_query,
-            Validated.description,
-            PROTEIN_DESCRIPTION_WEIGHT
-        )
-        ranks.append(protein_description_rank)
-        stmt = stmt.filter(
-            Validated.description.ilike(protein_query)
-        )
-    if location:
-        location_query = f"%{location}%"
-        location_rank = ilike_rank(
-            "location_rank",
-            location_query,
-            Validated.location,
-            LOCATION_WEIGHT
-        )
-        ranks.append(location_rank)
-        stmt = stmt.filter(
-            Validated.location.ilike(location_query)
-        )
-    if peptide_sequence_length_range:
-        min_length, max_length = peptide_sequence_length_range
-        if min_length is not None:
-            ps_min_query = Validated.length_aa > min_length
-            ps_min_rank = case(
-                (ps_min_query, PEPTIDE_SEQUENCE_LENGTH_WEIGHT),
-                else_=0
-            ).label("ps_min_rank")
-            ranks.append(ps_min_rank)
-            stmt = stmt.filter(ps_min_query)
-        if max_length is not None:
-            ps_max_query = Validated.length_aa < max_length
-            ps_max_rank = case(
-                (ps_max_query, PEPTIDE_SEQUENCE_LENGTH_WEIGHT),
-                else_=0
-            ).label("ps_max_rank")
-            ranks.append(ps_max_rank)
-            stmt = stmt.filter(ps_max_query)
-    if gene_name:
-        gene_name_query = Validated.gene_name.in_(gene_name)
-        gene_name_rank = case(
-            (gene_name_query, GENE_NAME_WEIGHT),
-            else_=0
-        ).label("gene_name_rank")
-        ranks.append(gene_name_rank)
-        stmt = stmt.filter(gene_name_query)
-    if free_text:
-        search_pattern = build_wildcard_pattern(free_text)
+        (f, r) = chemical_class_filter_rank(chemical_class)
+        ranks.append(r)
+        filters.append(f)
 
-        free_ilike_ranks = (
-            ilike_rank(
-                f"free_{label}_rank",
-                search_pattern,
-                field,
-                weight
-            )
-            for label, field, weight in (
-                ("protein_accession_ncbi", Validated.protein_accession_ncbi, ACCESSION_ID_WEIGHT),
-                ("nucleotide_accession_ena_embl", Validated.nucleotide_accession_ena_embl, ACCESSION_ID_WEIGHT),
-                ("protein_accession_uniprot", Validated.protein_accession_uniprot, ACCESSION_ID_WEIGHT),
-                ("gene_name", Validated.gene_name, GENE_NAME_WEIGHT),
-                ("organism", Validated.organism, ORGANISM_WEIGHT),
-            )
+    if compound and len(compound) > 0:
+        (f, r) = compound_filter_rank(compound)
+        ranks.append(r)
+        filters.append(f)
+
+    if protein_description:
+        (f, r) = protein_description_filter_rank(protein_description)
+        ranks.append(r)
+        filters.append(f)
+
+    if location:
+        (f, r) = location_filter_rank(location)
+        ranks.append(r)
+        filters.append(f)
+
+    if peptide_sequence_length_range:
+        (f, r) = peptide_sequence_length_range_filter_rank(
+            peptide_sequence_length_range
         )
-        chemical_class_query = func.trim(Compounds.chemical_class).ilike(search_pattern, escape='\\')
-        chemical_class_ratio = (func.length(literal(search_pattern)) / func.length(Compounds.chemical_class))
-        free_chemical_class_rank = sum_rank(
-            "free_chemcial_class_rank",
-            chemical_class_query,
-            chemical_class_ratio * CHEMICAL_CLASS_WEIGHT
-        )
-        compound_name_query = func.trim(Compounds.compound_name).ilike(search_pattern, escape='\\')
-        compound_name_ratio = (func.length(literal(search_pattern)) / func.length(Compounds.compound_name))
-        free_compound_name_rank = sum_rank(
-            "free_compound_name_rank",
-            compound_name_query,
-            compound_name_ratio * COMPOUND_WEIGHT
-        )
-        cas_number_query = func.trim(Compounds.cas_number).ilike(search_pattern, escape='\\')
-        cas_number_ratio = (func.length(literal(search_pattern)) / func.length(Compounds.cas_number))
-        free_cas_number_rank = sum_rank(
-            "free_cas_number_rank",
-            cas_number_query,
-            cas_number_ratio * COMPOUND_WEIGHT
-        )
-        ranks.extend(free_ilike_ranks)
-        ranks.append(free_chemical_class_rank)
-        ranks.append(free_compound_name_rank)
-        ranks.append(free_cas_number_rank)
-        stmt = stmt.filter(
-            Validated.gene_name.ilike(search_pattern, escape='\\') |
-            Validated.organism.ilike(search_pattern, escape='\\') |
-            Validated.protein_accession_uniprot.ilike(search_pattern, escape='\\') |
-            Validated.nucleotide_accession_ena_embl.ilike(search_pattern, escape='\\') |
-            Validated.protein_accession_ncbi.ilike(search_pattern, escape='\\') |
-            Validated.compounds.any(compound_name_query) |
-            Validated.compounds.any(chemical_class_query) |
-            Validated.compounds.any(cas_number_query)
-        )
+        ranks.append(r)
+        filters.append(f)
+
+    if gene_name:
+        (f, r) = gene_name_filter_rank(gene_name)
+        ranks.append(r)
+        filters.append(f)
+
+    if free_text:
+        (f, r) = free_text_filter_rank(free_text)
+        ranks.append(r)
+        filters.append(f)
+
     total_rank = (
         reduce(operator.add, ranks).label("total_rank")
-        if len(ranks)
+        if len(ranks) > 0
         else Validated.validated_id
     )
-    return stmt.group_by(Validated.validated_id).order_by(total_rank.desc())
+    total_filter = reduce(operator.and_, filters, sql.true())
+    return (
+        stmt.filter(total_filter)
+        .group_by(Validated.validated_id)
+        .order_by(total_rank.desc())
+    )
 
 
 def apply_pagination(stmt, pagination: Tuple[int, int]):
@@ -230,6 +326,7 @@ def get_from_predicted(
     with db_session() as session:
         return session.execute(stmt).scalar_one_or_none()
 
+
 def get_from_compounds(
     compound_name
 ) -> Compounds:
@@ -240,6 +337,7 @@ def get_from_compounds(
             (compound,) = result
             return compound
         return None
+
 
 def find_in_validated(
     chemical_class: Optional[list[str]],
