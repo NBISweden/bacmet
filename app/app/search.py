@@ -444,6 +444,7 @@ def get_gene_names(
             for item in list(session.execute(summary_stmt))
         ]
 
+
 def build_wildcard_pattern(free_text: str) -> str:
     pattern = re.sub(r"([%_])", r"\\\1", free_text)
     if '*' not in free_text:
