@@ -19,15 +19,14 @@ from functools import cache, reduce
 import operator
 
 
-CHEMICAL_CLASS_WEIGHT = 1000
-COMPOUND_WEIGHT = 1000
-PROTEIN_DESCRIPTION_WEIGHT = 1000
-LOCATION_WEIGHT = 1000
-PEPTIDE_SEQUENCE_LENGTH_WEIGHT = 1000
-GENE_NAME_WEIGHT = 1000
-ORGANISM_WEIGHT = 500
+GENE_NAME_WEIGHT = 2000
 CAS_NUMBER_WEIGHT = 1000
-ACCESSION_ID_WEIGHT = 500
+COMPOUND_WEIGHT = 600
+PROTEIN_DESCRIPTION_WEIGHT = 500
+CHEMICAL_CLASS_WEIGHT = 400
+ORGANISM_WEIGHT = 300
+ACCESSION_ID_WEIGHT = 200
+LOCATION_WEIGHT = 100
 
 
 def ilike_rank(label, query_str, target_field, weight):
@@ -121,11 +120,6 @@ def peptide_sequence_length_range_filter_rank(
         query_filter = query_filter & Validated.length_aa > min_length
     if max_length is not None:
         query_filter = query_filter & Validated.length_aa < max_length
-
-    query_rank = case(
-        (query_filter, PEPTIDE_SEQUENCE_LENGTH_WEIGHT),
-        else_=0
-    ).label("ps_length_rank")
 
     return (
         query_filter,
