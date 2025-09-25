@@ -1,0 +1,43 @@
+.loading {
+    white-space: nowrap;
+}
+
+.loader {
+    --loader-size: 1em;
+    position: relative;
+    width: var(--loader-size);
+    height: var(--loader-size);
+    display: inline-block;
+    opacity: 50%;
+    margin-left: calc(0.5 * var(--loader-size));
+}
+
+.loader::after, .loader::before {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes loaderForwardRotation {
+  0% {transform: rotate(0deg)}
+  100% {transform: rotate(360deg)}
+}
+
+.loader::after {
+    animation-name: loaderForwardRotation;
+    animation-duration: 4s;
+    border: dashed calc(0.25 * var(--loader-size)) var(--bs-secondary);
+}
+
+.loader::before {
+    animation-name: loaderForwardRotation;
+    animation-duration: 3s;
+    border: dashed calc(0.25 * var(--loader-size)) var(--bs-secondary);
+}

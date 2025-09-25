@@ -97,19 +97,6 @@ export type Result<T> = {
   _links: Link[];
 }
 
-export type ValidatedResult = {
-  type: "validated"
-} & Result<Validated>
-
-export type PredictedResult = {
-  type: "predicted"
-} & Result<Predicted>
-
-export type ErrorResult = {
-  type: "error";
-  error: string;
-}
-
 export type ReplicateKeys<T, V> = {
   [K in keyof T]: V;
 };

@@ -1,73 +1,76 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { useConfig } from "../../../contexts/config";
-import { Compound } from "../../search/types";
+import { Compound, ReplicateKeys } from "../../search/types";
+import { usePromiseData, fetchData, requiredOrNotFound } from "../../utils";
+import { LineLoading } from "@/app/components/loading/loading";
+import ErrorView from "@/app/components/error-view";
 
-function CompoundEntry({ compound, error, compoundName }: { compound: Compound | null, error: string | null, compoundName?: string | null }) {
+function CompoundEntry({ compound, children }: { compound: ReplicateKeys<Compound, React.ReactNode>, children?: React.ReactNode}) {
   return (
     <div className="row justify-content-center pt-3 pb-3">
       <div className="col-sm-12 col-md-9 col-lg-7">
-        {error && <p className="text-danger text-center">{compoundName} {error}</p>}
-        {compound && (
-          <>
-            <h1 className="text-center">Compound information</h1>
-            <table className="table">
-              <tbody>
-                <tr>
-                  <th scope="row">Name:</th>
-                  <td>{compound.compound_name}</td>
-                </tr>
-                <tr>
-                  <th scope="row">Chemical Class:</th>
-                  <td>{compound.chemical_class}</td>
-                </tr>
-                <tr>
-                  <th scope="row">CAS Number:</th>
-                  <td>{compound.cas_number}</td>
-                </tr>
-                {compound.description && (
-                  <tr>
-                    <th scope="row">Description:</th>
-                    <td>{compound.description}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </>
-        )}
+        <h1 className="text-center">Compound information: {compound.compound_name}</h1>
+        {children}
+        <table className="table">
+          <tbody>
+            <tr>
+              <th scope="row">Name:</th>
+              <td>{compound.compound_name}</td>
+            </tr>
+            <tr>
+              <th scope="row">Chemical Class:</th>
+              <td>{compound.chemical_class}</td>
+            </tr>
+            <tr>
+              <th scope="row">CAS Number:</th>
+              <td>{compound.cas_number}</td>
+            </tr>
+            {compound.description && (
+              <tr>
+                <th scope="row">Description:</th>
+                <td>{compound.description}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
+}
+
+const LoadingPlaceholder = <LineLoading>Loading</LineLoading>;
+
+const DefaultCompound: ReplicateKeys<Compound, React.ReactNode> = {
+  compound_name: LoadingPlaceholder,
+  chemical_class: LoadingPlaceholder,
+  cas_number: LoadingPlaceholder,
 }
 
 function CompoundEntryWithData() {
   const { apiRoot } = useConfig();
   const searchParams = useSearchParams();
   const compoundName = searchParams.get("compound_name");
-  const [compound, setCompound] = useState<Compound | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const defaultCompound: ReplicateKeys<Compound, React.ReactNode> = useMemo(
+    () => (compoundName ? {...DefaultCompound, compound_name: compoundName} : DefaultCompound),
+    [compoundName]
+  )
+  const compoundFetcher = useCallback(
+    () => compoundName ? fetchData<Compound>(`${apiRoot}/compound/${encodeURIComponent(compoundName)}`) : Promise.resolve(defaultCompound),
+    [apiRoot, compoundName]
+  )
+  const [compound, compoundError] = usePromiseData(compoundFetcher, defaultCompound);
+  requiredOrNotFound(compoundError)
 
-  useEffect(() => {
-    if (!compoundName) return;
-    setError(null);
-    setCompound(null);
-
-    fetch(`${apiRoot}/compound/${encodeURIComponent(compoundName)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("not found");
-        return res.json();
-      })
-      .then((data) => setCompound(data))
-      .catch((e) => setError(e.message));
-  }, [apiRoot, compoundName]);
-
-  return <CompoundEntry compound={compound} error={error} compoundName={compoundName} />;
+  return <CompoundEntry compound={compound}>
+    {compoundError ? <ErrorView>Faild to load compound data: {compoundError.error}</ErrorView> : <></>}
+  </CompoundEntry>;
 }
 
 export default function CompoundEntryPage() {
   return (
-    <Suspense fallback={<CompoundEntry compound={null} error={null} />}>
+    <Suspense fallback={<CompoundEntry compound={DefaultCompound} />}>
       <CompoundEntryWithData />
     </Suspense>
   );
