@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.sql import func, collate
 from sqlalchemy.orm import joinedload
+import re
 from typing import Optional, Tuple
 from .database import (
     db_session,
@@ -64,9 +65,9 @@ def apply_search_filters(
     if free_text:
         search_pattern = build_wildcard_pattern(free_text)
         stmt = stmt.filter(
-            (Validated.gene_name.ilike(search_pattern)) |
-            (Validated.compounds.any(Compounds.compound_name.ilike(search_pattern))) |
-            (Validated.compounds.any(Compounds.chemical_class.ilike(search_pattern)))
+            (func.trim(Validated.gene_name).ilike(search_pattern, escape='\\')) |
+            (Validated.compounds.any(func.trim(Compounds.compound_name).ilike(search_pattern, escape='\\'))) |
+            (Validated.compounds.any(func.trim(Compounds.chemical_class).ilike(search_pattern, escape='\\')))
         )
     return stmt
 
@@ -230,14 +231,8 @@ def get_gene_names(
         ]
 
 def build_wildcard_pattern(free_text: str) -> str:
-    pattern = free_text.replace('*', '%')
-    while '%%' in pattern:
-        pattern = pattern.replace('%%', '%')
+    pattern = re.sub(r"([%_])", r"\\\1", free_text)
     if '*' not in free_text:
-        pattern = f"%{pattern}%"
-    else:
-        if free_text.startswith('*') and not pattern.startswith('%'):
-            pattern = '%' + pattern
-        if free_text.endswith('*') and not pattern.endswith('%'):
-            pattern = pattern + '%'
+        return f"%{pattern}%"
+    pattern = re.sub(r"\*+", "%", pattern)
     return pattern
