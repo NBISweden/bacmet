@@ -279,7 +279,6 @@ def apply_search_filters(
     total_filter = reduce(operator.and_, filters, sql.true())
     return (
         stmt.filter(total_filter)
-        .group_by(Validated.validated_id)
         .order_by(total_rank.desc())
     )
 
@@ -354,7 +353,7 @@ def find_in_validated(
         peptide_sequence_length_range,
         gene_name,
         free_text
-    )
+    ).group_by(Validated.validated_id)
     with db_session() as session:
         items = session.execute(
             apply_pagination(stmt, pagination)
