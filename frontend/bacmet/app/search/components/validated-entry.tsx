@@ -15,10 +15,15 @@ export default function ValidatedEntry({entry}: {entry: Validated | ReplicateKey
         <tr><th scope="row">Organism:</th><td><em>{ entry.organism }</em></td></tr>
         <tr><th scope="row">Location:</th><td>{ entry.location }</td></tr>
         <tr><th scope="row">Compound:</th><td>{Array.isArray(entry.compounds) ? <>
-          {entry.compounds.map((c, index, array) => <React.Fragment key={c.compound_name}>
-            <Link href={`/compounds/entry?${new URLSearchParams({ compound_name: c.compound_name })}`}>{c.compound_name}</Link>
-            {index < array.length -1 ? ", " : <></>}
-          </React.Fragment>)}
+          {entry.compounds.map((c, index, array) => (
+            <React.Fragment key={c.compound_name}>
+              <Link href={`/compounds/entry?${new URLSearchParams({ compound_name: c.compound_name })}`}>
+                {c.compound_name}
+                {c.cas_number ? ` [${c.cas_number}]` : ""}
+              </Link>
+              {index < array.length -1 ? ", " : <></>}
+            </React.Fragment>
+          ))}
         </> : entry.compounds}</td></tr>
         <tr><th scope="row">Description:</th><td>{ entry.description }</td></tr>
         <tr><th scope="row">Length (amino acid):</th><td>{ entry.length_aa }</td></tr>
