@@ -5,11 +5,11 @@
 To get started running this project you need to get through the
 following steps:
 
--   [Install docker and docker compose](https://www.docker.com/) or
-    other container runtime alternatives
--   [Perform `Data import`](#data-import)
--   [Start the app](#start-the-app)
--   View the app on http://localhost:5000/
+- [Install docker and docker compose](https://www.docker.com/) or other
+  container runtime alternatives
+- [Perform `Data import`](#data-import)
+- [Start the app](#start-the-app)
+- View the app on http://localhost:5000/
 
 ### Data import
 
@@ -19,12 +19,13 @@ structure on the Chalmers server (see below).
 
 The data is imported into the persistent SQLite database
 `/data/database.db` by copying the `data-import` directory into the
-running `app` containers persistent volume.  This can be done at any
+running `app` containers persistent volume. This can be done at any
 time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
 
 This shows how to explicitly throw the old data away and reload it from
-scratch.  In reality, the `down -v` step is not actually needed:
+scratch. In reality, the `down -v` step is not actually needed:
+
 ``` shell
 docker compose down -v
 docker compose up -d
@@ -32,8 +33,8 @@ docker compose up -d
 docker compose cp data-import app:/home/bacmet/data/
 ```
 
-By observing the container log (`docker compose logs -f`), you should
-be able to follow the service noticing that new data is available,
+By observing the container log (`docker compose logs -f`), you should be
+able to follow the service noticing that new data is available,
 importing it (in several steps), and then finally restarting the
 service.
 
@@ -94,8 +95,9 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 ### Run tests
 
-Tests can only be run in the development docker container since the HTML validation 
-requires `openjdk`. The tests can be run by using the following command:
+Tests can only be run in the development docker container since the HTML
+validation requires `openjdk`. The tests can be run by using the
+following command:
 
 ``` sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm app pytest -p no:cacheprovider app/tests
