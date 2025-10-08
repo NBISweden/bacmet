@@ -1,9 +1,9 @@
 "use client"
 import { useConfig } from "../../contexts/config";
-import { Suspense, useCallback, useState, useMemo } from "react";
-import { Compound, Result, MultiValueField, FieldValue } from "../search/types";
+import { Suspense, useCallback, useState, useEffect, FormEventHandler } from "react";
+import { Compound, Result, Field } from "../search/types";
 import { usePromiseData, fetchData } from "../utils";
-import { MultiSelectField } from "../search/components/multi-select-field/multi-select-field";
+import { TextField } from "../search/components/text-field";
 import Link from 'next/link'
 import ErrorView from "../components/error-view";
 import { LineLoading } from "../components/loading/loading";
@@ -34,27 +34,46 @@ function CompoundListWithData() {
 }
 
 function CompoundList({entries, children}: {entries: Compound[], children?: React.ReactNode}) {
-  const [usedChemcialClasses, setUsedChemicalClasses] = useState<Set<unknown>>(new Set());
-  const chemicalClasses = useMemo(() => (
-    Array.from(new Set<string>(entries.map(c => c.chemical_class)))
-    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-    .map<FieldValue>(cc => ({value: cc, label: cc}))
-  ), [entries]);
-  const chemicalClassField: MultiValueField = useMemo(() => ({
-    label: "Filter by chemical classes",
-    name: "chemical_class",
-    value: Array.from(usedChemcialClasses || []),
-    values: chemicalClasses,
-  }), [usedChemcialClasses, chemicalClasses]);
-  const handleSelectedChemicalClass = useCallback((value: unknown[]) => setUsedChemicalClasses(new Set(value)), [setUsedChemicalClasses])
-  const filteredEntries = entries.filter(c => usedChemcialClasses.size > 0 ? usedChemcialClasses.has(c.chemical_class) : true );
+  const [filteredEntries, setFilteredEntries] = useState(entries);
+
+  const searchField: Field<string> = {
+    label: "Filter by compound name, chemical class, or CAS number",
+    name: "compound_filtering",
+    value: "",
+    values: [],
+    placeholder: "compound name, chemical class, or CAS number"
+  };
+
+  useEffect(() => {
+    setFilteredEntries(entries);
+  }, [entries]);
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const text = event.currentTarget["compound_filtering"]?.value?.trim().toLowerCase() || "";
+    setFilteredEntries(
+      entries.filter(c =>
+        !text ||
+        c.compound_name.toLowerCase().includes(text) ||
+        c.chemical_class.toLowerCase().includes(text) ||
+        (c.cas_number && c.cas_number.toLowerCase().includes(text))
+      )
+    );
+  }, [entries]);
+
   return (
     <div className="col-sm-12 col-md-9 col-lg-7">
       <h1 className="text-center">Compounds</h1>
       {children}
       {entries.length > 0 ? (
         <>
-          <MultiSelectField field={chemicalClassField} onChange={handleSelectedChemicalClass}/>
+          <form onSubmit={handleSubmit}>
+            <TextField field={searchField} />
+            <div className="pt-3 pb-2">
+              <input className="btn btn-primary" type="submit" value="Filter" />
+            </div>
+          </form>
           <hr />
           <table className="table">
             <thead>
