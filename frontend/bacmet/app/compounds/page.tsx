@@ -8,17 +8,6 @@ import Link from 'next/link'
 import ErrorView from "../components/error-view";
 import { LineLoading } from "../components/loading/loading";
 
-const DefaultCompounds: Result<Compound> = {
-  items: [],
-  _meta: {
-    totalRecords: 0,
-    totalPages: 0,
-    page: 0,
-    count: 0,
-  },
-  _links: [],
-}
-
 function CompoundListWithData() {
   const {apiRoot} = useConfig();
 
@@ -52,13 +41,12 @@ function CompoundList({entries, children}: {entries: Compound[], children?: Reac
     event.preventDefault();
     event.stopPropagation();
     const text = event.currentTarget["compound_filtering"]?.value?.trim().toLowerCase() || "";
-    setFilteredEntries(
-      entries.filter(c =>
-        !text ||
-        c.compound_name.toLowerCase().includes(text) ||
-        c.chemical_class.toLowerCase().includes(text) ||
-        (c.cas_number && c.cas_number.toLowerCase().includes(text))
-      )
+    setFilteredEntries(entries.filter(c =>
+      !text ||
+      c.compound_name.toLowerCase().includes(text) ||
+      c.chemical_class.toLowerCase().includes(text) ||
+      (c.cas_number && c.cas_number.toLowerCase().includes(text))
+    )
     );
   }, [entries]);
 
