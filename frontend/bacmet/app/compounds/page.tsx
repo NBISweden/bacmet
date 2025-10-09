@@ -1,6 +1,6 @@
 "use client"
 import { useConfig } from "../../contexts/config";
-import { Suspense, useCallback, useState, useEffect, FormEventHandler, useMemo } from "react";
+import { Suspense, useCallback, useState, useMemo } from "react";
 import { Compound, Result, Field } from "../search/types";
 import { usePromiseData, fetchData } from "../utils";
 import { TextField } from "../search/components/text-field";
@@ -23,32 +23,25 @@ function CompoundListWithData() {
 }
 
 function CompoundList({entries, children}: {entries: Compound[], children?: React.ReactNode}) {
-  const [filteredEntries, setFilteredEntries] = useState(entries);
+  const [filterText, setFilterText] = useState<string>("");
 
-  const searchField: Field<string> = useMemo(() => ({
-    label: "Filter by compound name, chemical class, or CAS number",
-    name: "compound_filtering",
-    value: "",
-    values: [],
-    placeholder: "compound name, chemical class, or CAS number"
-  }), []);
-
-  useEffect(() => {
-    setFilteredEntries(entries);
-  }, [entries]);
-
-  const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const text = event.currentTarget["compound_filtering"]?.value?.trim().toLowerCase() || "";
-    setFilteredEntries(entries.filter(c =>
+  const filteredEntries = useMemo(() => {
+    const text = filterText.trim().toLowerCase();
+    return entries.filter(c =>
       !text ||
       c.compound_name.toLowerCase().includes(text) ||
       c.chemical_class.toLowerCase().includes(text) ||
       (c.cas_number && c.cas_number.toLowerCase().includes(text))
-    )
     );
-  }, [entries]);
+  }, [entries, filterText]);
+
+  const filterField: Field<string> = useMemo(() => ({
+    label: "Filter by compound name, chemical class, or CAS number",
+    name: "compound_filtering",
+    value: filterText,
+    values: [],
+    placeholder: "compound name, chemical class, or CAS number"
+  }), [filterText]);
 
   return (
     <div className="col-sm-12 col-md-9 col-lg-7">
@@ -56,12 +49,7 @@ function CompoundList({entries, children}: {entries: Compound[], children?: Reac
       {children}
       {entries.length > 0 ? (
         <>
-          <form onSubmit={handleSubmit}>
-            <TextField field={searchField} />
-            <div className="pt-3 pb-2">
-              <input className="btn btn-primary" type="submit" value="Filter" />
-            </div>
-          </form>
+          <TextField field={filterField} onChange={event => setFilterText(event.target.value)}/>
           <hr />
           <table className="table">
             <thead>
