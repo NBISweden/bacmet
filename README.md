@@ -54,6 +54,8 @@ data-import
 ├── 1-Experimentally_validated
 │   ├── 1-BacMet_experimentally_validated_database_3.0.csv
 │   ├── 2-BacMet_compound_CAS_numbers.csv
+│   ├── BacMet_nt_sequences.fasta
+│   ├── BacMet_v3_proteins.fasta
 │   └── Experimentally_validated_PDB_files.zip
 ├── 2-Predicted_database
 │   ├── 1-Predicted_unique_homologues.zip
@@ -64,7 +66,7 @@ data-import
     ├── MIC_metals.zip
     └── MIC_other_compounds.zip
 
-4 directories, 9 files
+4 directories, 11 files
 ```
 
 ### Start the app
