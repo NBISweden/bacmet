@@ -95,13 +95,3 @@ automatically reload code when it is changed.
 ``` sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
-
-### Run tests
-
-Tests can only be run in the development docker container since the HTML
-validation requires `openjdk`. The tests can be run by using the
-following command:
-
-``` sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm app pytest -p no:cacheprovider app/tests
-```
