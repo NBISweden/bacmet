@@ -1,23 +1,12 @@
 "use client"
 import { useConfig } from "../../contexts/config";
 import { Suspense, useCallback, useState, useMemo } from "react";
-import { Compound, Result, MultiValueField, FieldValue } from "../search/types";
+import { Compound, Result, Field } from "../search/types";
 import { usePromiseData, fetchData } from "../utils";
-import { MultiSelectField } from "../search/components/multi-select-field/multi-select-field";
+import { TextField } from "../search/components/text-field";
 import Link from 'next/link'
 import ErrorView from "../components/error-view";
 import { LineLoading } from "../components/loading/loading";
-
-const DefaultCompounds: Result<Compound> = {
-  items: [],
-  _meta: {
-    totalRecords: 0,
-    totalPages: 0,
-    page: 0,
-    count: 0,
-  },
-  _links: [],
-}
 
 function CompoundListWithData() {
   const {apiRoot} = useConfig();
@@ -34,27 +23,33 @@ function CompoundListWithData() {
 }
 
 function CompoundList({entries, children}: {entries: Compound[], children?: React.ReactNode}) {
-  const [usedChemcialClasses, setUsedChemicalClasses] = useState<Set<unknown>>(new Set());
-  const chemicalClasses = useMemo(() => (
-    Array.from(new Set<string>(entries.map(c => c.chemical_class)))
-    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-    .map<FieldValue>(cc => ({value: cc, label: cc}))
-  ), [entries]);
-  const chemicalClassField: MultiValueField = useMemo(() => ({
-    label: "Filter by chemical classes",
-    name: "chemical_class",
-    value: Array.from(usedChemcialClasses || []),
-    values: chemicalClasses,
-  }), [usedChemcialClasses, chemicalClasses]);
-  const handleSelectedChemicalClass = useCallback((value: unknown[]) => setUsedChemicalClasses(new Set(value)), [setUsedChemicalClasses])
-  const filteredEntries = entries.filter(c => usedChemcialClasses.size > 0 ? usedChemcialClasses.has(c.chemical_class) : true );
+  const [filterText, setFilterText] = useState<string>("");
+
+  const filteredEntries = useMemo(() => {
+    const text = filterText.trim().toLowerCase();
+    return entries.filter(c =>
+      !text ||
+      c.compound_name.toLowerCase().includes(text) ||
+      c.chemical_class.toLowerCase().includes(text) ||
+      (c.cas_number && c.cas_number.toLowerCase().includes(text))
+    );
+  }, [entries, filterText]);
+
+  const filterField: Field<string> = useMemo(() => ({
+    label: "Filter by compound name, chemical class, or CAS number",
+    name: "compound_filtering",
+    value: filterText,
+    values: [],
+    placeholder: "compound name, chemical class, or CAS number"
+  }), [filterText]);
+
   return (
     <div className="col-sm-12 col-md-9 col-lg-7">
       <h1 className="text-center">Compounds</h1>
       {children}
       {entries.length > 0 ? (
         <>
-          <MultiSelectField field={chemicalClassField} onChange={handleSelectedChemicalClass}/>
+          <TextField field={filterField} onChange={event => setFilterText(event.target.value)}/>
           <hr />
           <table className="table">
             <thead>

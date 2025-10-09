@@ -1,7 +1,7 @@
 import {useId} from "react";
 import {Field} from "../types";
 
-export const TextField = ({field}: {field: Field<unknown>}) => {
+export const TextField = ({field, onChange}: {field: Field<unknown>, onChange?: React.ChangeEventHandler<HTMLInputElement>}) => {
   const fieldId = useId();
   return (
     <>
@@ -13,6 +13,7 @@ export const TextField = ({field}: {field: Field<unknown>}) => {
         defaultValue={field.value !== undefined ? field.value + "" : undefined}
         id={fieldId}
         placeholder={field.placeholder}
+        onChange={onChange}
       />
     </>
   )
