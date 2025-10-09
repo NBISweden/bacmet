@@ -74,7 +74,7 @@ const SearchBase = (
         chemicalClasses: ccs.items,
         compounds: cs.items.map(c => ({
           value: c.compound_name,
-          label: c.compound_name,
+          label: c.cas_number ? `${c.compound_name} [${c.cas_number}]` : c.compound_name,
           _meta: {chemical_class: c.chemical_class}
         })),
         geneNames: gns.items
