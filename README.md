@@ -74,8 +74,8 @@ data-import
 The app can be started in a production-like environment or in an
 environment tuned for convenient development. When you are switching
 between environments it is important to remember to rebuild the
-container so either use the `build` command or add the `--build` option
-to the `up` command.
+container so either use the `docker compose [...] build` command or add
+the `--build` option to the `docker compose [...] up` command.
 
 #### Start production-like environment
 
