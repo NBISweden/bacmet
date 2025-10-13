@@ -5,11 +5,38 @@
 To get started running this project you need to get through the
 following steps:
 
-- [Install docker and docker compose](https://www.docker.com/) or other
-  container runtime alternatives
-- [Perform `Data import`](#data-import)
+- [Install Docker and Docker Compose](https://www.docker.com/)
 - [Start the app](#start-the-app)
+- [Perform `Data import`](#data-import)
 - View the app on http://localhost:5000/
+
+### Start the app
+
+The app can be started in a production-like environment or in an
+environment tuned for convenient development. When you are switching
+between running the app in different environments, it is important to
+remember to rebuild the container, so either use the
+`docker compose [...] build` command or add the `--build` option to the
+`docker compose [...] up` command.
+
+#### Start production-like environment
+
+The production-like environment will copy all necessary app related code
+and assets into the container in order to create a self contained
+deployable container.
+
+``` sh
+docker compose up --build
+```
+
+#### Start development environment
+
+The development environment will mount the `app` directory and
+automatically reload code when it is changed.
+
+``` sh
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
 
 ### Data import
 
@@ -67,31 +94,4 @@ data-import
     └── MIC_other_compounds.zip
 
 4 directories, 11 files
-```
-
-### Start the app
-
-The app can be started in a production-like environment or in an
-environment tuned for convenient development. When you are switching
-between environments it is important to remember to rebuild the
-container so either use the `docker compose [...] build` command or add
-the `--build` option to the `docker compose [...] up` command.
-
-#### Start production-like environment
-
-The production-like environment will copy all necessary app related code
-and assets into the container in order to create a self contained
-deployable container.
-
-``` sh
-docker compose up --build
-```
-
-#### Start development environment
-
-The development environment will mount the `app` directory and
-automatically reload code when it is changed.
-
-``` sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
