@@ -16,7 +16,7 @@ following steps:
 The app can be started in a production-like environment or in an
 environment tuned for convenient development. When you are switching
 between running the app in different environments, it is important to
-remember to rebuild the container, so either use the
+remember to rebuild the container, so use either the
 `docker compose [...] build` command or add the `--build` option to the
 `docker compose [...] up` command.
 
