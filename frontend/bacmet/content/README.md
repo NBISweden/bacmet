@@ -2,6 +2,8 @@
 
 This is a simple instruction on how to update text on the static information on the Bacmet website using markdown.
 
+`NOTE:` In order for any of the changes in the markdown or static information to take effect the system needs to be rebuilt and redeployed.
+
 Documentation on markdown: https://www.markdownguide.org/basic-syntax/
 
 ## Basic structures
