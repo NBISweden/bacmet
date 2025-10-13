@@ -34,6 +34,12 @@ deployable container.
 docker compose up --build
 ```
 
+By setting the environment variable `DOCKER_HOST` to some host and port
+(e.g., `server.example.com:2375`), you can deploy the app to a remote
+Docker host, assuming that the Docker daemon on that host [is configured
+to accept remote
+connections](https://docs.docker.com/engine/daemon/remote-access/).
+
 #### Start development environment
 
 The development environment will mount the `app` directory and
@@ -56,7 +62,8 @@ time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
 
 This shows how to explicitly throw the old data away and reload it from
-scratch. In reality, the `down -v` step is not actually needed:
+scratch. Note that `DOCKER_HOST` is required to be set if you are
+running the container on a remote Docker host.
 
 ``` shell
 docker compose down -v
