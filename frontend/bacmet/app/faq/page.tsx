@@ -21,7 +21,7 @@ export default function FAQPage() {
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(fileContent);
 
-  const faqData = parseFAQData(data.faqData);
+  const faqData = parseFAQData(data.faq_data);
 
   return (
     <>
