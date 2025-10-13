@@ -42,12 +42,18 @@ connections](https://docs.docker.com/engine/daemon/remote-access/).
 
 #### Start development environment
 
-The development environment will mount the `app` directory and
-automatically reload code when it is changed.
+The development environment will mount the directories that contain the
+code for the backend and for the frontend into the container, so that
+changes to the code on the host immediately are reflected in the running
+container.
 
 ``` sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
+
+Since the development environment mounts a couple of directories from
+the host, you will not be able to run it on a remote Docker host (i.e.,
+`DOCKER_HOST` should not be set).
 
 ### Data import
 
