@@ -3,9 +3,10 @@ import Image from "next/image";
 import NavBarCore from "./components/nav-bar-core";
 import NavBar from "./components/navbar";
 import { Suspense } from "react";
+import siteInfo from "../content/site-info.json";
 
 export const metadata: Metadata = {
-  description: "BacMet is an easy-to-use bioinformatics resource of antibacterial biocide- and metal-resistance genes.",
+  description: siteInfo.description,
 };
 
 export default function RootLayout({
@@ -13,11 +14,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const title = "BacMet";
-  const brandName = "BacMet";
-  const copyright = "Copyright © 2013-2018 All rights reserved";
-  const contact = "info@example.com";
-  const attribution = "BacMet database/website was developed and designed by Chandan Pal and currently maintained by Joakim Larsson's team";
+  const {
+    title,
+    brandName,
+    copyright,
+    contact,
+    attribution
+  } = siteInfo;
   const navigation: ({ label: string, href?: string, dropdown?: { label: string, href: string }[] })[] = [
     { label: "Search", href: "/search/" },
     { label: "Sensitivity Distributions",
