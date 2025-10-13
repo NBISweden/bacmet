@@ -8,7 +8,8 @@ following steps:
 - [Install Docker and Docker Compose](https://www.docker.com/)
 - [Start the app](#start-the-app)
 - [Perform `Data import`](#data-import)
-- View the app on http://localhost:5000/
+- View the app on http://localhost:5000/ or at the address and port
+  defined by the environment variables `APP_HOST` and `APP_PORT`.
 
 ### Start the app
 
@@ -18,6 +19,10 @@ between running the app in different environments, it is important to
 remember to rebuild the container, so either use the
 `docker compose [...] build` command or add the `--build` option to the
 `docker compose [...] up` command.
+
+By setting the environment variables `APP_HOST` and `APP_PORT`, you can
+change the address and port where the app will be available. The default
+is `localhost:5000`.
 
 #### Start production-like environment
 
