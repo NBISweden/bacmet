@@ -17,7 +17,7 @@ function parseFAQData(value: unknown): FAQItem[] {
 }
 
 export default function FAQPage() {
-  const filePath = path.join(process.cwd(), "public/markdown-content/faq.md");
+  const filePath = path.join(process.cwd(), "content/faq.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(fileContent);
 

@@ -32,7 +32,7 @@ function parseIndexData(data: unknown): IndexProps {
 }
 
 export default function Home() {
-  const filePath = path.join(process.cwd(), "public/markdown-content/index.md");
+  const filePath = path.join(process.cwd(), "content/index.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(fileContent);
   const indexProps = parseIndexData(data);

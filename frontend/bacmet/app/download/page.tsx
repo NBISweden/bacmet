@@ -5,7 +5,7 @@ import React from "react";
 import Markdown from "../components/markdown-util";
 
 export default function Download() {
-  const filePath = path.join(process.cwd(), "public/markdown-content/download.md");
+  const filePath = path.join(process.cwd(), "content/download.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content } = matter(fileContent);
 
