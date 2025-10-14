@@ -20,7 +20,7 @@ function parseContacts(value: unknown): Contact[] {
 }
 
 export default function Contact() {
-  const filePath = path.join(process.cwd(), "public/markdown-content/contact.md");
+  const filePath = path.join(process.cwd(), "content/contact.md");
   const fileContent = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(fileContent);
 
