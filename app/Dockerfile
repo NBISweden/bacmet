@@ -27,9 +27,9 @@ RUN install -d -o "$UID" app/
 RUN install -d -o "$UID" db-scripts/
 
 # Install Python dependencies.
-COPY --chmod=444 app/app/requirements.txt app/
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-	pip install -r app/requirements.txt
+RUN --mount=type=bind,source=app/app/requirements.txt,target=/tmp/requirements.txt \
+    --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
+	pip install -r /tmp/requirements.txt
 
 # The start script.
 COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
@@ -83,8 +83,9 @@ RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
 # require root access.
 USER "$UID"
 
-COPY --chown=$UID --chmod=444 frontend/bacmet/package*.json ./
-RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+RUN --mount=type=bind,source=frontend/bacmet/package-lock.json,target=/tmp/build/package-lock.json \
+    --mount=type=bind,source=frontend/bacmet/package.json,target=/tmp/build/package.json \
+    --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
     --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
     --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm ci
