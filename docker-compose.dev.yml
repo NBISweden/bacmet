@@ -9,6 +9,7 @@ services:
     depends_on:
       frontend:
         condition: service_healthy
+    restart: no
 
   frontend:
     build:
@@ -21,6 +22,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    restart: no
 
 volumes:
   data:
