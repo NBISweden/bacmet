@@ -4,6 +4,9 @@ services:
   app:
     build:
       target: dev
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
     volumes:
       - ./app/app:/home/bacmet/app
     depends_on:
@@ -14,6 +17,9 @@ services:
   frontend:
     build:
       dockerfile: frontend/Dockerfile
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
     volumes:
       - ./frontend/bacmet:/home/bacmet/frontend
     healthcheck:
@@ -25,6 +31,6 @@ services:
     restart: no
 
 volumes:
-  data:
+  vol:
     external: true
-    name: bacmet_data
+    name: bacmet_vol
