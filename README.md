@@ -14,11 +14,16 @@ following steps:
 ### Start the app
 
 The app can be started in a production-like environment or in an
-environment tuned for convenient development. When you are switching
-between running the app in different environments, it is important to
-remember to rebuild the container, so use either the
-`docker compose [...] build` command or add the `--build` option to the
-`docker compose [...] up` command.
+environment tuned for convenient development. To simplify managing the
+Docker services, use the convenience script `compose-prod.sh` for the
+production-like environment, or `compose-dev.sh` for the development
+environment. Both scripts accept the same arguments as `docker compose`,
+so you can use `up`, `down`, `logs`, etc.
+
+When you are switching between running the app in different
+environments, it is important to remember to rebuild the container, so
+use, e.g., the `./compose-prod.sh [...] build` command or add the
+`--build` option to the `./compose-prod.sh [...] up` command.
 
 By setting the environment variables `APP_HOST` and `APP_PORT`, you can
 change the address and port where the app will be available. The default
@@ -31,7 +36,7 @@ and assets into the container in order to create a self contained
 deployable container.
 
 ``` sh
-docker compose up --build
+./compose-prod.sh up --build
 ```
 
 #### Start development environment
@@ -42,7 +47,7 @@ changes to the code on the host immediately are reflected in the running
 container.
 
 ``` sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+./compose-dev.sh up --build
 ```
 
 ### Data import
@@ -58,14 +63,14 @@ time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
 
 ``` shell
-docker compose down -v
-docker compose up -d
+./compose-prod.sh down -v
+./compose-prod.sh up -d
 
-docker compose cp data-import app:/home/bacmet/vol/
+./compose-prod.sh cp data-import app:/home/bacmet/vol/
 ```
 
-By observing the container log (`docker compose logs -f`), you should be
-able to follow the service noticing that new data is available,
+By observing the container log (`./compose-prod.sh logs -f`), you should
+be able to follow the service noticing that new data is available,
 importing it (in several steps), and then finally restarting the
 service.
 
