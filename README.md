@@ -22,7 +22,7 @@ remember to rebuild the container, so use either the
 
 By setting the environment variables `APP_HOST` and `APP_PORT`, you can
 change the address and port where the app will be available. The default
-is `localhost:5000`.
+is `0.0.0.0:5000` (port 5000 on all available interfaces).
 
 #### Start production-like environment
 
