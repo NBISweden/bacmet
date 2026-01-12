@@ -34,12 +34,6 @@ deployable container.
 docker compose up --build
 ```
 
-By setting the environment variable `DOCKER_HOST` to some host and port
-(e.g., `server.example.com:2375`), you can deploy the app to a remote
-Docker host, assuming that the Docker daemon on that host [is configured
-to accept remote
-connections](https://docs.docker.com/engine/daemon/remote-access/).
-
 #### Start development environment
 
 The development environment will mount the directories that contain the
@@ -51,10 +45,6 @@ container.
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-Since the development environment mounts a couple of directories from
-the host, you will not be able to run it on a remote Docker host (i.e.,
-`DOCKER_HOST` should not be set).
-
 ### Data import
 
 The original data should be fetched from the server at Chalmers and be
@@ -62,20 +52,16 @@ put in a directory called `data-import`, replicating the directory
 structure on the Chalmers server (see below).
 
 The data is imported into the persistent SQLite database
-`/data/database.db` by copying the `data-import` directory into the
+`/vol/database.db` by copying the `data-import` directory into the
 running `app` containers persistent volume. This can be done at any
 time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
-
-This shows how to explicitly throw the old data away and reload it from
-scratch. Note that `DOCKER_HOST` is required to be set if you are
-running the container on a remote Docker host.
 
 ``` shell
 docker compose down -v
 docker compose up -d
 
-docker compose cp data-import app:/home/bacmet/data/
+docker compose cp data-import app:/home/bacmet/vol/
 ```
 
 By observing the container log (`docker compose logs -f`), you should be
