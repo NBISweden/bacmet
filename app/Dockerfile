@@ -17,8 +17,8 @@ RUN --mount=type=cache,id=apk-cache,target=/etc/apk/cache \
 
 WORKDIR /home/bacmet
 
-# The caddy and data volume mount points.
-RUN install -d -o "$UID" caddy/ data/
+# The volume mount point.
+RUN install -d -o "$UID" vol/
 
 # The "app" directory.
 RUN install -d -o "$UID" app/
