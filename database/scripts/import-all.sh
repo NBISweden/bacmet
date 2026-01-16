@@ -4,12 +4,10 @@ set -u
 
 PATH=$HOME/db-scripts/scripts:$PATH
 
-# The database is created if it does not exist, and recreated if
-# the environment variable DATABASE_REINIT is set to some value.
+# The database is created if it does not exist.
 
 if [ ! -f "$DATABASE" ]; then
 	echo 'Initializing database.' >&2
-	rm -f "$DATABASE"
 	sqlite3 "$DATABASE" <"$HOME/db-scripts/sql/schema.sql"
 fi
 

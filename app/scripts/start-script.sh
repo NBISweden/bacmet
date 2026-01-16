@@ -2,17 +2,51 @@
 
 set -u
 
-export XDG_CONFIG_HOME="$HOME/caddy/config"
-export XDG_DATA_HOME="$HOME/caddy/data"
+service_mode=${1-}
+
+volume=$HOME/vol
+
+export XDG_CONFIG_HOME="$volume/.caddy/config"
+export XDG_DATA_HOME="$volume/.caddy/data"
+
+export IMPORT_DIR="$volume/data-import"
 
 # Create the above directories if they don't exist.
-install -d "$XDG_CONFIG_HOME"
-install -d "$XDG_DATA_HOME"
+mkdir -p "$XDG_CONFIG_HOME"
+mkdir -p "$XDG_DATA_HOME"
+
+mkdir -p "$IMPORT_DIR"
+
+start_service() {
+	# Start the service if it is not running.
+	
+	if [ ! -f "$DATABASE" ]; then
+		echo 'Initializing database.' >&2
+		sqlite3 "$DATABASE" <"$HOME/db-scripts/sql/schema.sql"
+	fi
+
+	if [ -z "${service_pid-}" ] || ! kill -0 "$service_pid" 2>/dev/null
+	then
+		echo 'Starting service...' >&2
+
+		if [ "$service_mode" = dev ]; then
+			# Run development service.
+			flask --app app/main --debug run --host 0.0.0.0 --port 5000 &
+		else
+			# Run production service.
+			gunicorn -w "${APP_WORKERS:-4}" app:app -b 0.0.0.0:5000 &
+		fi
+		service_pid=$!
+	fi
+}
 
 caddy start --config ./Caddyfile
 
-export DATABASE="$HOME/data/database.db"
-export IMPORT_DIR="$HOME/data/data-import"
+export DATABASE="$volume/database.db"
+
+export APP_DATABASE_CONFIG="sqlite:///$DATABASE"
+
+start_service
 
 while true; do
 	if [ ! -s "$DATABASE" ]; then
@@ -54,6 +88,14 @@ while true; do
 		echo 'Sleeping for 30s...' >&2
 		sleep 30
 
+		# Bail out if there is no data to import.
+		set -- "$IMPORT_DIR"/*
+		if [ ! -e "$1" ]; then
+			echo 'No data found to import, skipping.' >&2
+			unset -v do_import
+			continue
+		fi
+
 		# Import data into a temporary database, then switch it
 		# to be the active one if the data did not change during
 		# the import.
@@ -84,20 +126,7 @@ while true; do
 		unset -v service_pid
 	fi
 
-	# Start the service if it is not running.
-	if [ -z "${service_pid-}" ] || ! kill -0 "$service_pid" 2>/dev/null
-	then
-		echo 'Starting service...' >&2
-
-		if [ "${1-}" = dev ]; then
-			# Run development service.
-			flask --app app/main --debug run --host 0.0.0.0 --port 5000 &
-		else
-			# Run production service.
-			gunicorn -w "${APP_WORKERS:-4}" app:app -b 0.0.0.0:5000 &
-		fi
-		service_pid=$!
-	fi
+	start_service
 
 	sleep 60
 done

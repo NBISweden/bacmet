@@ -6,8 +6,9 @@ FROM python:3.13-alpine AS base
 # and defines the default command.
 
 ARG UID=1000
+ARG GID=1000
 
-RUN adduser -D -u "$UID" bacmet
+RUN adduser -D -u "$UID" -g "$GID" bacmet
 
 RUN --mount=type=cache,id=apk-cache,target=/etc/apk/cache \
 	apk add \
@@ -17,25 +18,25 @@ RUN --mount=type=cache,id=apk-cache,target=/etc/apk/cache \
 
 WORKDIR /home/bacmet
 
-# The caddy and data volume mount points.
-RUN install -d -o "$UID" caddy/ data/
+# The volume mount point.
+RUN install -d -o "$UID" -g "$GID" vol/
 
 # The "app" directory.
-RUN install -d -o "$UID" app/
+RUN install -d -o "$UID" -g "$GID" app/
 
 # The "db-scripts" directory.
-RUN install -d -o "$UID" db-scripts/
+RUN install -d -o "$UID" -g "$GID" db-scripts/
 
 # Install Python dependencies.
-COPY --chmod=444 app/app/requirements.txt app/
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-	pip install -r app/requirements.txt
+RUN --mount=type=bind,source=app/app/requirements.txt,target=/tmp/requirements.txt \
+    --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
+	pip install -r /tmp/requirements.txt
 
 # The start script.
-COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
+COPY --chown="$UID:$GID" --chmod=555 app/scripts/start-script.sh ./start-script.sh
 
 # Copy the database loading scripts and schema into "db-scripts".
-COPY --chown=$UID --chmod=555 ../database/ db-scripts/
+COPY --chown="$UID:$GID" --chmod=555 ../database/ db-scripts/
 
 EXPOSE 8080/tcp
 
@@ -47,26 +48,28 @@ FROM base AS dev
 # The REST API code is added via a bind mount by the compose file.
 
 ARG UID=1000
+ARG GID=1000
 
 # Install developent Python dependencies.
 COPY --chmod=444 app/app/requirements.dev.txt app/
 RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
 	pip install -r app/requirements.dev.txt
 
-COPY --chown=$UID --chmod=444 app/caddy/Caddyfile.dev ./Caddyfile
+COPY --chown="$UID:$GID" --chmod=444 app/caddy/Caddyfile.dev ./Caddyfile
 
-USER "$UID"
+USER "$UID:$GID"
 
 CMD [ "./start-script.sh", "dev" ]
 
 
 ## Production build setup
-FROM node:24-alpine as prod-build
+FROM node:25-alpine as prod-build
 
 # The "prod-build" target builds the frontend assets.  It does not
 # include code or configuration.
 
 ARG UID=1000
+ARG GID=1000
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -77,19 +80,20 @@ WORKDIR /tmp/build
 RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
     --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
     --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
-	chown -R "$UID" /tmp/build/
+	chown -R "$UID:$GID" /tmp/build/
 
 # Switch to the service user as the rest of the RUN actions shouldn't
 # require root access.
-USER "$UID"
+USER "$UID:$GID"
 
-COPY --chown=$UID --chmod=444 frontend/bacmet/package*.json ./
-RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
+RUN --mount=type=bind,source=frontend/bacmet/package-lock.json,target=/tmp/build/package-lock.json \
+    --mount=type=bind,source=frontend/bacmet/package.json,target=/tmp/build/package.json \
+    --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
     --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
     --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
 	npm --cache=/tmp/build/.npm ci
 
-COPY --chown=$UID frontend/bacmet/ ./
+COPY --chown="$UID:$GID" frontend/bacmet/ ./
 RUN --mount=type=cache,id=npm-cache,target=/tmp/build/.npm \
     --mount=type=cache,id=next-cache,target=/tmp/build/.next/cache \
     --mount=type=cache,id=node_modules-cache,target=/tmp/build/node_modules \
@@ -103,16 +107,17 @@ FROM base AS prod
 # copies in the built frontend assets.
 
 ARG UID=1000
+ARG GID=1000
 
 # Copy the static content from the previous build step.
-COPY --chown=$UID --from=prod-build /tmp/build/out ./frontend/
+COPY --chown="$UID:$GID" --from=prod-build /tmp/build/out ./frontend/
 
-COPY --chown=$UID --chmod=444 app/caddy/Caddyfile ./Caddyfile
-COPY --chown=$UID --chmod=555 app/scripts/start-script.sh ./start-script.sh
+COPY --chown="$UID:$GID" --chmod=444 app/caddy/Caddyfile ./Caddyfile
+COPY --chown="$UID:$GID" --chmod=555 app/scripts/start-script.sh ./start-script.sh
 
 # Copy the REST API code last to maximize use of Docker layer caching.
-COPY --chown=$UID app/app ./app/
+COPY --chown="$UID:$GID" app/app ./app/
 
-USER "$UID"
+USER "$UID:$GID"
 
 CMD [ "./start-script.sh" ]

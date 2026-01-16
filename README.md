@@ -14,15 +14,48 @@ following steps:
 ### Start the app
 
 The app can be started in a production-like environment or in an
-environment tuned for convenient development. When you are switching
-between running the app in different environments, it is important to
-remember to rebuild the container, so use either the
-`docker compose [...] build` command or add the `--build` option to the
-`docker compose [...] up` command.
+environment tuned for convenient development. To simplify managing the
+Docker services, use the convenience script `compose-prod.sh` for the
+production-like environment, or `compose-dev.sh` for the development
+environment. Both scripts accept the same arguments as `docker compose`,
+so you can use `up`, `down`, `logs`, etc.
+
+When you are switching between running the app in different
+environments, it is important to remember to rebuild the container, so
+use, e.g., the `./compose-prod.sh [...] build` command or add the
+`--build` option to the `./compose-prod.sh [...] up` command.
 
 By setting the environment variables `APP_HOST` and `APP_PORT`, you can
 change the address and port where the app will be available. The default
-is `localhost:5000`.
+is `0.0.0.0:5000` (port 5000 on all available interfaces).
+
+#### Using HTTPS
+
+By default, the app is served over plain HTTP, on a non-standard port
+(5000).
+
+If the application has access to both ports 80 and 443 on the deployment
+host, and a domain name that resolves to the host's IP address, it can
+automatially request a TLS certificate from Let's Encrypt and serve the
+app over HTTPS. To enable this, modify the `ports:` section in the
+`docker-compose.yml` file to map ports 80 and 443 from the host to the
+same ports in the container:
+
+``` yaml
+ports:
+    - 80:80
+    - 443:443
+```
+
+Then also modify the file `app/caddy/Caddyfile` to use the domain name
+you want to use for accessing the app (rathor than the port number).
+Change the first line of the Caddyfile from
+
+    :8080 {
+
+to
+
+    your.domain.name {
 
 #### Start production-like environment
 
@@ -31,14 +64,8 @@ and assets into the container in order to create a self contained
 deployable container.
 
 ``` sh
-docker compose up --build
+./compose-prod.sh up --build
 ```
-
-By setting the environment variable `DOCKER_HOST` to some host and port
-(e.g., `server.example.com:2375`), you can deploy the app to a remote
-Docker host, assuming that the Docker daemon on that host [is configured
-to accept remote
-connections](https://docs.docker.com/engine/daemon/remote-access/).
 
 #### Start development environment
 
@@ -48,12 +75,8 @@ changes to the code on the host immediately are reflected in the running
 container.
 
 ``` sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+./compose-dev.sh up --build
 ```
-
-Since the development environment mounts a couple of directories from
-the host, you will not be able to run it on a remote Docker host (i.e.,
-`DOCKER_HOST` should not be set).
 
 ### Data import
 
@@ -62,24 +85,20 @@ put in a directory called `data-import`, replicating the directory
 structure on the Chalmers server (see below).
 
 The data is imported into the persistent SQLite database
-`/data/database.db` by copying the `data-import` directory into the
+`/vol/database.db` by copying the `data-import` directory into the
 running `app` containers persistent volume. This can be done at any
 time, and copying updated data (or the same old data a further time)
 will cause the already imported data to be discarded.
 
-This shows how to explicitly throw the old data away and reload it from
-scratch. Note that `DOCKER_HOST` is required to be set if you are
-running the container on a remote Docker host.
-
 ``` shell
-docker compose down -v
-docker compose up -d
+./compose-prod.sh down -v
+./compose-prod.sh up -d
 
-docker compose cp data-import app:/home/bacmet/data/
+./compose-prod.sh cp data-import app:/home/bacmet/vol/
 ```
 
-By observing the container log (`docker compose logs -f`), you should be
-able to follow the service noticing that new data is available,
+By observing the container log (`./compose-prod.sh logs -f`), you should
+be able to follow the service noticing that new data is available,
 importing it (in several steps), and then finally restarting the
 service.
 
