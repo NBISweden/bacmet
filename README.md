@@ -29,6 +29,34 @@ By setting the environment variables `APP_HOST` and `APP_PORT`, you can
 change the address and port where the app will be available. The default
 is `0.0.0.0:5000` (port 5000 on all available interfaces).
 
+#### Using HTTPS
+
+By default, the app is served over plain HTTP, on a non-standard port
+(5000).
+
+If the application has access to both ports 80 and 443 on the deployment
+host, and a domain name that resolves to the host's IP address, it can
+automatially request a TLS certificate from Let's Encrypt and serve the
+app over HTTPS. To enable this, modify the `ports:` section in the
+`docker-compose.yml` file to map ports 80 and 443 from the host to the
+same ports in the container:
+
+``` yaml
+ports:
+    - 80:80
+    - 443:443
+```
+
+Then also modify the file `app/caddy/Caddyfile` to use the domain name
+you want to use for accessing the app (rathor than the port number).
+Change the first line of the Caddyfile from
+
+    :8080 {
+
+to
+
+    your.domain.name {
+
 #### Start production-like environment
 
 The production-like environment will copy all necessary app related code
